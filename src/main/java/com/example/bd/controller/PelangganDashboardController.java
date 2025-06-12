@@ -58,7 +58,7 @@ public class PelangganDashboardController implements Initializable {
         }
     }
 
-    // === PERBAIKAN UTAMA ADA DI METHOD INI ===
+  
     private VBox createKategoriCard(Kategori kategori) {
         VBox card = new VBox(10);
         card.getStyleClass().add("category-card");

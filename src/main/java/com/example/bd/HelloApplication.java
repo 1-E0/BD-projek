@@ -15,7 +15,7 @@ public class HelloApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/LoginView.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
 
-    
+
 
         try {
             Image appIcon = new Image(HelloApplication.class.getResourceAsStream("images/chef.png"));
