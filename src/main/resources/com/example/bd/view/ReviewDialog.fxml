@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER_LEFT" spacing="15.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.ReviewDialogController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Beri Ulasan Anda" />
+        <VBox spacing="5.0">
+            <children>
+                <Label text="Rating Anda (1-5)" />
+                <HBox fx:id="ratingBox" alignment="CENTER_LEFT" spacing="5.0" />
+            </children>
+        </VBox>
+        <VBox spacing="5.0">
+            <children>
+                <Label text="Komentar Anda" />
+                <TextArea fx:id="txtKomentar" prefHeight="100.0" promptText="Tuliskan pengalaman Anda di sini..." wrapText="true" />
+            </children>
+        </VBox>
+        <ButtonBar>
+            <buttons>
+                <Button fx:id="btnBatal" mnemonicParsing="false" onAction="#handleBatal" text="Batal" />
+                <Button fx:id="btnKirim" mnemonicParsing="false" onAction="#handleKirim" styleClass="button" text="Kirim Ulasan" />
+            </buttons>
+        </ButtonBar>
+    </children>
+</VBox>

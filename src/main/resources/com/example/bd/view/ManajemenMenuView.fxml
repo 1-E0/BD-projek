@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="rootPane" prefHeight="650.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.ManajemenMenuController">
+    <stylesheets>
+        <URL value="@../styles/style.css" />
+    </stylesheets>
+    <children>
+        <Button layoutX="30.0" layoutY="15.0" mnemonicParsing="false" onAction="#handleKembali" style="-fx-background-color: #757575;" text="Kembali">
+            <graphic><FontAwesomeIconView fill="WHITE" glyphName="ARROW_LEFT" /></graphic>
+        </Button>
+        <VBox spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <FontAwesomeIconView glyphName="CUTLERY" size="30" styleClass="title-label" />
+                        <Label styleClass="title-label" text="Manajemen Menu Catering" />
+                    </children>
+                </HBox>
+                <TableView fx:id="menuTable" prefHeight="300.0">
+                    <columns>
+                        <TableColumn fx:id="colIdMenu" prefWidth="75.0" text="ID Menu" />
+                        <TableColumn fx:id="colNamaMenu" prefWidth="350.0" text="Nama Menu" />
+                        <TableColumn fx:id="colHargaMenu" prefWidth="200.0" text="Harga" />
+                    </columns>
+                </TableView>
+                <VBox styleClass="card" spacing="15.0">
+                    <children>
+                        <Label fx:id="formTitleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Form Tambah Menu Baru" />
+                        <HBox alignment="BOTTOM_LEFT" spacing="15.0">
+                            <children>
+                                <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                                    <children>
+                                        <Label text="Nama Menu" />
+                                        <TextField fx:id="txtNamaMenu" promptText="Contoh: Nasi Goreng Spesial" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Harga" />
+                                        <TextField fx:id="txtHargaMenu" prefWidth="150.0" promptText="Contoh: 25000" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Kategori" />
+                                        <ChoiceBox fx:id="choiceKategori" prefWidth="200.0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                            <children>
+                                <Button fx:id="btnSimpan" mnemonicParsing="false" onAction="#handleSimpanButton" text="Simpan"><graphic><FontAwesomeIconView glyphName="SAVE" styleClass="glyph-icon" /></graphic></Button>
+                                <Button fx:id="btnBatal" mnemonicParsing="false" onAction="#handleBatalButton" style="-fx-background-color: #F37878;" text="Batal"><graphic><FontAwesomeIconView glyphName="TIMES" styleClass="glyph-icon" /></graphic></Button>
+                                <Button fx:id="btnHapus" mnemonicParsing="false" onAction="#handleHapusButton" styleClass="delete-button" text="Hapus"><graphic><FontAwesomeIconView glyphName="TRASH" styleClass="glyph-icon" /></graphic></Button>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

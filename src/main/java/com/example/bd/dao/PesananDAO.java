@@ -1,0 +1,213 @@
+package com.example.bd.dao;
+
+import com.example.bd.model.DetailPesanan;
+import com.example.bd.model.Pembayaran;
+import com.example.bd.model.Pesanan;
+import com.example.bd.util.DatabaseConnection;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PesananDAO {
+    private final Connection conn = DatabaseConnection.getConnection();
+
+    // Method untuk mengambil semua pesanan berdasarkan ID pelanggan
+    public List<Pesanan> getPesananByPelanggan(int idPelanggan) {
+        List<Pesanan> pesananList = new ArrayList<>();
+        String sql = "SELECT * FROM pesanan WHERE id_pelanggan = ? ORDER BY tanggal_pesanan DESC";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPelanggan);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Pesanan p = new Pesanan();
+                p.setIdPesanan(rs.getInt("id_pesanan"));
+                p.setIdPelanggan(rs.getInt("id_pelanggan"));
+                p.setTanggalPesanan(rs.getTimestamp("tanggal_pesanan"));
+                p.setTotalHargaPesanan(rs.getDouble("total_harga_pesanan"));
+                p.setStatusPembayaran(rs.getString("status_pembayaran"));
+                p.setAlamatTujuan(rs.getString("alamat_tujuan"));
+                pesananList.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pesananList;
+    }
+
+    // Method untuk mengambil semua item detail dari sebuah pesanan
+    public List<DetailPesanan> getDetailByPesanan(int idPesanan) {
+        List<DetailPesanan> detailList = new ArrayList<>();
+        // Query ini melakukan JOIN antara detail_pesanan dan menu untuk mendapatkan nama_menu
+        String sql = "SELECT dp.*, m.nama_menu FROM detail_pesanan dp JOIN menu m ON dp.id_menu = m.id_menu WHERE dp.id_pesanan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPesanan);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                DetailPesanan d = new DetailPesanan();
+                d.setIdDetailPesanan(rs.getInt("id_detail_pesanan"));
+                d.setIdPesanan(rs.getInt("id_pesanan"));
+                d.setIdMenu(rs.getInt("id_menu"));
+                d.setKuantitas(rs.getInt("kuantitas"));
+                d.setHargaProduk(rs.getDouble("harga_produk"));
+                d.setNamaMenu(rs.getString("nama_menu")); // Mengambil nama menu dari hasil JOIN
+                detailList.add(d);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return detailList;
+    }
+
+
+    // Method simpanPesananDanDetail dari sebelumnya tetap ada
+    public void simpanPesananDanDetail(Pesanan pesanan, List<DetailPesanan> detailList) {
+        // Query untuk memasukkan pesanan utama dan mendapatkan ID yang baru dibuat
+        String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, ?, ?, ?) RETURNING id_pesanan";
+        // Query untuk memasukkan setiap item di keranjang
+        String sqlDetail = "INSERT INTO detail_pesanan (id_pesanan, id_menu, kuantitas, harga_produk) VALUES (?, ?, ?, ?)";
+
+        try {
+            // 1. Matikan auto-commit untuk memulai transaksi
+            conn.setAutoCommit(false);
+
+            // 2. Simpan data pesanan utama
+            int idPesananBaru;
+            try (PreparedStatement pstmtPesanan = conn.prepareStatement(sqlPesanan)) {
+                pstmtPesanan.setInt(1, pesanan.getIdPelanggan());
+                pstmtPesanan.setDouble(2, pesanan.getTotalHargaPesanan());
+                pstmtPesanan.setString(3, pesanan.getStatusPembayaran());
+                pstmtPesanan.setString(4, pesanan.getAlamatTujuan());
+
+                ResultSet rs = pstmtPesanan.executeQuery();
+                if (rs.next()) {
+                    idPesananBaru = rs.getInt(1); // Ambil ID pesanan yang baru saja di-generate
+                } else {
+                    throw new SQLException("Gagal membuat pesanan, tidak mendapatkan ID.");
+                }
+            }
+
+            // 3. Gunakan ID pesanan baru untuk menyimpan semua detail pesanan
+            try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
+                for (DetailPesanan detail : detailList) {
+                    pstmtDetail.setInt(1, idPesananBaru);
+                    pstmtDetail.setInt(2, detail.getIdMenu());
+                    pstmtDetail.setInt(3, detail.getKuantitas());
+                    pstmtDetail.setDouble(4, detail.getHargaProduk());
+                    pstmtDetail.addBatch(); // Tambahkan ke 'antrian' untuk dieksekusi bersamaan
+                }
+                pstmtDetail.executeBatch(); // Eksekusi semua perintah INSERT detail
+            }
+
+            // 4. Jika semua berhasil tanpa error, simpan perubahan secara permanen
+            conn.commit();
+            System.out.println("Transaksi berhasil di-commit.");
+
+        } catch (SQLException e) {
+            // 5. Jika ada satu saja error, batalkan semua perubahan
+            System.err.println("Transaksi GAGAL, melakukan rollback.");
+            e.printStackTrace(); // INI AKAN MENAMPILKAN ERROR SQL DI CONSOLE
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            // 6. Selalu kembalikan ke mode auto-commit setelah selesai
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public List<Pesanan> getAllPesanan() {
+        List<Pesanan> pesananList = new ArrayList<>();
+        // Query diubah untuk LEFT JOIN dengan pengiriman
+        String sql = "SELECT p.*, pl.nama_pelanggan, png.status_pengiriman " +
+                "FROM pesanan p " +
+                "JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan " +
+                "LEFT JOIN pengiriman png ON p.id_pesanan = png.id_pesanan " +
+                "ORDER BY p.tanggal_pesanan DESC";
+
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Pesanan p = new Pesanan();
+                // ... (semua set...() yang sudah ada) ...
+                p.setNamaPelanggan(rs.getString("nama_pelanggan"));
+                // Ambil status pengiriman, bisa jadi null jika belum ada
+                p.setStatusPengiriman(rs.getString("status_pengiriman"));
+                pesananList.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pesananList;
+    }
+
+    // METHOD BARU: Mengupdate status pembayaran
+    public void updateStatusPembayaran(int idPesanan, String status) {
+        String sql = "UPDATE pesanan SET status_pembayaran = ? WHERE id_pesanan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, idPesanan);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void simpanPesananLengkap(Pesanan pesanan, List<DetailPesanan> detailList, Pembayaran pembayaran) throws SQLException {
+        String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, ?, ?, ?) RETURNING id_pesanan";
+        String sqlDetail = "INSERT INTO detail_pesanan (id_pesanan, id_menu, kuantitas, harga_produk) VALUES (?, ?, ?, ?)";
+        String sqlPembayaran = "INSERT INTO pembayaran (id_pesanan, id_metode) VALUES (?, ?)";
+
+        try {
+            conn.setAutoCommit(false); // Mulai Transaksi
+
+            // 1. Simpan Pesanan, dapatkan ID baru
+            int idPesananBaru;
+            try (PreparedStatement pstmtPesanan = conn.prepareStatement(sqlPesanan)) {
+                pstmtPesanan.setInt(1, pesanan.getIdPelanggan());
+                pstmtPesanan.setDouble(2, pesanan.getTotalHargaPesanan());
+                pstmtPesanan.setString(3, pesanan.getStatusPembayaran());
+                pstmtPesanan.setString(4, pesanan.getAlamatTujuan());
+                ResultSet rs = pstmtPesanan.executeQuery();
+                if (rs.next()) {
+                    idPesananBaru = rs.getInt(1);
+                } else {
+                    throw new SQLException("Gagal membuat pesanan.");
+                }
+            }
+
+            // 2. Simpan Detail Pesanan
+            try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
+                for (DetailPesanan detail : detailList) {
+                    pstmtDetail.setInt(1, idPesananBaru);
+                    pstmtDetail.setInt(2, detail.getIdMenu());
+                    pstmtDetail.setInt(3, detail.getKuantitas());
+                    pstmtDetail.setDouble(4, detail.getHargaProduk());
+                    pstmtDetail.addBatch();
+                }
+                pstmtDetail.executeBatch();
+            }
+
+            // 3. Simpan Pembayaran
+            try (PreparedStatement pstmtPembayaran = conn.prepareStatement(sqlPembayaran)) {
+                pstmtPembayaran.setInt(1, idPesananBaru);
+                pstmtPembayaran.setInt(2, pembayaran.getIdMetode());
+                pstmtPembayaran.executeUpdate();
+            }
+
+            conn.commit(); // Sukses, simpan semua perubahan
+            System.out.println("Transaksi pesanan lengkap berhasil di-commit.");
+
+        } catch (SQLException e) {
+            System.err.println("Transaksi GAGAL, melakukan rollback.");
+            conn.rollback(); // Jika ada error, batalkan semua
+            throw e; // Lemparkan error agar bisa ditangani di controller
+        } finally {
+            conn.setAutoCommit(true); // Kembalikan ke state normal
+        }
+    }
+
+}

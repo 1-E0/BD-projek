@@ -1,0 +1,54 @@
+/* =================================================================
+   Aplikasi Catering - Final Design Stylesheet
+   ================================================================= */
+
+/* ===== PALET WARNA & FONT DASAR ===== */
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-background-color: #FDF7F1; /* Warna latar krem hangat */
+}
+
+/* ===== STYLE TEKS UMUM ===== */
+.title-label { -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3E2723; } /* Coklat Tua */
+.sub-title-label { -fx-font-size: 16px; -fx-text-fill: #795548; } /* Coklat Muda */
+.label { -fx-font-size: 14px; -fx-text-fill: #4E342E; }
+.input-label { -fx-font-size: 12px; -fx-text-fill: #8D6E63; -fx-padding: 0 0 4px 2px; }
+.section-title { -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #3E2723; -fx-padding: 10px 0; }
+
+/* ===== STYLE KOMPONEN UMUM ===== */
+.button { -fx-background-color: #FF7043; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 25px; -fx-padding: 10px 22px; -fx-cursor: hand; }
+.button:hover { -fx-background-color: #F4511E; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2); }
+.text-field, .password-field, .date-picker, .text-area, .choice-box, .form-combo-box { -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #D7CCC8; -fx-font-size: 14px; -fx-prompt-text-fill: #BCAAA4; -fx-background-color: #FFFFFF; }
+.text-field, .password-field, .text-area { -fx-padding: 8px; }
+.text-field:focused, .password-field:focused, .choice-box:focused, .form-combo-box:focused, .date-picker:focused, .text-area:focused { -fx-border-color: #FF7043; -fx-border-width: 2px; }
+.card { -fx-background-color: #FFFFFF; -fx-padding: 25px; -fx-background-radius: 15px; -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.2), 15, 0, 0, 4); }
+.delete-button { -fx-background-color: #EF5350; }
+.delete-button:hover { -fx-background-color: #E53935; }
+
+/* ===== STYLE KHUSUS LOGIN/REGISTER ===== */
+.auth-container { -fx-background-color: white; -fx-padding: 40px; -fx-background-radius: 15px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 20, 0, 0, 5); }
+.login-button { -fx-pref-height: 45px; }
+.link-button { -fx-background-color: transparent; -fx-text-fill: #FF7043; -fx-effect: none; -fx-font-weight: bold; -fx-padding: 5px; }
+.link-button:hover { -fx-underline: true; -fx-background-color: transparent; }
+
+/* ===== STYLE IKON ===== */
+.glyph-icon { -fx-font-family: "FontAwesome"; -fx-fill: white; }
+#iconTogglePassword { -fx-fill: #A1887F; }
+.title-label .glyph-icon { -fx-fill: #3E2723; }
+
+/* ===== GAYA TABEL ===== */
+.table-view { -fx-background-color: #FFFFFF; -fx-border-color: #D7CCC8; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-cell-size: 45px; }
+.table-view .column-header { -fx-background-color: #F5F5F5; -fx-padding: 0 0 0 12px; -fx-font-weight: bold; -fx-text-fill: #5D4037; }
+.table-view .table-row-cell { -fx-padding: 0 0 0 12px; -fx-border-width: 0 0 1px 0; -fx-border-color: #EFEBE9; }
+.table-view .table-row-cell:odd { -fx-background-color: #FAFAFA; }
+.table-view .table-row-cell:selected { -fx-background-color: #FF7043; -fx-text-fill: white; }
+.table-view .table-row-cell:selected .text { -fx-fill: white; }
+.table-view .table-cell { -fx-text-fill: #4E342E; -fx-border-color: transparent; }
+.table-view .table-row-cell:selected .table-cell { -fx-text-fill: white; }
+
+/* ===== STYLE RATING BINTANG ===== */
+.rating-toggle-button { -fx-background-color: transparent; -fx-padding: 2px; }
+.rating-toggle-button .glyph-icon { -fx-font-family: "FontAwesome"; -fx-fill: #BDBDBD; }
+.rating-toggle-button:selected .glyph-icon { -fx-fill: #FFB300; }
+.review-table-star { -fx-font-family: "FontAwesome"; -fx-fill: #BDBDBD; }
+.review-table-star.filled { -fx-fill: #FFB300; }

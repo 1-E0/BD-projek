@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="card" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.RiwayatPesananItemController">
+    <padding>
+        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+    </padding>
+    <children>
+        <FontAwesomeIconView glyphName="SPOON" size="2em" style="-fx-fill: -fx-app-text-color;" />
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="lblIdPesanan" style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Pesanan #123" />
+                <Label fx:id="lblTotalHarga" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: var(--primary-color);" text="Rp 252.500" />
+                <Label fx:id="lblStatus" style="-fx-font-size: 12px; -fx-text-fill: #767676;" text="Status: Makanan sudah diantar" />
+                <Label fx:id="lblTanggal" style="-fx-font-size: 12px; -fx-text-fill: #767676;" text="28 Agustus 2023" />
+            </children>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button fx:id="btnBeriReview" mnemonicParsing="false" onAction="#handleBeriReview" style="-fx-background-color: #4CAF50;" text="Beri Review" />
+        <Button fx:id="btnPesanLagi" mnemonicParsing="false" onAction="#handlePesanLagi" text="Pesan Lagi" />
+
+    </children>
+</HBox>

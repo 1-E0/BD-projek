@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.RiwayatPesananController">
+    <stylesheets>
+        <URL value="@../styles/style.css" />
+    </stylesheets>
+    <children>
+        <Button layoutX="30.0" layoutY="15.0" mnemonicParsing="false" onAction="#handleKembali" style="-fx-background-color: #757575;" text="Kembali" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="15.0">
+            <graphic>
+                <FontAwesomeIconView fill="WHITE" glyphName="ARROW_LEFT" />
+            </graphic>
+        </Button>
+
+        <VBox spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <FontAwesomeIconView glyphName="HISTORY" size="30" styleClass="title-label" />
+                        <Label fx:id="lblTitle" styleClass="title-label" text="Riwayat Pesanan Saya" />
+                    </children>
+                </HBox>
+                <Label text="Klik pada salah satu pesanan untuk melihat detail item." />
+                <TableView fx:id="pesananTable" prefHeight="250.0">
+                    <columns>
+                        <TableColumn fx:id="colIdPesanan" prefWidth="75.0" text="ID Pesanan" />
+                        <TableColumn fx:id="colTanggal" prefWidth="200.0" text="Tanggal Pesanan" />
+                        <TableColumn fx:id="colTotal" prefWidth="150.0" text="Total Harga" />
+                        <TableColumn fx:id="colStatus" prefWidth="150.0" text="Status Bayar" />
+                        <TableColumn fx:id="colAlamat" prefWidth="325.0" text="Alamat Pengiriman" />
+                    </columns>
+                </TableView>
+                <VBox styleClass="card" spacing="10.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Detail Item Pesanan" />
+                        <TableView fx:id="detailTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colNamaItem" prefWidth="350.0" text="Nama Menu" />
+                                <TableColumn fx:id="colKuantitas" prefWidth="100.0" text="Jumlah" />
+                                <TableColumn fx:id="colHargaSatuan" prefWidth="200.0" text="Harga Satuan" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

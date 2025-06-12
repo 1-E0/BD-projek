@@ -1,0 +1,4 @@
+package com.example.bd.util;
+
+public class SceneTransition {
+}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="720.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.DashboardController">
+    <stylesheets>
+        <URL value="@../styles/style.css" />
+    </stylesheets>
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+            <children>
+                <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #757575;" text="Logout">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="SIGN_OUT" styleClass="glyph-icon" />
+                    </graphic>
+                </Button>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label styleClass="title-label" text="Dashboard Admin" />
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+            </padding>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+            <children>
+                <Button onAction="#goToManajemenMenu" prefHeight="50.0" prefWidth="250.0" text="Manajemen Menu">
+                    <graphic><FontAwesomeIconView glyphName="CUTLERY" styleClass="glyph-icon" /></graphic>
+                </Button>
+                <Button onAction="#goToManajemenPelanggan" prefHeight="50.0" prefWidth="250.0" text="Manajemen Pelanggan">
+                    <graphic><FontAwesomeIconView glyphName="USERS" styleClass="glyph-icon" /></graphic>
+                </Button>
+                <Button onAction="#goToManajemenStaff" prefHeight="50.0" prefWidth="250.0" text="Manajemen Staff">
+                    <graphic><FontAwesomeIconView glyphName="USER_SECRET" styleClass="glyph-icon" /></graphic>
+                </Button>
+                <Button onAction="#goToManajemenPesanan" prefHeight="50.0" prefWidth="250.0" text="Manajemen Pesanan">
+                    <graphic><FontAwesomeIconView glyphName="CLIPBOARD" styleClass="glyph-icon" /></graphic>
+                </Button>
+                <Button onAction="#goToManajemenKategori" prefHeight="50.0" prefWidth="250.0" text="Manajemen Kategori">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TAGS" styleClass="glyph-icon" />
+                    </graphic>
+                </Button>
+                <Button onAction="#goToManajemenCabang" prefHeight="50.0" prefWidth="250.0" text="Manajemen Cabang dan Kota">
+                    <graphic><FontAwesomeIconView glyphName="BUILDING" styleClass="glyph-icon" /></graphic>
+                </Button>
+                <Button onAction="#goToManajemenReview" prefHeight="50.0" prefWidth="250.0" text="Manajemen Review">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="STAR" styleClass="glyph-icon" />
+                    </graphic>
+                </Button>
+                <Button onAction="#goToManajemenDiskon" prefHeight="50.0" prefWidth="250.0" text="Manajemen Diskon">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="PERCENT" styleClass="glyph-icon" />
+                    </graphic>
+                </Button>
+                <Button onAction="#goToManajemenMetodePembayaran" prefHeight="50.0" prefWidth="250.0" text="Metode Pembayaran">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CREDIT_CARD" styleClass="glyph-icon" />
+                    </graphic>
+                </Button>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>
