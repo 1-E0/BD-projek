@@ -15,7 +15,7 @@ public class Admin {
     public Admin() {
     }
 
-    // Getters and Setters
+    
     public int getIdAdmin() {
         return idAdmin;
     }
