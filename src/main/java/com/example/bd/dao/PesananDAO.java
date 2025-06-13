@@ -101,6 +101,16 @@ public class PesananDAO {
             e.printStackTrace();
         }
     }
+    public void updateAlamatTujuan(int idPesanan, String alamatBaru) {
+        String sql = "UPDATE pesanan SET alamat_tujuan = ? WHERE id_pesanan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, alamatBaru);
+            pstmt.setInt(2, idPesanan);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void simpanPesananLengkap(Pesanan pesanan, List<DetailPesanan> detailList, Pembayaran pembayaran) throws SQLException {
         String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, tanggal_pesanan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, CURRENT_DATE, ?, ?, ?) RETURNING id_pesanan";
