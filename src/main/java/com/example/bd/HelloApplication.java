@@ -26,6 +26,8 @@ public class HelloApplication extends Application {
 
 
         stage.setTitle("Aplikasi Catering");
+        //tes merge
+        
 
 
 
