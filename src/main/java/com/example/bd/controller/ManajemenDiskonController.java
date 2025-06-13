@@ -1,6 +1,5 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.DiskonDAO;
 import com.example.bd.model.Diskon;
 import com.example.bd.util.Navigasi;
@@ -8,14 +7,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,19 +23,19 @@ public class ManajemenDiskonController implements Initializable {
     @FXML private TableColumn<Diskon, Integer> colId;
     @FXML private TableColumn<Diskon, String> colNama;
     @FXML private TableColumn<Diskon, Double> colPersen;
-    @FXML private TableColumn<Diskon, Double> colMin;
     @FXML private TableColumn<Diskon, String> colSyarat;
     @FXML private TableColumn<Diskon, LocalDate> colMulai;
     @FXML private TableColumn<Diskon, LocalDate> colAkhir;
 
     @FXML private TextField txtNama;
     @FXML private TextField txtPersen;
-    @FXML private TextField txtMinPembelian;
     @FXML private TextField txtSyarat;
     @FXML private DatePicker dateMulai;
     @FXML private DatePicker dateAkhir;
     @FXML private Label formTitleLabel;
     @FXML private Button btnSimpan;
+
+    // O campo txtMinPembelian foi removido da UI
 
     private final DiskonDAO diskonDAO = new DiskonDAO();
     private final ObservableList<Diskon> diskonList = FXCollections.observableArrayList();
@@ -58,7 +52,6 @@ public class ManajemenDiskonController implements Initializable {
         colId.setCellValueFactory(new PropertyValueFactory<>("idDiskon"));
         colNama.setCellValueFactory(new PropertyValueFactory<>("namaDiskon"));
         colPersen.setCellValueFactory(new PropertyValueFactory<>("persenDiskon"));
-        colMin.setCellValueFactory(new PropertyValueFactory<>("minPembelian"));
         colSyarat.setCellValueFactory(new PropertyValueFactory<>("syaratDanKetentuanDiskon"));
         colMulai.setCellValueFactory(new PropertyValueFactory<>("tanggalMulaiDiskon"));
         colAkhir.setCellValueFactory(new PropertyValueFactory<>("tanggalAkhirDiskon"));
@@ -76,20 +69,19 @@ public class ManajemenDiskonController implements Initializable {
                 diskonTerpilih = newVal;
                 txtNama.setText(newVal.getNamaDiskon());
                 txtPersen.setText(String.valueOf(newVal.getPersenDiskon()));
-                txtMinPembelian.setText(String.format("%.0f", newVal.getMinPembelian()));
                 txtSyarat.setText(newVal.getSyaratDanKetentuanDiskon());
                 dateMulai.setValue(newVal.getTanggalMulaiDiskon());
                 dateAkhir.setValue(newVal.getTanggalAkhirDiskon());
-                formTitleLabel.setText("Form Edit Diskon");
-                btnSimpan.setText("Update");
+                formTitleLabel.setText("Formulário de Edição de Desconto");
+                btnSimpan.setText("Atualizar");
             }
         });
     }
 
     @FXML
     private void handleSimpan(ActionEvent event) {
-        if (txtNama.getText().isEmpty() || txtPersen.getText().isEmpty() || txtMinPembelian.getText().isEmpty() || dateMulai.getValue() == null || dateAkhir.getValue() == null) {
-            showAlert(Alert.AlertType.ERROR, "Error Validasi", "Semua field wajib diisi!");
+        if (txtNama.getText().isEmpty() || txtPersen.getText().isEmpty() || dateMulai.getValue() == null || dateAkhir.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Erro de Validação", "Todos os campos são obrigatórios!");
             return;
         }
 
@@ -97,37 +89,36 @@ public class ManajemenDiskonController implements Initializable {
             Diskon diskon = (diskonTerpilih == null) ? new Diskon() : diskonTerpilih;
             diskon.setNamaDiskon(txtNama.getText());
             diskon.setPersenDiskon(Double.parseDouble(txtPersen.getText()));
-            diskon.setMinPembelian(Double.parseDouble(txtMinPembelian.getText()));
             diskon.setSyaratDanKetentuanDiskon(txtSyarat.getText());
             diskon.setTanggalMulaiDiskon(dateMulai.getValue());
             diskon.setTanggalAkhirDiskon(dateAkhir.getValue());
 
             if (diskonTerpilih == null) {
                 diskonDAO.addDiskon(diskon);
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon baru berhasil ditambahkan.");
+                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Novo desconto adicionado com sucesso.");
             } else {
                 diskonDAO.updateDiskon(diskon);
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon berhasil diupdate.");
+                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Desconto atualizado com sucesso.");
             }
             loadDiskonData();
             clearForm();
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Error Input", "Persentase dan Minimum Pembelian harus berupa angka.");
+            showAlert(Alert.AlertType.ERROR, "Erro de Entrada", "A porcentagem deve ser um número.");
         }
     }
 
     @FXML
     private void handleHapus(ActionEvent event) {
         if (diskonTerpilih == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Pilih diskon yang ingin dihapus.");
+            showAlert(Alert.AlertType.ERROR, "Erro", "Selecione um desconto para deletar.");
             return;
         }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Yakin ingin menghapus diskon: " + diskonTerpilih.getNamaDiskon() + "?", ButtonType.YES, ButtonType.NO);
-        confirm.setHeaderText("Konfirmasi Hapus");
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Tem certeza que deseja deletar o desconto: " + diskonTerpilih.getNamaDiskon() + "?", ButtonType.YES, ButtonType.NO);
+        confirm.setHeaderText("Confirmar Exclusão");
         Optional<ButtonType> response = confirm.showAndWait();
         if (response.isPresent() && response.get() == ButtonType.YES) {
             diskonDAO.deleteDiskon(diskonTerpilih.getIdDiskon());
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon berhasil dihapus.");
+            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Desconto deletado com sucesso.");
             loadDiskonData();
             clearForm();
         }
@@ -142,16 +133,14 @@ public class ManajemenDiskonController implements Initializable {
         diskonTerpilih = null;
         txtNama.clear();
         txtPersen.clear();
-        txtMinPembelian.clear();
         txtSyarat.clear();
         dateMulai.setValue(null);
         dateAkhir.setValue(null);
         diskonTable.getSelectionModel().clearSelection();
-        formTitleLabel.setText("Form Tambah Diskon Baru");
-        btnSimpan.setText("Simpan");
+        formTitleLabel.setText("Formulário de Adição de Novo Desconto");
+        btnSimpan.setText("Salvar");
     }
 
-    // === METHOD UNTUK TOMBOL KEMBALI ===
     @FXML
     private void handleKembali(ActionEvent event) throws IOException {
         Navigasi.goBack(event, "DashboardView.fxml");

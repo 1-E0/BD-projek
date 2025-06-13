@@ -3,25 +3,37 @@ package com.example.bd.model;
 public class Admin {
 
     private int idAdmin;
+    private int idCabang; // Adicionado
+    private String jenisAdmin; // Adicionado
     private String namaAdmin;
     private String emailAdmin;
-    private String passwordAdmin; // Ditambahkan untuk fungsi login
-    private String jenisKelamin;
-    private String noTelpAdmin;
+    private String passwordAdmin;
+    private String noTelpAdmin; // Renomeado
     private String statusAdmin;
-    private String fotoProfilAdmin;
 
-    // Constructors (opsional, tapi baik untuk dimiliki)
-    public Admin() {
-    }
-
-    
+    // Getters e Setters
     public int getIdAdmin() {
         return idAdmin;
     }
 
     public void setIdAdmin(int idAdmin) {
         this.idAdmin = idAdmin;
+    }
+
+    public int getIdCabang() {
+        return idCabang;
+    }
+
+    public void setIdCabang(int idCabang) {
+        this.idCabang = idCabang;
+    }
+
+    public String getJenisAdmin() {
+        return jenisAdmin;
+    }
+
+    public void setJenisAdmin(String jenisAdmin) {
+        this.jenisAdmin = jenisAdmin;
     }
 
     public String getNamaAdmin() {
@@ -48,14 +60,6 @@ public class Admin {
         this.passwordAdmin = passwordAdmin;
     }
 
-    public String getJenisKelamin() {
-        return jenisKelamin;
-    }
-
-    public void setJenisKelamin(String jenisKelamin) {
-        this.jenisKelamin = jenisKelamin;
-    }
-
     public String getNoTelpAdmin() {
         return noTelpAdmin;
     }
@@ -70,13 +74,5 @@ public class Admin {
 
     public void setStatusAdmin(String statusAdmin) {
         this.statusAdmin = statusAdmin;
-    }
-
-    public String getFotoProfilAdmin() {
-        return fotoProfilAdmin;
-    }
-
-    public void setFotoProfilAdmin(String fotoProfilAdmin) {
-        this.fotoProfilAdmin = fotoProfilAdmin;
     }
 }

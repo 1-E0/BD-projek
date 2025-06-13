@@ -2,6 +2,7 @@ package com.example.bd.controller;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
@@ -15,23 +16,20 @@ public class ReviewDialogController {
     @FXML private Button btnKirim;
 
     private int rating = 0;
+    private boolean submitted = false; // PENANDA BARU DITAMBAHKAN
 
     public void initialize() {
         for (int i = 1; i <= 5; i++) {
             ToggleButton starButton = new ToggleButton();
-            // Beri style class pada tombolnya agar bisa di-style oleh CSS
             starButton.getStyleClass().add("rating-toggle-button");
 
             FontAwesomeIconView icon = new FontAwesomeIconView();
-            // Kita set BINTANG KOSONG sebagai ikon default
             icon.setGlyphName("STAR_ALT");
             icon.setSize("2em");
-            // Beri style class pada ikonnya
             icon.getStyleClass().add("glyph-icon");
 
             starButton.setGraphic(icon);
 
-            // Saat sebuah bintang diklik, panggil method untuk update visual
             final int starIndex = i;
             starButton.setOnAction(event -> {
                 this.rating = starIndex;
@@ -42,34 +40,43 @@ public class ReviewDialogController {
         }
     }
 
-    /**
-     * Method ini hanya mengatur tombol mana yang "terpilih"
-     * dan mana yang tidak. CSS akan mengurus sisanya (warna dan bentuk ikon).
-     */
     private void updateStarSelection(int currentRating) {
         for (int i = 0; i < ratingBox.getChildren().size(); i++) {
             ToggleButton currentButton = (ToggleButton) ratingBox.getChildren().get(i);
             FontAwesomeIconView icon = (FontAwesomeIconView) currentButton.getGraphic();
 
             if (i < currentRating) {
-                currentButton.setSelected(true); // Set status tombol
-                icon.setGlyphName("STAR");       // Ganti ikon menjadi bintang penuh
+                currentButton.setSelected(true);
+                icon.setGlyphName("STAR");
             } else {
-                currentButton.setSelected(false); // Set status tombol
-                icon.setGlyphName("STAR_ALT");  // Ganti ikon menjadi bintang kosong
+                currentButton.setSelected(false);
+                icon.setGlyphName("STAR_ALT");
             }
         }
     }
 
     @FXML
     private void handleKirim() {
-        closeDialog();
+        // Hanya tandai sebagai "submitted" jika rating sudah dipilih
+        if (rating > 0) {
+            this.submitted = true;
+            closeDialog();
+        } else {
+            // Beri peringatan jika pengguna mencoba mengirim tanpa rating
+            showAlert(Alert.AlertType.WARNING, "Peringatan", "Silakan pilih rating bintang terlebih dahulu sebelum mengirim.");
+        }
     }
 
     @FXML
     private void handleBatal() {
-        rating = 0; // Tandai sebagai batal
+        this.rating = 0;
+        this.submitted = false; // Pastikan statusnya tidak terkirim
         closeDialog();
+    }
+
+    // Metode getter baru untuk penanda
+    public boolean isSubmitted() {
+        return this.submitted;
     }
 
     public int getRating() {
@@ -83,5 +90,13 @@ public class ReviewDialogController {
     private void closeDialog() {
         Stage stage = (Stage) btnKirim.getScene().getWindow();
         stage.close();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -2,9 +2,7 @@ package com.example.bd.controller;
 
 import com.example.bd.HelloApplication;
 import com.example.bd.dao.KategoriDAO;
-
 import com.example.bd.model.Kategori;
-
 import com.example.bd.model.Pelanggan;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
@@ -66,12 +64,10 @@ public class PelangganDashboardController implements Initializable {
         card.setPrefSize(140, 120);
 
         FontAwesomeIconView icon = new FontAwesomeIconView();
-        icon.setSize("3em");
 
         String namaLower = kategori.getNamaKategori().toLowerCase();
         String warnaIkon;
 
-        // Atur ikon dan warna berdasarkan nama kategori
         if (namaLower.contains("minum")) {
             icon.setGlyphName("COFFEE");
             warnaIkon = "#8D6E63"; // Coklat
@@ -86,8 +82,11 @@ public class PelangganDashboardController implements Initializable {
             warnaIkon = "#EF5350"; // Merah
         }
 
-        // Terapkan warna ke ikon secara langsung
-        icon.setStyle("-fx-fill: " + warnaIkon + ";");
+        // --- PERUBAHAN DI SINI ---
+        // Mengatur ukuran font ikon secara absolut (40px) DAN warnanya dalam satu perintah.
+        // Ini cara yang lebih stabil untuk mencegah ikon mengecil.
+        icon.setStyle("-fx-font-size: 40px; -fx-fill: " + warnaIkon + ";");
+        // --- AKHIR PERUBAHAN ---
 
         Label namaKategori = new Label(kategori.getNamaKategori());
         namaKategori.setWrapText(true);
@@ -100,24 +99,19 @@ public class PelangganDashboardController implements Initializable {
 
     private void handleKategoriClick(MouseEvent event, Kategori kategori) {
         try {
-            // 1. Dapatkan Scene saat ini
             Node source = (Node) event.getSource();
             Scene scene = source.getScene();
 
-            // 2. Muat FXML baru DAN DAPATKAN CONTROLLER-nya
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/MenuListByCategoryView.fxml"));
             Parent newRoot = loader.load();
 
-            // 3. SEBELUM PINDAH, kirim data ke controller yang baru dimuat
             MenuListByCategoryController controller = loader.getController();
             controller.initializeData(kategori);
 
-            // 4. Lakukan animasi transisi secara manual
             double sceneWidth = scene.getWidth();
-            newRoot.setTranslateX(sceneWidth); // Posisikan di luar layar kanan
-            scene.setRoot(newRoot); // Ganti konten scene
+            newRoot.setTranslateX(sceneWidth);
+            scene.setRoot(newRoot);
 
-            // Mainkan animasi slide-in
             TranslateTransition slideIn = new TranslateTransition(Duration.millis(350), newRoot);
             slideIn.setToX(0);
             slideIn.setInterpolator(Interpolator.EASE_OUT);
@@ -133,28 +127,23 @@ public class PelangganDashboardController implements Initializable {
     private void handleSearch(ActionEvent event) {
         String keyword = txtSearch.getText();
         if (keyword == null || keyword.trim().isEmpty()) {
-            return; // Jangan lakukan apa-apa jika search bar kosong
+            return;
         }
 
         try {
-            // 1. Dapatkan Scene saat ini
             Node source = (Node) event.getSource();
             Scene scene = source.getScene();
 
-            // 2. Muat FXML baru DAN DAPATKAN CONTROLLER-nya
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/SearchResultView.fxml"));
             Parent newRoot = loader.load();
 
-            // 3. SEBELUM PINDAH, kirim data (kata kunci) ke controller baru
             SearchResultController controller = loader.getController();
             controller.initializeData(keyword);
 
-            // 4. Lakukan animasi transisi secara manual
             double sceneWidth = scene.getWidth();
-            newRoot.setTranslateX(sceneWidth); // Posisikan di luar layar kanan
-            scene.setRoot(newRoot); // Ganti konten scene
+            newRoot.setTranslateX(sceneWidth);
+            scene.setRoot(newRoot);
 
-            // Mainkan animasi slide-in
             TranslateTransition slideIn = new TranslateTransition(Duration.millis(350), newRoot);
             slideIn.setToX(0);
             slideIn.setInterpolator(Interpolator.EASE_OUT);
@@ -180,7 +169,7 @@ public class PelangganDashboardController implements Initializable {
         UserSession.getInstance().cleanUserSession();
         Navigasi.goBack(event, "LoginView.fxml");
     }
-    // Di dalam kelas PelangganDashboardController
+
     @FXML
     void goToEditProfil(ActionEvent event) {
         Navigasi.switchScene(event, "EditProfilView.fxml");

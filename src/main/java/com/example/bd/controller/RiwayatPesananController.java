@@ -13,12 +13,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,7 +24,7 @@ import java.util.ResourceBundle;
 public class RiwayatPesananController implements Initializable {
 
     @FXML private Label lblTitle;
-    @FXML private ListView<Pesanan> pesananListView; // Menggunakan ListView
+    @FXML private ListView<Pesanan> pesananListView;
 
     private final PesananDAO pesananDAO = new PesananDAO();
     private Pelanggan pelangganLogin;
@@ -51,7 +48,6 @@ public class RiwayatPesananController implements Initializable {
         pesananListView.setItems(pesananList);
     }
 
-    // === LOGIKA BARU MENGGUNAKAN CELL FACTORY ===
     private void setupPesananListView() {
         pesananListView.setCellFactory(listView -> new ListCell<Pesanan>() {
             @Override

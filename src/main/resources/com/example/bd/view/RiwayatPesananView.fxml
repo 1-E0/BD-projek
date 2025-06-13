@@ -1,32 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.RiwayatPesananController">
-    <stylesheets>
-        <URL value="@../styles/style.css" />
-    </stylesheets>
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="15.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.RiwayatPesananController">
     <children>
-        <Button layoutX="30.0" layoutY="15.0" mnemonicParsing="false" onAction="#handleKembali" style="-fx-background-color: #757575;" text="Kembali">
-            <graphic><FontAwesomeIconView fill="WHITE" glyphName="ARROW_LEFT" /></graphic>
-        </Button>
-        <VBox spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="60.0">
-            <children>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <children>
-                        <FontAwesomeIconView glyphName="HISTORY" size="30" styleClass="title-label" />
-                        <Label fx:id="lblTitle" styleClass="title-label" text="Riwayat Pesanan Saya" />
-                    </children>
-                </HBox>
-                <ListView fx:id="pesananListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;" />
-            </children>
-        </VBox>
+        <Label fx:id="lblTitle" styleClass="title-label" text="Riwayat Pesanan Anda" />
+        <ListView fx:id="pesananListView" VBox.vgrow="ALWAYS" />
+        <Button mnemonicParsing="false" onAction="#handleKembali" styleClass="delete-button" text="Kembali ke Dashboard" />
     </children>
-</AnchorPane>
+    <padding>
+        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+    </padding>
+</VBox>

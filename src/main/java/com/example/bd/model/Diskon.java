@@ -1,8 +1,6 @@
 package com.example.bd.model;
 
 import java.time.LocalDate;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 public class Diskon {
     private int idDiskon;
@@ -11,15 +9,14 @@ public class Diskon {
     private String syaratDanKetentuanDiskon;
     private LocalDate tanggalMulaiDiskon;
     private LocalDate tanggalAkhirDiskon;
-    private double minPembelian; // Field baru
+    // O campo min_pembelian foi removido
 
-    // StringConverter untuk ComboBox
     @Override
     public String toString() {
         return namaDiskon + " (" + persenDiskon + "%)";
     }
 
-    // Getters and Setters
+    // Getters e Setters
     public int getIdDiskon() { return idDiskon; }
     public void setIdDiskon(int idDiskon) { this.idDiskon = idDiskon; }
 
@@ -37,7 +34,4 @@ public class Diskon {
 
     public LocalDate getTanggalAkhirDiskon() { return tanggalAkhirDiskon; }
     public void setTanggalAkhirDiskon(LocalDate tanggalAkhirDiskon) { this.tanggalAkhirDiskon = tanggalAkhirDiskon; }
-
-    public double getMinPembelian() { return minPembelian; }
-    public void setMinPembelian(double minPembelian) { this.minPembelian = minPembelian; }
 }

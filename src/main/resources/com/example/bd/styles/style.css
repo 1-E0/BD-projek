@@ -52,3 +52,41 @@
 .rating-toggle-button:selected .glyph-icon { -fx-fill: #FFB300; }
 .review-table-star { -fx-font-family: "FontAwesome"; -fx-fill: #BDBDBD; }
 .review-table-star.filled { -fx-fill: #FFB300; }
+
+/* ===== STYLE SEARCH BAR BARU ===== */
+
+.search-container {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 25px; /* Membuat ujungnya sangat bundar */
+    -fx-border-radius: 25px;
+    -fx-border-color: #D7CCC8;
+    -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.1), 5, 0, 0, 1);
+    -fx-padding: 0; /* Hapus padding default */
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #BCAAA4;
+    -fx-padding: 10px 20px; /* Padding di dalam text field */
+}
+
+.search-button {
+    -fx-background-color: #FF7043;
+    -fx-background-radius: 0 25px 25px 0; /* Membuat bundar hanya di ujung kanan */
+    -fx-border-radius: 0 25px 25px 0;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.search-button:hover {
+    -fx-background-color: #F4511E;
+}
+
+/* Style saat search bar sedang aktif (diketik) */
+.search-container:focused-within {
+     -fx-border-color: #FF7043;
+     -fx-border-width: 2px;
+     -fx-effect: dropshadow(gaussian, rgba(255,112,67,0.4), 10, 0, 0, 0);
+}

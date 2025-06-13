@@ -1,26 +1,20 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.MenuDAO;
-import com.example.bd.model.Menu;
+import com.example.bd.model.Menu; // <-- Import ini penting untuk mengatasi ambiguitas
+import com.example.bd.model.MenuHarian;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +25,9 @@ public class SearchResultController {
     @FXML private FlowPane menuFlowPane;
 
     private final MenuDAO menuDAO = new MenuDAO();
+    // Asumsi cabang default
+    private static final int ID_CABANG_PADRAO = 1;
 
-    // Method ini akan dipanggil dari Dashboard untuk mengirim kata kunci pencarian
     public void initializeData(String keyword) {
         lblSearchResult.setText("Hasil Pencarian untuk: \"" + keyword + "\"");
         loadMenuData(keyword);
@@ -40,41 +35,43 @@ public class SearchResultController {
 
     private void loadMenuData(String keyword) {
         menuFlowPane.getChildren().clear();
-        List<Menu> resultList = menuDAO.searchMenu(keyword);
+        // Memanggil metode pencarian baru
+        List<MenuHarian> resultList = menuDAO.searchMenuHarian(keyword, ID_CABANG_PADRAO);
 
         lblJumlahHasil.setText("Ditemukan " + resultList.size() + " hasil");
 
-        for (Menu menu : resultList) {
-            VBox card = createMenuCard(menu);
+        for (MenuHarian menuHarian : resultList) {
+            VBox card = createMenuCard(menuHarian);
             menuFlowPane.getChildren().add(card);
         }
     }
 
-    // Method ini sama persis dengan yang ada di MenuListByCategoryController
-    private VBox createMenuCard(Menu menu) {
+    // Metode ini sekarang menerima MenuHarian
+    private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");
         card.setPrefWidth(200);
 
-        Label namaMenu = new Label(menu.getNamaMenu());
+        Label namaMenu = new Label(menuHarian.getNamaMenu());
         namaMenu.getStyleClass().add("item-name");
         namaMenu.setWrapText(true);
 
-        Label hargaMenu = new Label(String.format("Rp %.0f", menu.getHargaMenu()));
+        Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));
         hargaMenu.getStyleClass().add("item-price");
 
         Button btnTambah = new Button("Tambah ke Keranjang");
         btnTambah.setPrefWidth(Double.MAX_VALUE);
-        btnTambah.setOnAction(event -> handleTambahKeKeranjang(menu));
+        btnTambah.setOnAction(event -> handleTambahKeKeranjang(menuHarian));
 
         card.getChildren().addAll(namaMenu, hargaMenu, btnTambah);
         return card;
     }
 
-    private void handleTambahKeKeranjang(Menu menu) {
+    // Metode ini juga sekarang menerima MenuHarian
+    private void handleTambahKeKeranjang(MenuHarian menuHarian) {
         TextInputDialog dialog = new TextInputDialog("1");
         dialog.setTitle("Input Kuantitas");
-        dialog.setHeaderText("Masukkan jumlah untuk: " + menu.getNamaMenu());
+        dialog.setHeaderText("Masukkan jumlah untuk: " + menuHarian.getNamaMenu());
         dialog.setContentText("Jumlah:");
         Optional<String> result = dialog.showAndWait();
 
@@ -85,8 +82,15 @@ public class SearchResultController {
                     showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus lebih dari 0.");
                     return;
                 }
-                UserSession.getInstance().addItemToCart(menu, kuantitas);
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", menu.getNamaMenu() + " telah ditambahkan ke keranjang.");
+                if (kuantitas > menuHarian.getStokMenuHarian()) {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Jumlah melebihi stok yang tersedia (" + menuHarian.getStokMenuHarian() + ").");
+                    return;
+                }
+
+                // Mengambil menu dasar dan memanggil addItemToCart dengan 3 argumen
+                Menu menuBase = menuDAO.getMenuById(menuHarian.getIdMenu());
+                UserSession.getInstance().addItemToCart(menuBase, kuantitas, menuHarian.getIdMenuHarian());
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", menuHarian.getNamaMenu() + " telah ditambahkan ke keranjang.");
             } catch (NumberFormatException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus berupa angka.");
             }

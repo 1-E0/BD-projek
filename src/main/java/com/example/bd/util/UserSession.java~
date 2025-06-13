@@ -10,6 +10,8 @@ public class UserSession {
 
     private static UserSession instance;
     private Pelanggan loggedInPelanggan;
+
+    // --- KERANJANG BELANJA GLOBAL ---
     private ObservableList<ItemKeranjang> keranjang;
 
     private UserSession() {
@@ -31,18 +33,22 @@ public class UserSession {
         this.loggedInPelanggan = loggedInPelanggan;
     }
 
+    // --- METHOD BARU UNTUK MENGELOLA KERANJANG ---
+
     public ObservableList<ItemKeranjang> getKeranjang() {
         return keranjang;
     }
 
-    public void addItemToCart(Menu menu, int kuantitas, int idMenuHarian) {
+    public void addItemToCart(Menu menu, int kuantitas) {
+        // Cek apakah item sudah ada di keranjang
         for (ItemKeranjang item : keranjang) {
-            if (item.getIdMenuHarian() == idMenuHarian) {
-                item.setKuantitas(item.getKuantitas() + kuantitas);
+            if (item.getMenu().getIdMenu() == menu.getIdMenu()) {
+                item.setKuantitas(item.getKuantitas() + kuantitas); // Cukup update kuantitas
                 return;
             }
         }
-        keranjang.add(new ItemKeranjang(menu, kuantitas, idMenuHarian));
+        // Jika belum ada, tambahkan item baru
+        keranjang.add(new ItemKeranjang(menu, kuantitas));
     }
 
     public void clearKeranjang() {
@@ -51,6 +57,6 @@ public class UserSession {
 
     public void cleanUserSession() {
         loggedInPelanggan = null;
-        clearKeranjang();
+        clearKeranjang(); // Sekalian bersihkan keranjang saat logout
     }
 }

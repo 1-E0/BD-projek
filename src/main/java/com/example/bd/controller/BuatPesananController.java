@@ -5,7 +5,7 @@ import com.example.bd.dao.DiskonDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.dao.PesananDAO;
 import com.example.bd.model.*;
-import com.example.bd.model.Menu;
+import com.example.bd.model.Menu; // <-- BARIS PENTING DITAMBAHKAN DI SINI
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
@@ -15,9 +15,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -34,9 +32,9 @@ import java.util.ResourceBundle;
 public class BuatPesananController implements Initializable {
 
     // --- FXML Components ---
-    @FXML private TableView<Menu> menuTable;
-    @FXML private TableColumn<Menu, String> colNamaMenu;
-    @FXML private TableColumn<Menu, Double> colHargaMenu;
+    @FXML private TableView<MenuHarian> menuTable;
+    @FXML private TableColumn<MenuHarian, String> colNamaMenu;
+    @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
     @FXML private TableView<ItemKeranjang> keranjangTable;
     @FXML private TableColumn<ItemKeranjang, String> colKeranjangNama;
     @FXML private TableColumn<ItemKeranjang, Integer> colKeranjangKuantitas;
@@ -54,11 +52,12 @@ public class BuatPesananController implements Initializable {
     private final DiskonDAO diskonDAO = new DiskonDAO();
 
     // --- Data Lists ---
-    private final ObservableList<Menu> menuList = FXCollections.observableArrayList();
+    private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
 
-
+    // Asumsi cabang default untuk demonstrasi
+    private static final int ID_CABANG_PADRAO = 1;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -108,15 +107,19 @@ public class BuatPesananController implements Initializable {
     }
 
     private void loadAllData() {
-        menuList.setAll(menuDAO.getAllMenu());
+        // Sekarang memuat MenuHarian untuk cabang default
+        menuList.setAll(menuDAO.getMenuHarianByKategori(1, ID_CABANG_PADRAO)); // Contoh Kategori 1
+        menuList.addAll(menuDAO.getMenuHarianByKategori(2, ID_CABANG_PADRAO)); // Contoh Kategori 2
+        menuList.addAll(menuDAO.getMenuHarianByKategori(3, ID_CABANG_PADRAO)); // Contoh Kategori 3
         menuTable.setItems(menuList);
+
         ObservableList<Diskon> diskonAktifList = FXCollections.observableArrayList(diskonDAO.getActiveDiscounts());
         comboDiskon.setItems(diskonAktifList);
     }
 
     @FXML
     void handleTambahKeKeranjang(ActionEvent event) {
-        Menu menuTerpilih = menuTable.getSelectionModel().getSelectedItem();
+        MenuHarian menuTerpilih = menuTable.getSelectionModel().getSelectedItem();
         if (menuTerpilih == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "Pilih menu dari daftar terlebih dahulu!");
             return;
@@ -136,27 +139,19 @@ public class BuatPesananController implements Initializable {
                     return;
                 }
 
-                // Cek apakah item sudah ada di keranjang
-                for (ItemKeranjang item : keranjangList) {
-                    if (item.getMenu().getIdMenu() == menuTerpilih.getIdMenu()) {
-                        item.setKuantitas(item.getKuantitas() + kuantitas);
-                        keranjangTable.refresh();
-                        // === PERBAIKAN DI SINI ===
-                        updateTotalHarga(); // Panggil update manual setelah mengubah kuantitas
-                        return;
-                    }
+                if (kuantitas > menuTerpilih.getStokMenuHarian()) {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Jumlah melebihi stok yang tersedia (" + menuTerpilih.getStokMenuHarian() + ").");
+                    return;
                 }
 
-                // Jika belum ada, tambahkan item baru (ini akan otomatis trigger listener)
-                UserSession.getInstance().addItemToCart(menuTerpilih, kuantitas);
+                Menu menuBase = menuDAO.getMenuById(menuTerpilih.getIdMenu());
+                UserSession.getInstance().addItemToCart(menuBase, kuantitas, menuTerpilih.getIdMenuHarian());
 
             } catch (NumberFormatException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus berupa angka.");
             }
         });
     }
-
-
 
     @FXML
     void handleHapusDariKeranjang(ActionEvent event) {
@@ -168,7 +163,6 @@ public class BuatPesananController implements Initializable {
         keranjangList.remove(itemTerpilih);
     }
 
-    // Di dalam kelas BuatPesananController
     private void updateTotalHarga() {
         double subtotal = 0;
         for (ItemKeranjang item : this.keranjangList) {
@@ -177,27 +171,14 @@ public class BuatPesananController implements Initializable {
 
         Diskon diskonTerpilih = comboDiskon.getValue();
         double jumlahDiskon = 0;
-        String diskonLabelText = "- Rp 0";
-        String diskonLabelStyle = "-fx-text-fill: #4CAF50;"; // Warna hijau default
-
         if (diskonTerpilih != null) {
-            // CEK KONDISI MINIMUM PEMBELIAN DI SINI!
-            if (subtotal >= diskonTerpilih.getMinPembelian()) {
-                // Jika syarat terpenuhi, hitung diskon
-                jumlahDiskon = subtotal * (diskonTerpilih.getPersenDiskon() / 100.0);
-                diskonLabelText = String.format("- Rp %.0f", jumlahDiskon);
-            } else {
-                // Jika syarat tidak terpenuhi, beri pesan
-                diskonLabelText = String.format("(Belanja min. Rp %.0f)", diskonTerpilih.getMinPembelian());
-                diskonLabelStyle = "-fx-text-fill: #E53935;"; // Warna merah
-            }
+            jumlahDiskon = subtotal * (diskonTerpilih.getPersenDiskon() / 100.0);
         }
 
         double totalAkhir = subtotal - jumlahDiskon;
 
         lblSubtotal.setText(String.format("Rp %.0f", subtotal));
-        lblJumlahDiskon.setText(diskonLabelText);
-        lblJumlahDiskon.setStyle(diskonLabelStyle); // Terapkan style (warna)
+        lblJumlahDiskon.setText(String.format("- Rp %.0f", jumlahDiskon));
         lblTotalAkhir.setText(String.format("Rp %.0f", totalAkhir));
     }
 
@@ -207,44 +188,39 @@ public class BuatPesananController implements Initializable {
         if (keranjangList.isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Keranjang pesanan tidak boleh kosong."); return; }
         if (txtAlamat.getText().trim().isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Alamat pengiriman harus diisi."); return; }
 
-        // Hitung total harga final
         double subtotal = 0;
         for (ItemKeranjang item : keranjangList) { subtotal += item.getSubtotal(); }
         double jumlahDiskon = 0;
         if (comboDiskon.getValue() != null) {
-            if (subtotal >= comboDiskon.getValue().getMinPembelian()) {
-                jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
-            }
+            jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
         }
         double totalHargaFinal = subtotal - jumlahDiskon;
 
-        // Tampilkan Dialog Pembayaran
         try {
             Dialog<ButtonType> dialog = new Dialog<>();
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/PembayaranDialog.fxml"));
             Parent root = loader.load();
 
             PembayaranDialogController controller = loader.getController();
-            controller.setTotal(totalHargaFinal); // Kirim total harga ke dialog
+            controller.setTotal(totalHargaFinal);
 
             dialog.getDialogPane().setContent(root);
             dialog.showAndWait();
 
             MetodePembayaran metode = controller.getMetodeTerpilih();
 
-            // Lanjutkan hanya jika pelanggan mengkonfirmasi pembayaran (memilih metode)
             if (metode != null) {
                 Pesanan pesanan = new Pesanan();
                 pesanan.setIdPelanggan(pelangganAktif.getIdPelanggan());
                 pesanan.setAlamatTujuan(txtAlamat.getText());
-                pesanan.setStatusPembayaran("Lunas"); // Anggap langsung lunas setelah konfirmasi
+                pesanan.setStatusPembayaran("Lunas");
                 pesanan.setTotalHargaPesanan(totalHargaFinal);
 
                 List<DetailPesanan> detailList = new ArrayList<>();
                 for (ItemKeranjang item : this.keranjangList) {
                     DetailPesanan detail = new DetailPesanan();
-                    detail.setIdMenu(item.getMenu().getIdMenu());
-                    detail.setKuantitas(item.getKuantitas());
+                    detail.setIdMenuHarian(item.getIdMenuHarian());
+                    detail.setJumlah(item.getKuantitas());
                     detail.setHargaProduk(item.getHargaMenu());
                     detailList.add(detail);
                 }
@@ -252,7 +228,6 @@ public class BuatPesananController implements Initializable {
                 Pembayaran pembayaran = new Pembayaran();
                 pembayaran.setIdMetode(metode.getIdMetode());
 
-                // Panggil method DAO yang baru untuk transaksi lengkap
                 pesananDAO.simpanPesananLengkap(pesanan, detailList, pembayaran);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
@@ -288,5 +263,4 @@ public class BuatPesananController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }

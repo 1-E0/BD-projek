@@ -1,26 +1,19 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.KategoriDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.model.Kategori;
-import com.example.bd.model.Menu;
+import com.example.bd.model.Menu; // <-- BARIS PENTING DITAMBAHKAN DI SINI
 import com.example.bd.util.Navigasi;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -37,7 +30,6 @@ public class ManajemenMenuController implements Initializable {
     @FXML private Button btnSimpan;
     @FXML private Label formTitleLabel;
 
-    // PERUBAHAN TIPE DARI ComboBox MENJADI ChoiceBox
     @FXML private ChoiceBox<Kategori> choiceKategori;
 
     // DAOs dan list
@@ -49,7 +41,7 @@ public class ManajemenMenuController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupTableColumns();
-        populateKategoriChoiceBox(); // Panggil method baru
+        populateKategoriChoiceBox();
         setupTableSelectionListener();
         loadTableData();
     }
@@ -90,7 +82,6 @@ public class ManajemenMenuController implements Initializable {
                 formTitleLabel.setText("Form Edit Menu");
                 btnSimpan.setText("Update");
 
-                // Logika baru untuk memilih kategori di ChoiceBox
                 for (Kategori k : choiceKategori.getItems()) {
                     if (k.getIdKategori() == newSelection.getIdKategori()) {
                         choiceKategori.setValue(k);

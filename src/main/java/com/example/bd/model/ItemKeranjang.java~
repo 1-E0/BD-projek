@@ -8,32 +8,24 @@ import javafx.beans.property.SimpleIntegerProperty;
 public class ItemKeranjang {
     private Menu menu;
     private IntegerProperty kuantitas;
+
+    // --- PERUBAHAN UTAMA: Tambahkan DoubleProperty untuk subtotal ---
     private DoubleProperty subtotal;
 
-    // Adicionado para rastrear qual item de menu diário está sendo pedido
-    private int idMenuHarian;
-
-    public ItemKeranjang(Menu menu, int kuantitas, int idMenuHarian) {
+    public ItemKeranjang(Menu menu, int kuantitas) {
         this.menu = menu;
         this.kuantitas = new SimpleIntegerProperty(kuantitas);
-        this.idMenuHarian = idMenuHarian;
 
+        // Inisialisasi subtotal dan ikat nilainya
         this.subtotal = new SimpleDoubleProperty();
         this.subtotal.bind(this.kuantitas.multiply(menu.getHargaMenu()));
-    }
-
-    public int getIdMenuHarian() {
-        return idMenuHarian;
-    }
-
-    public void setIdMenuHarian(int idMenuHarian) {
-        this.idMenuHarian = idMenuHarian;
     }
 
     public Menu getMenu() {
         return menu;
     }
 
+    // --- Kuantitas (tidak ada perubahan) ---
     public int getKuantitas() {
         return kuantitas.get();
     }
@@ -44,6 +36,7 @@ public class ItemKeranjang {
         return kuantitas;
     }
 
+    // --- Nama dan Harga (tidak ada perubahan) ---
     public String getNamaMenu() {
         return menu.getNamaMenu();
     }
@@ -51,6 +44,7 @@ public class ItemKeranjang {
         return menu.getHargaMenu();
     }
 
+    // --- Subtotal sekarang menggunakan Property ---
     public double getSubtotal() {
         return subtotal.get();
     }

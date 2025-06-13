@@ -42,14 +42,10 @@
                 <VBox spacing="25.0">
                     <padding><Insets bottom="25.0" left="25.0" right="25.0" top="10.0" /></padding>
                     <children>
-                        <HBox alignment="CENTER_LEFT" styleClass="search-container">
+                        <HBox styleClass="search-bar">
                             <children>
-                                <TextField fx:id="txtSearch" onAction="#handleSearch" promptText="Cari makanan atau minuman..." styleClass="search-field" HBox.hgrow="ALWAYS" />
-                                <Button mnemonicParsing="false" onAction="#handleSearch" styleClass="search-button">
-                                    <graphic>
-                                        <FontAwesomeIconView fill="WHITE" glyphName="SEARCH" size="1.5em" />
-                                    </graphic>
-                                </Button>
+                                <FontAwesomeIconView glyphName="SEARCH" size="1.5em" style="-fx-fill: #767676;" />
+                                <TextField fx:id="txtSearch" onAction="#handleSearch" HBox.hgrow="ALWAYS" promptText="Cari makanan atau minuman..." />
                             </children>
                         </HBox>
                         <Button onAction="#goToBuatPesanan" prefHeight="60.0" prefWidth="Infinity" text="atau Buat Pesanan Langsung">

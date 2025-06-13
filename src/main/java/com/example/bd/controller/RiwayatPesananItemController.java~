@@ -4,7 +4,11 @@ import com.example.bd.HelloApplication;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.dao.PesananDAO;
 import com.example.bd.dao.ReviewDAO;
-import com.example.bd.model.*;
+import com.example.bd.model.DetailPesanan;
+import com.example.bd.model.Menu;
+import com.example.bd.model.MenuHarian;
+import com.example.bd.model.Pesanan;
+import com.example.bd.model.Review;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.event.ActionEvent;
@@ -35,6 +39,7 @@ public class RiwayatPesananItemController {
     private Pesanan pesanan;
     private final PesananDAO pesananDAO = new PesananDAO();
     private final ReviewDAO reviewDAO = new ReviewDAO();
+    // Tambahkan MenuDAO untuk digunakan di 'Pesan Lagi'
     private final MenuDAO menuDAO = new MenuDAO();
 
     public void setData(Pesanan pesanan) {
@@ -57,14 +62,70 @@ public class RiwayatPesananItemController {
         btnBeriReview.setManaged(!sudahDireview);
     }
 
+    // --- LOGIKA PESAN LAGI DIPERBARUI DI SINI ---
+    @FXML
+    void handlePesanLagi(ActionEvent event) {
+        // 1. Ambil detail pesanan lama
+        List<DetailPesanan> detailLama = pesananDAO.getDetailByPesanan(pesanan.getIdPesanan());
+
+        // Kosongkan keranjang saat ini
+        UserSession.getInstance().clearKeranjang();
+
+        StringBuilder itemTidakTersedia = new StringBuilder();
+        int itemDitambahkan = 0;
+        final int ID_CABANG_PADRAO = 1; // Asumsi cabang default
+
+        // 2. Loop setiap item dari pesanan lama
+        for (DetailPesanan detail : detailLama) {
+            Menu menuLama = menuDAO.getMenuById(detail.getIdMenu());
+            if (menuLama == null) continue; // Lewati jika menu sudah dihapus dari sistem
+
+            // 2a. Cek apakah menu ini dijual hari ini
+            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), ID_CABANG_PADRAO);
+
+            if (menuHariIni == null) {
+                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (tidak tersedia hari ini)\n");
+                continue;
+            }
+
+            // 2b. Cek apakah stok cukup
+            if (menuHariIni.getStokMenuHarian() < detail.getJumlah()) {
+                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (stok tidak cukup)\n");
+                continue;
+            }
+
+            // 2c. Jika semua OK, tambahkan ke keranjang
+            UserSession.getInstance().addItemToCart(menuLama, detail.getJumlah(), menuHariIni.getIdMenuHarian());
+            itemDitambahkan++;
+        }
+
+        // 3. Beri feedback ke pengguna
+        if (itemDitambahkan > 0) {
+            String pesanSukses = itemDitambahkan + " item berhasil ditambahkan kembali ke keranjang.";
+            if (itemTidakTersedia.length() > 0) {
+                pesanSukses += "\n\nItem berikut tidak dapat ditambahkan:\n" + itemTidakTersedia.toString();
+            }
+            showAlert(Alert.AlertType.INFORMATION, "Sukses Sebagian", pesanSukses);
+        } else {
+            String pesanGagal = "Semua item dari pesanan ini tidak tersedia saat ini.\n\nAlasan:\n" + itemTidakTersedia.toString();
+            showAlert(Alert.AlertType.WARNING, "Gagal Memesan Lagi", pesanGagal);
+            return; // Jangan pindah halaman jika tidak ada item yang berhasil ditambahkan
+        }
+
+        // 4. Pindah ke halaman pembuatan pesanan
+        Navigasi.switchScene(event, "BuatPesananView.fxml");
+    }
+
     @FXML
     private void handleBeriReview() {
         try {
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Beri Ulasan untuk Pesanan #" + pesanan.getIdPesanan());
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
 
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/ReviewDialog.fxml"));
             Parent root = loader.load();
+
             ReviewDialogController controller = loader.getController();
 
             dialog.getDialogPane().setContent(root);
@@ -74,9 +135,7 @@ public class RiwayatPesananItemController {
 
             dialog.showAndWait();
 
-            // --- PERUBAHAN LOGIKA UTAMA ADA DI SINI ---
-            // Sekarang kita periksa apakah tombol "Kirim" yang benar-benar ditekan
-            if (controller.isSubmitted()) {
+            if (controller.getRating() > 0) {
                 Review review = new Review();
                 review.setIdPelanggan(UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan());
                 review.setIdPesanan(pesanan.getIdPesanan());
@@ -89,54 +148,9 @@ public class RiwayatPesananItemController {
                 btnBeriReview.setVisible(false);
                 btnBeriReview.setManaged(false);
             }
-            // Jika dialog ditutup dengan "X", controller.isSubmitted() akan false, dan blok ini akan dilewati.
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    void handlePesanLagi(ActionEvent event) {
-        List<DetailPesanan> detailLama = pesananDAO.getDetailByPesanan(pesanan.getIdPesanan());
-        UserSession.getInstance().clearKeranjang();
-
-        StringBuilder itemTidakTersedia = new StringBuilder();
-        int itemDitambahkan = 0;
-        final int ID_CABANG_PADRAO = 1;
-
-        for (DetailPesanan detail : detailLama) {
-            Menu menuLama = menuDAO.getMenuById(detail.getIdMenu());
-            if (menuLama == null) continue;
-
-            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), ID_CABANG_PADRAO);
-
-            if (menuHariIni == null) {
-                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (tidak tersedia hari ini)\n");
-                continue;
-            }
-
-            if (menuHariIni.getStokMenuHarian() < detail.getJumlah()) {
-                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (stok tidak cukup)\n");
-                continue;
-            }
-
-            UserSession.getInstance().addItemToCart(menuLama, detail.getJumlah(), menuHariIni.getIdMenuHarian());
-            itemDitambahkan++;
-        }
-
-        if (itemDitambahkan > 0) {
-            String pesanSukses = itemDitambahkan + " item berhasil ditambahkan kembali ke keranjang.";
-            if (itemTidakTersedia.length() > 0) {
-                pesanSukses += "\n\nItem berikut tidak dapat ditambahkan:\n" + itemTidakTersedia.toString();
-            }
-            showAlert(Alert.AlertType.INFORMATION, "Sukses Sebagian", pesanSukses);
-        } else {
-            String pesanGagal = "Semua item dari pesanan ini tidak tersedia saat ini.\n\nAlasan:\n" + itemTidakTersedia.toString();
-            showAlert(Alert.AlertType.WARNING, "Gagal Memesan Lagi", pesanGagal);
-            return;
-        }
-        Navigasi.switchScene(event, "BuatPesananView.fxml");
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

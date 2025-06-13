@@ -9,7 +9,6 @@ import java.util.List;
 public class ReviewDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
-    // Cek apakah sebuah pesanan sudah pernah di-review
     public boolean hasBeenReviewed(int idPesanan) {
         String sql = "SELECT COUNT(*) FROM review WHERE id_pesanan = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -24,19 +23,19 @@ public class ReviewDAO {
         return false;
     }
 
-    // Menambahkan review baru
     public void addReview(Review review) {
-        String sql = "INSERT INTO review (id_pelanggan, id_pesanan, review_pesanan, komentar) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO review (id_pelanggan, id_pesanan, rating, komentar, tanggal_review) VALUES (?, ?, ?, ?, CURRENT_DATE)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, review.getIdPelanggan());
             pstmt.setInt(2, review.getIdPesanan());
-            pstmt.setInt(3, review.getReviewPesanan());
+            pstmt.setInt(3, review.getRating());
             pstmt.setString(4, review.getKomentar());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     public List<Review> getAllReviews() {
         List<Review> reviewList = new ArrayList<>();
         String sql = "SELECT r.*, p.nama_pelanggan " +
@@ -49,10 +48,10 @@ public class ReviewDAO {
                 Review r = new Review();
                 r.setIdReview(rs.getInt("id_review"));
                 r.setIdPesanan(rs.getInt("id_pesanan"));
-                r.setNamaPelanggan(rs.getString("nama_pelanggan")); // Ambil dari JOIN
-                r.setReviewPesanan(rs.getInt("review_pesanan"));
+                r.setNamaPelanggan(rs.getString("nama_pelanggan"));
+                r.setRating(rs.getInt("rating"));
                 r.setKomentar(rs.getString("komentar"));
-                r.setTanggalReview(rs.getTimestamp("tanggal_review"));
+                r.setTanggalReview(rs.getDate("tanggal_review"));
                 reviewList.add(r);
             }
         } catch (SQLException e) {

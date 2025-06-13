@@ -1,36 +1,26 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.CabangDAO;
 import com.example.bd.dao.StaffDAO;
 import com.example.bd.model.Cabang;
 import com.example.bd.model.Staff;
 import com.example.bd.util.Navigasi;
-import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ManajemenStaffController implements Initializable {
 
-    // --- Komponen FXML ---
     @FXML private AnchorPane rootPane;
     @FXML private TableView<Staff> staffTable;
     @FXML private TableColumn<Staff, Integer> colId;
@@ -43,14 +33,11 @@ public class ManajemenStaffController implements Initializable {
     @FXML private TextField txtJabatan;
     @FXML private ComboBox<Cabang> comboCabang;
     @FXML private TextField txtTelepon;
-    @FXML private DatePicker datePickerTglJoin;
+    @FXML private TextField txtUmur; // Alterado de DatePicker
     @FXML private TextField txtAlamat;
     @FXML private Button btnSimpan;
-    @FXML private Button btnBatal;
-    @FXML private Button btnHapus;
     @FXML private Label formTitleLabel;
 
-    // --- Objek untuk data & state ---
     private final StaffDAO staffDAO = new StaffDAO();
     private final CabangDAO cabangDAO = new CabangDAO();
     private final ObservableList<Staff> staffList = FXCollections.observableArrayList();
@@ -58,7 +45,6 @@ public class ManajemenStaffController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         setupTableColumns();
         populateCabangComboBox();
         setupTableSelectionListener();
@@ -93,37 +79,41 @@ public class ManajemenStaffController implements Initializable {
                 txtJabatan.setText(staffTerpilih.getJabatanStaff());
                 txtTelepon.setText(staffTerpilih.getNoTelpStaff());
                 txtAlamat.setText(staffTerpilih.getAlamatStaff());
-                datePickerTglJoin.setValue(staffTerpilih.getTglJoinStaff());
+                txtUmur.setText(String.valueOf(staffTerpilih.getUmurStaff()));
                 for (Cabang cabang : comboCabang.getItems()) {
                     if (cabang.getIdCabang() == staffTerpilih.getIdCabang()) {
                         comboCabang.setValue(cabang);
                         break;
                     }
                 }
-                formTitleLabel.setText("Form Edit Staff");
-                btnSimpan.setText("Update");
+                formTitleLabel.setText("Formulário de Edição de Funcionário");
+                btnSimpan.setText("Atualizar");
             }
         });
     }
 
     @FXML
     private void handleSimpanButton() {
-        if (txtNama.getText().isEmpty() || comboCabang.getValue() == null) {
-            showAlert(Alert.AlertType.ERROR, "Error Validasi", "Nama dan Cabang wajib diisi!");
+        if (txtNama.getText().isEmpty() || comboCabang.getValue() == null || txtUmur.getText().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Erro de Validação", "Nome, Filial e Idade são obrigatórios!");
             return;
         }
-        if (staffTerpilih == null) {
-            Staff newStaff = new Staff();
-            fillStaffFromForm(newStaff);
-            staffDAO.addStaff(newStaff);
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Staff baru berhasil ditambahkan!");
-        } else {
-            fillStaffFromForm(staffTerpilih);
-            staffDAO.updateStaff(staffTerpilih);
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data staff berhasil diupdate!");
+        try {
+            if (staffTerpilih == null) {
+                Staff newStaff = new Staff();
+                fillStaffFromForm(newStaff);
+                staffDAO.addStaff(newStaff);
+                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Novo funcionário adicionado com sucesso!");
+            } else {
+                fillStaffFromForm(staffTerpilih);
+                staffDAO.updateStaff(staffTerpilih);
+                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Dados do funcionário atualizados com sucesso!");
+            }
+            loadStaffData();
+            clearFormAndSelection();
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Erro de Entrada", "A idade deve ser um número válido.");
         }
-        loadStaffData();
-        clearFormAndSelection();
     }
 
     private void fillStaffFromForm(Staff staff) {
@@ -132,23 +122,23 @@ public class ManajemenStaffController implements Initializable {
         staff.setIdCabang(comboCabang.getValue().getIdCabang());
         staff.setNoTelpStaff(txtTelepon.getText());
         staff.setAlamatStaff(txtAlamat.getText());
-        staff.setTglJoinStaff(datePickerTglJoin.getValue());
+        staff.setUmurStaff(Integer.parseInt(txtUmur.getText()));
     }
 
     @FXML
     private void handleHapusButton() {
         if (staffTerpilih == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Pilih staff yang ingin dihapus.");
+            showAlert(Alert.AlertType.ERROR, "Erro", "Selecione um funcionário para deletar.");
             return;
         }
         Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmationAlert.setTitle("Konfirmasi Hapus");
-        confirmationAlert.setHeaderText("Hapus staff: " + staffTerpilih.getNamaStaff() + "?");
-        confirmationAlert.setContentText("Apakah Anda yakin?");
+        confirmationAlert.setTitle("Confirmar Exclusão");
+        confirmationAlert.setHeaderText("Deletar funcionário: " + staffTerpilih.getNamaStaff() + "?");
+        confirmationAlert.setContentText("Você tem certeza?");
         Optional<ButtonType> response = confirmationAlert.showAndWait();
         if (response.isPresent() && response.get() == ButtonType.OK) {
             staffDAO.deleteStaff(staffTerpilih.getIdStaff());
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data staff telah dihapus.");
+            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Dados do funcionário foram deletados.");
             loadStaffData();
             clearFormAndSelection();
         }
@@ -159,11 +149,9 @@ public class ManajemenStaffController implements Initializable {
         clearFormAndSelection();
     }
 
-    // === METHOD BARU UNTUK KEMBALI KE DASHBOARD ADMIN ===
     @FXML
     private void handleKembali(ActionEvent event) throws IOException {
         Navigasi.goBack(event, "DashboardView.fxml");
-
     }
 
     private void clearFormAndSelection() {
@@ -173,10 +161,10 @@ public class ManajemenStaffController implements Initializable {
         txtJabatan.clear();
         txtTelepon.clear();
         txtAlamat.clear();
+        txtUmur.clear();
         comboCabang.setValue(null);
-        datePickerTglJoin.setValue(null);
-        formTitleLabel.setText("Form Tambah Staff Baru");
-        btnSimpan.setText("Simpan");
+        formTitleLabel.setText("Formulário de Adição de Novo Funcionário");
+        btnSimpan.setText("Salvar");
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
@@ -186,6 +174,4 @@ public class ManajemenStaffController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
 }
