@@ -28,28 +28,20 @@
 .link-button:hover { -fx-underline: true; -fx-background-color: transparent; }
 
 /* ===== GAYA HALAMAN LOGIN & REGISTER (TERPUSAT) ===== */
-
-/* Memberi warna latar pada seluruh halaman */
 .auth-background {
     -fx-background-color: #FDF7F1; /* Warna krem hangat */
 }
-
-/* "Kartu" form utama yang berada di tengah */
 .auth-form-container {
-    -fx-max-width: 480px; /* Lebar maksimal kartu form */
+    -fx-max-width: 480px;
     -fx-background-color: white;
-    -fx-background-radius: 15px; /* Ujung kartu yang tumpul */
-    -fx-padding: 40px 50px; /* Padding: atas/bawah 40px, kiri/kanan 50px */
-    -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.2), 20, 0, 0, 5); /* Efek bayangan */
+    -fx-background-radius: 15px;
+    -fx-padding: 40px 50px;
+    -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.2), 20, 0, 0, 5);
 }
-
-/* Ikon besar di bagian atas form */
 .auth-form-icon {
-    -fx-fill: #FF7043; /* Warna oranye primer */
+    -fx-fill: #FF7043;
     -fx-margin-bottom: 10px;
 }
-
-/* Container untuk password field dan ikon mata */
 .password-container {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 8px;
@@ -68,7 +60,6 @@
     -fx-font-size: 14px;
     -fx-prompt-text-fill: #BCAAA4;
 }
-
 .password-toggle-icon {
     -fx-cursor: hand;
     -fx-fill: #A1887F;
@@ -76,7 +67,6 @@
 .password-toggle-icon:hover {
     -fx-fill: #795548;
 }
-
 
 /* ===== STYLE IKON ===== */
 .glyph-icon { -fx-font-family: "FontAwesome"; -fx-fill: white; }
@@ -86,11 +76,18 @@
 /* ===== GAYA TABEL ===== */
 .table-view { -fx-background-color: #FFFFFF; -fx-border-color: #D7CCC8; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-cell-size: 45px; }
 .table-view .column-header { -fx-background-color: #F5F5F5; -fx-padding: 0 0 0 12px; -fx-font-weight: bold; -fx-text-fill: #5D4037; }
-.table-view .table-row-cell { -fx-padding: 0 0 0 12px; -fx-border-width: 0 0 1px 0; -fx-border-color: #EFEBE9; }
+.table-view .table-row-cell { -fx-border-width: 0 0 1px 0; -fx-border-color: #EFEBE9; }
 .table-view .table-row-cell:odd { -fx-background-color: #FAFAFA; }
 .table-view .table-row-cell:selected { -fx-background-color: #FF7043; -fx-text-fill: white; }
 .table-view .table-row-cell:selected .text { -fx-fill: white; }
-.table-view .table-cell { -fx-text-fill: #4E342E; -fx-border-color: transparent; -fx-alignment: CENTER_LEFT; }
+
+/* --- PERBAIKAN ALIGNMENT TABEL ADA DI SINI --- */
+.table-view .table-cell {
+    -fx-alignment: CENTER_LEFT; /* MEMBUAT RATA KIRI & TENGAH VERTIKAL */
+    -fx-padding: 0 10px;        /* Memberi jarak kiri-kanan pada teks */
+    -fx-text-fill: #4E342E;
+    -fx-border-color: transparent;
+}
 .table-view .table-row-cell:selected .table-cell { -fx-text-fill: white; }
 
 
@@ -104,22 +101,22 @@
 /* ===== STYLE SEARCH BAR BARU ===== */
 .search-container {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 25px; /* Membuat ujungnya sangat bundar */
+    -fx-background-radius: 25px;
     -fx-border-radius: 25px;
     -fx-border-color: #D7CCC8;
     -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.1), 5, 0, 0, 1);
-    -fx-padding: 0; /* Hapus padding default */
+    -fx-padding: 0;
 }
 .search-field {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-font-size: 14px;
     -fx-prompt-text-fill: #BCAAA4;
-    -fx-padding: 10px 20px; /* Padding di dalam text field */
+    -fx-padding: 10px 20px;
 }
 .search-button {
     -fx-background-color: #FF7043;
-    -fx-background-radius: 0 25px 25px 0; /* Membuat bundar hanya di ujung kanan */
+    -fx-background-radius: 0 25px 25px 0;
     -fx-border-radius: 0 25px 25px 0;
     -fx-padding: 10px 20px;
     -fx-cursor: hand;
@@ -136,12 +133,12 @@
 /* ===== STYLE DASHBOARD ADMIN BARU ===== */
 .admin-dashboard-header {
     -fx-padding: 0 20px 20px 20px;
-    -fx-border-color: transparent transparent #E0E0E0 transparent; /* Garis bawah tipis */
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
     -fx-border-width: 1px;
 }
 .admin-dashboard-grid {
-    -fx-hgap: 25px; /* Jarak horizontal antar kartu */
-    -fx-vgap: 25px; /* Jarak vertikal antar kartu */
+    -fx-hgap: 25px;
+    -fx-vgap: 25px;
     -fx-alignment: CENTER;
     -fx-padding: 25px;
 }
@@ -149,19 +146,19 @@
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 15px;
     -fx-padding: 20px;
-    -fx-pref-width: 180px;  /* Lebar kartu */
-    -fx-pref-height: 140px; /* Tinggi kartu */
+    -fx-pref-width: 180px;
+    -fx-pref-height: 140px;
     -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.2), 15, 0, 0, 4);
     -fx-cursor: hand;
-    -fx-text-fill: #4E342E; /* Warna teks label di dalam kartu */
+    -fx-text-fill: #4E342E;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 .admin-dashboard-card-button:hover {
-    -fx-background-color: #FDF7F1; /* Warna krem hangat saat hover */
+    -fx-background-color: #FDF7F1;
     -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.4), 20, 0, 0, 5);
-    -fx-translate-y: -3px; /* Efek sedikit terangkat */
+    -fx-translate-y: -3px;
 }
 .admin-dashboard-icon {
-    -fx-fill: #FF7043; /* Warna oranye primer */
+    -fx-fill: #FF7043;
 }
