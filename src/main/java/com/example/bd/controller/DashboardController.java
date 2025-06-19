@@ -45,6 +45,11 @@ public class DashboardController {
     }
 
     @FXML
+    void goToManajemenMenuHarian(ActionEvent event) {
+        Navigasi.switchScene(event, "ManajemenMenuHarianView.fxml");
+    }
+
+    @FXML
     void goToManajemenMetodePembayaran(ActionEvent event) {
         Navigasi.switchScene(event, "ManajemenMetodePembayaranView.fxml");
     }
