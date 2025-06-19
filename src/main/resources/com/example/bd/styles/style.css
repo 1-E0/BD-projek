@@ -146,8 +146,7 @@
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 15px;
     -fx-padding: 20px;
-    -fx-pref-width: 180px;
-    -fx-pref-height: 140px;
+    /* -fx-pref-width dan -fx-pref-height dihapus agar layout responsif */
     -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.2), 15, 0, 0, 4);
     -fx-cursor: hand;
     -fx-text-fill: #4E342E;
@@ -161,4 +160,18 @@
 }
 .admin-dashboard-icon {
     -fx-fill: #FF7043;
+}
+/* ===== STYLE TOMBOL KEMBALI BARU ===== */
+.back-button {
+    -fx-background-color: #757575; /* Warna abu-abu dari permintaan Anda */
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-padding: 8px 18px;
+    -fx-cursor: hand;
+}
+.back-button:hover {
+    -fx-background-color: #616161; /* Warna lebih gelap saat disentuh mouse */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
 }

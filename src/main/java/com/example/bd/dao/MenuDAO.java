@@ -49,6 +49,92 @@ public class MenuDAO {
         }
         return menuHarianList;
     }
+    public List<MenuHarian> getMenuHarianByDateAndBranch(LocalDate date, int idCabang) {
+        List<MenuHarian> menuHarianList = new ArrayList<>();
+        String sql = "SELECT mh.*, m.nama_menu, m.harga_menu " +
+                "FROM menu_harian mh " +
+                "JOIN menu m ON mh.id_menu = m.id_menu " +
+                "WHERE mh.tanggal_menu_harian = ? AND mh.id_cabang = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDate(1, Date.valueOf(date));
+            pstmt.setInt(2, idCabang);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                MenuHarian mh = new MenuHarian();
+                mh.setIdMenuHarian(rs.getInt("id_menu_harian"));
+                mh.setIdMenu(rs.getInt("id_menu"));
+                mh.setIdCabang(rs.getInt("id_cabang"));
+                mh.setTanggalMenuHarian(rs.getDate("tanggal_menu_harian").toLocalDate());
+                mh.setStokMenuHarian(rs.getInt("stok_menu_harian"));
+                // Mengambil data dari join dengan tabel menu
+                mh.setNamaMenu(rs.getString("nama_menu"));
+                mh.setHargaMenu(rs.getDouble("harga_menu"));
+                menuHarianList.add(mh);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return menuHarianList;
+    }
+    public void saveOrUpdateMenuHarian(MenuHarian menuHarian) {
+        if (checkIfMenuHarianExists(menuHarian.getIdMenu(), menuHarian.getIdCabang(), menuHarian.getTanggalMenuHarian())) {
+            // Jika ada, update stoknya
+            updateStokMenuHarian(menuHarian);
+        } else {
+            // Jika tidak ada, buat entri baru
+            addMenuHarian(menuHarian);
+        }
+    }
+    private boolean checkIfMenuHarianExists(int idMenu, int idCabang, LocalDate tanggal) {
+        String sql = "SELECT COUNT(*) FROM menu_harian WHERE id_menu = ? AND id_cabang = ? AND tanggal_menu_harian = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idMenu);
+            pstmt.setInt(2, idCabang);
+            pstmt.setDate(3, java.sql.Date.valueOf(tanggal));
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    private void addMenuHarian(MenuHarian menuHarian) {
+        String sql = "INSERT INTO menu_harian (id_menu, id_cabang, tanggal_menu_harian, stok_menu_harian) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, menuHarian.getIdMenu());
+            pstmt.setInt(2, menuHarian.getIdCabang());
+            pstmt.setDate(3, java.sql.Date.valueOf(menuHarian.getTanggalMenuHarian()));
+            pstmt.setInt(4, menuHarian.getStokMenuHarian());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void updateStokMenuHarian(MenuHarian menuHarian) {
+        String sql = "UPDATE menu_harian SET stok_menu_harian = ? WHERE id_menu = ? AND id_cabang = ? AND tanggal_menu_harian = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, menuHarian.getStokMenuHarian());
+            pstmt.setInt(2, menuHarian.getIdMenu());
+            pstmt.setInt(3, menuHarian.getIdCabang());
+            pstmt.setDate(4, java.sql.Date.valueOf(menuHarian.getTanggalMenuHarian()));
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    // METHOD BARU: Untuk menghapus menu dari daftar harian berdasarkan ID-nya
+    public void deleteMenuHarian(int idMenuHarian) {
+        String sql = "DELETE FROM menu_harian WHERE id_menu_harian = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idMenuHarian);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public List<Menu> getAllMenu() {
