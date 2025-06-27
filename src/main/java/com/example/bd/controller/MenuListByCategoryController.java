@@ -2,7 +2,7 @@ package com.example.bd.controller;
 
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.model.Kategori;
-import com.example.bd.model.Menu; // <-- Import ini penting untuk mengatasi ambiguitas
+import com.example.bd.model.Menu;
 import com.example.bd.model.MenuHarian;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
@@ -24,7 +24,6 @@ public class MenuListByCategoryController {
     @FXML private FlowPane menuFlowPane;
 
     private final MenuDAO menuDAO = new MenuDAO();
-    // Asumsi cabang default
     private static final int ID_CABANG_PADRAO = 1;
 
     public void initializeData(Kategori kategori) {
@@ -34,14 +33,12 @@ public class MenuListByCategoryController {
 
     private void loadMenuData(int idKategori) {
         menuFlowPane.getChildren().clear();
-        // Memanggil metode baru untuk mendapatkan menu harian
         for (MenuHarian menuHarian : menuDAO.getMenuHarianByKategori(idKategori, ID_CABANG_PADRAO)) {
             VBox card = createMenuCard(menuHarian);
             menuFlowPane.getChildren().add(card);
         }
     }
 
-    // Metode ini sekarang menerima MenuHarian
     private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");
@@ -54,16 +51,18 @@ public class MenuListByCategoryController {
         Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));
         hargaMenu.getStyleClass().add("item-price");
 
+        // --- STOK LABEL DITAMBAHKAN DI SINI ---
+        Label stokLabel = new Label("Stok: " + menuHarian.getStokMenuHarian());
+        stokLabel.getStyleClass().add("item-stock"); // Style class baru
+
         Button btnTambah = new Button("Tambah ke Keranjang");
         btnTambah.setPrefWidth(Double.MAX_VALUE);
-
         btnTambah.setOnAction(event -> handleTambahKeKeranjang(menuHarian));
 
-        card.getChildren().addAll(namaMenu, hargaMenu, btnTambah);
+        card.getChildren().addAll(namaMenu, hargaMenu, stokLabel, btnTambah);
         return card;
     }
 
-    // Metode ini juga sekarang menerima MenuHarian
     private void handleTambahKeKeranjang(MenuHarian menuHarian) {
         TextInputDialog dialog = new TextInputDialog("1");
         dialog.setTitle("Input Kuantitas");
@@ -73,20 +72,32 @@ public class MenuListByCategoryController {
 
         result.ifPresent(qtyStr -> {
             try {
-                int kuantitas = Integer.parseInt(qtyStr);
-                if (kuantitas <= 0) {
+                int kuantitasDiminta = Integer.parseInt(qtyStr);
+                if (kuantitasDiminta <= 0) {
                     showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus lebih dari 0.");
                     return;
                 }
-                if (kuantitas > menuHarian.getStokMenuHarian()) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Jumlah melebihi stok yang tersedia (" + menuHarian.getStokMenuHarian() + ").");
-                    return;
+
+                // --- LOGIKA STOK BARU ---
+                int stokTersedia = menuHarian.getStokMenuHarian();
+                int kuantitasDiKeranjang = 0;
+                for (var item : UserSession.getInstance().getKeranjang()) {
+                    if (item.getIdMenuHarian() == menuHarian.getIdMenuHarian()) {
+                        kuantitasDiKeranjang = item.getKuantitas();
+                        break;
+                    }
                 }
 
-                // Mengambil menu dasar untuk diteruskan ke sesi pengguna
+                if (kuantitasDiminta + kuantitasDiKeranjang > stokTersedia) {
+                    showAlert(Alert.AlertType.ERROR, "Stok Tidak Cukup",
+                            "Jumlah melebihi stok yang tersedia.\nStok tersedia: " + stokTersedia +
+                                    "\nSudah ada di keranjang: " + kuantitasDiKeranjang);
+                    return;
+                }
+                // --- AKHIR LOGIKA STOK BARU ---
+
                 Menu menuBase = menuDAO.getMenuById(menuHarian.getIdMenu());
-                // Memanggil metode addItemToCart dengan 3 argumen yang benar
-                UserSession.getInstance().addItemToCart(menuBase, kuantitas, menuHarian.getIdMenuHarian());
+                UserSession.getInstance().addItemToCart(menuBase, kuantitasDiminta, menuHarian.getIdMenuHarian());
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", menuHarian.getNamaMenu() + " telah ditambahkan ke keranjang.");
 
             } catch (NumberFormatException e) {

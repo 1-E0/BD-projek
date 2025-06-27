@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 
 public class RegisterController {
 
@@ -40,7 +41,11 @@ public class RegisterController {
             return;
         }
 
-        // Anda bisa menambahkan validasi email unik di sini jika perlu
+        // Validasi jika email sudah terdaftar
+        if (pelangganDAO.isEmailRegistered(email)) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Email ini sudah terdaftar. Silakan gunakan email lain.");
+            return;
+        }
 
         Pelanggan newPelanggan = new Pelanggan();
         newPelanggan.setNamaPelanggan(nama);
@@ -49,10 +54,15 @@ public class RegisterController {
         newPelanggan.setNoTelpPelanggan(telepon);
         newPelanggan.setAlamatPelanggan(alamat);
 
-        pelangganDAO.addPelanggan(newPelanggan);
-
-        showAlert(Alert.AlertType.INFORMATION, "Sukses", "Registrasi berhasil! Silakan login dengan akun baru Anda.");
-        goToLogin(event);
+        try {
+            // Memanggil metode baru yang juga membuat entri di tabel member
+            pelangganDAO.addPelangganAndCreateMember(newPelanggan);
+            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Registrasi berhasil! Anda sekarang adalah member. Silakan login.");
+            goToLogin(event);
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan data registrasi.");
+            e.printStackTrace();
+        }
     }
 
     @FXML

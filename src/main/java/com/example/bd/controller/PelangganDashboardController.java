@@ -171,6 +171,12 @@ public class PelangganDashboardController implements Initializable {
     }
 
     @FXML
+    void goToMemberArea(ActionEvent event) {
+        Navigasi.switchScene(event, "MemberAreaView.fxml");
+    }
+
+
+    @FXML
     void goToEditProfil(ActionEvent event) {
         Navigasi.switchScene(event, "EditProfilView.fxml");
     }

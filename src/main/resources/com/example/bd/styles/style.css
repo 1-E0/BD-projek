@@ -175,3 +175,31 @@
     -fx-background-color: #616161; /* Warna lebih gelap saat disentuh mouse */
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
 }
+.item-card {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 15px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.15), 10, 0, 0, 3);
+    -fx-alignment: top-left;
+}
+
+.item-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3E2723;
+}
+
+.item-price {
+    -fx-font-size: 14px;
+    -fx-text-fill: #FF7043;
+    -fx-font-weight: bold;
+}
+
+/* --- STYLE BARU UNTUK LABEL STOK --- */
+.item-stock {
+    -fx-font-size: 12px;
+    -fx-text-fill: #795548; /* Warna coklat muda */
+    -fx-background-color: #F5F5F5;
+    -fx-padding: 2px 6px;
+    -fx-background-radius: 5px;
+}

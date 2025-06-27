@@ -12,6 +12,9 @@ import java.util.List;
 public class PesananDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
+    private static final double RUPIAH_PER_POIN = 10000.0;
+
+    // ... (Metode lain seperti getPesananByPelanggan, getDetailByPesanan, dll tidak berubah)
     public List<Pesanan> getPesananByPelanggan(int idPelanggan) {
         List<Pesanan> pesananList = new ArrayList<>();
         String sql = "SELECT p.*, png.status_pengiriman FROM pesanan p " +
@@ -112,16 +115,23 @@ public class PesananDAO {
         }
     }
 
+
     public void simpanPesananLengkap(Pesanan pesanan, List<DetailPesanan> detailList, Pembayaran pembayaran) throws SQLException {
         String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, tanggal_pesanan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, CURRENT_DATE, ?, ?, ?) RETURNING id_pesanan";
         String sqlDetail = "INSERT INTO detail_pesanan (id_pesanan, id_menu_harian, jumlah, harga_produk) VALUES (?, ?, ?, ?)";
         String sqlPembayaran = "INSERT INTO pembayaran (id_pesanan, id_metode, total_pembayaran, tanggal_pembayaran) VALUES (?, ?, ?, CURRENT_DATE)";
         String sqlUpdateStok = "UPDATE menu_harian SET stok_menu_harian = stok_menu_harian - ? WHERE id_menu_harian = ?";
 
+        // --- QUERY BARU UNTUK LOGIKA POIN ---
+        String sqlCheckMember = "SELECT COUNT(*) FROM member WHERE id_pelanggan = ?";
+        String sqlCreateMember = "INSERT INTO member (id_pelanggan, nama_member, tanggal_join, jumlah_poin) SELECT id_pelanggan, nama_pelanggan, CURRENT_DATE, 0 FROM pelanggan WHERE id_pelanggan = ?";
+        String sqlUpdatePoin = "UPDATE member SET jumlah_poin = jumlah_poin + ? WHERE id_pelanggan = ?";
+
         try {
             conn.setAutoCommit(false);
 
             int idPesananBaru;
+            // ... (Blok simpan pesanan, detail, dan pembayaran tidak berubah)
             try (PreparedStatement pstmtPesanan = conn.prepareStatement(sqlPesanan)) {
                 pstmtPesanan.setInt(1, pesanan.getIdPelanggan());
                 pstmtPesanan.setDouble(2, pesanan.getTotalHargaPesanan());
@@ -160,6 +170,31 @@ public class PesananDAO {
                 pstmtPembayaran.setDouble(3, pesanan.getTotalHargaPesanan()); // O total do pagamento é o total do pedido
                 pstmtPembayaran.executeUpdate();
             }
+
+            // --- PERBAIKAN UTAMA DI SINI ---
+            int poinDidapat = (int) (pesanan.getTotalHargaPesanan() / RUPIAH_PER_POIN);
+            if (poinDidapat > 0) {
+                // 1. Cek apakah member sudah ada
+                try (PreparedStatement checkStmt = conn.prepareStatement(sqlCheckMember)) {
+                    checkStmt.setInt(1, pesanan.getIdPelanggan());
+                    ResultSet rs = checkStmt.executeQuery();
+                    if (rs.next() && rs.getInt(1) == 0) {
+                        // 2. Jika tidak ada, buatkan catatan member baru untuk pengguna lama
+                        try (PreparedStatement createStmt = conn.prepareStatement(sqlCreateMember)) {
+                            createStmt.setInt(1, pesanan.getIdPelanggan());
+                            createStmt.executeUpdate();
+                        }
+                    }
+                }
+
+                // 3. Sekarang, update poin. Catatan member dijamin sudah ada.
+                try (PreparedStatement updatePoinStmt = conn.prepareStatement(sqlUpdatePoin)) {
+                    updatePoinStmt.setInt(1, poinDidapat);
+                    updatePoinStmt.setInt(2, pesanan.getIdPelanggan());
+                    updatePoinStmt.executeUpdate();
+                }
+            }
+            // --- AKHIR PERBAIKAN ---
 
             conn.commit();
 

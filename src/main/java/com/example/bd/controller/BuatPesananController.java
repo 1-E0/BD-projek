@@ -4,8 +4,9 @@ import com.example.bd.HelloApplication;
 import com.example.bd.dao.DiskonDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.dao.PesananDAO;
+import com.example.bd.dao.VoucherDAO;
 import com.example.bd.model.*;
-import com.example.bd.model.Menu; // <-- BARIS PENTING DITAMBAHKAN DI SINI
+import com.example.bd.model.Menu;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
@@ -35,6 +36,7 @@ public class BuatPesananController implements Initializable {
     @FXML private TableView<MenuHarian> menuTable;
     @FXML private TableColumn<MenuHarian, String> colNamaMenu;
     @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
+    @FXML private TableColumn<MenuHarian, Integer> colStok;
     @FXML private TableView<ItemKeranjang> keranjangTable;
     @FXML private TableColumn<ItemKeranjang, String> colKeranjangNama;
     @FXML private TableColumn<ItemKeranjang, Integer> colKeranjangKuantitas;
@@ -42,6 +44,7 @@ public class BuatPesananController implements Initializable {
     @FXML private TextArea txtAlamat;
     @FXML private Label lblNamaPelanggan;
     @FXML private ComboBox<Diskon> comboDiskon;
+    @FXML private ComboBox<VoucherPelanggan> comboVoucher;
     @FXML private Label lblSubtotal;
     @FXML private Label lblJumlahDiskon;
     @FXML private Label lblTotalAkhir;
@@ -50,13 +53,14 @@ public class BuatPesananController implements Initializable {
     private final MenuDAO menuDAO = new MenuDAO();
     private final PesananDAO pesananDAO = new PesananDAO();
     private final DiskonDAO diskonDAO = new DiskonDAO();
+    private final VoucherDAO voucherDAO = new VoucherDAO();
 
-    // --- Data Lists ---
+    // --- Data Lists & Models ---
     private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
+    private VoucherPelanggan voucherTerpilih = null;
 
-    // Asumsi cabang default untuk demonstrasi
     private static final int ID_CABANG_PADRAO = 1;
 
     @Override
@@ -65,7 +69,6 @@ public class BuatPesananController implements Initializable {
         this.keranjangList = UserSession.getInstance().getKeranjang();
 
         keranjangList.addListener((ListChangeListener<ItemKeranjang>) c -> updateTotalHarga());
-        comboDiskon.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateTotalHarga());
 
         if (pelangganAktif != null) {
             lblNamaPelanggan.setText(pelangganAktif.getNamaPelanggan());
@@ -79,13 +82,15 @@ public class BuatPesananController implements Initializable {
         setupMenuTable();
         setupKeranjangTable();
         setupDiskonComboBox();
-        loadAllData();
+        setupVoucherComboBox();
+        loadInitialData();
         updateTotalHarga();
     }
 
     private void setupMenuTable() {
         colNamaMenu.setCellValueFactory(new PropertyValueFactory<>("namaMenu"));
         colHargaMenu.setCellValueFactory(new PropertyValueFactory<>("hargaMenu"));
+        colStok.setCellValueFactory(new PropertyValueFactory<>("stokMenuHarian"));
     }
 
     private void setupKeranjangTable() {
@@ -104,16 +109,65 @@ public class BuatPesananController implements Initializable {
             @Override
             public Diskon fromString(String string) { return null; }
         });
+
+        comboDiskon.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            comboVoucher.setDisable(newVal != null);
+            if(newVal != null) comboVoucher.getSelectionModel().clearSelection();
+            updateTotalHarga();
+        });
     }
 
-    private void loadAllData() {
-        // Sekarang memuat MenuHarian untuk cabang default
-        menuList.setAll(menuDAO.getMenuHarianByKategori(1, ID_CABANG_PADRAO)); // Contoh Kategori 1
-        menuList.addAll(menuDAO.getMenuHarianByKategori(2, ID_CABANG_PADRAO)); // Contoh Kategori 2
-        menuList.addAll(menuDAO.getMenuHarianByKategori(3, ID_CABANG_PADRAO)); // Contoh Kategori 3
-        menuTable.setItems(menuList);
+    private void setupVoucherComboBox() {
+        refreshVoucherComboBox();
 
+        comboVoucher.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(VoucherPelanggan voucher) {
+                if (voucher == null) {
+                    return "Tanpa Voucher";
+                } else {
+                    return String.format("%s (Diskon %.0f%%)", voucher.getNamaHadiah(), voucher.getNilaiVoucher());
+                }
+            }
+            @Override
+            public VoucherPelanggan fromString(String string) { return null; }
+        });
+
+        comboVoucher.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            this.voucherTerpilih = newVal;
+            comboDiskon.setDisable(newVal != null);
+            if (newVal != null) comboDiskon.getSelectionModel().clearSelection();
+            updateTotalHarga();
+        });
+    }
+
+    private void refreshMenuTable() {
+        menuList.clear();
+        menuList.addAll(menuDAO.getMenuHarianByKategori(1, ID_CABANG_PADRAO));
+        menuList.addAll(menuDAO.getMenuHarianByKategori(2, ID_CABANG_PADRAO));
+        menuList.addAll(menuDAO.getMenuHarianByKategori(3, ID_CABANG_PADRAO));
+        menuTable.setItems(menuList);
+    }
+
+    private void refreshVoucherComboBox() {
+        VoucherPelanggan selected = comboVoucher.getSelectionModel().getSelectedItem();
+        ObservableList<VoucherPelanggan> vouchers = FXCollections.observableArrayList(
+                voucherDAO.getVoucherTersediaByPelanggan(pelangganAktif.getIdPelanggan())
+        );
+        vouchers.add(0, null);
+        comboVoucher.setItems(vouchers);
+        if (selected != null && comboVoucher.getItems().contains(selected)) {
+            comboVoucher.getSelectionModel().select(selected);
+        } else {
+            comboVoucher.getSelectionModel().select(null);
+        }
+    }
+
+    private void loadInitialData() {
+        refreshMenuTable();
+        refreshVoucherComboBox();
         ObservableList<Diskon> diskonAktifList = FXCollections.observableArrayList(diskonDAO.getActiveDiscounts());
+        diskonAktifList.add(0, null);
         comboDiskon.setItems(diskonAktifList);
     }
 
@@ -133,20 +187,27 @@ public class BuatPesananController implements Initializable {
 
         result.ifPresent(qtyStr -> {
             try {
-                int kuantitas = Integer.parseInt(qtyStr);
-                if (kuantitas <= 0) {
+                int kuantitasDiminta = Integer.parseInt(qtyStr);
+                if (kuantitasDiminta <= 0) {
                     showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus lebih dari 0.");
                     return;
                 }
-
-                if (kuantitas > menuTerpilih.getStokMenuHarian()) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Jumlah melebihi stok yang tersedia (" + menuTerpilih.getStokMenuHarian() + ").");
+                int stokTersedia = menuTerpilih.getStokMenuHarian();
+                int kuantitasDiKeranjang = 0;
+                for (ItemKeranjang item : keranjangList) {
+                    if (item.getIdMenuHarian() == menuTerpilih.getIdMenuHarian()) {
+                        kuantitasDiKeranjang = item.getKuantitas();
+                        break;
+                    }
+                }
+                if (kuantitasDiminta + kuantitasDiKeranjang > stokTersedia) {
+                    showAlert(Alert.AlertType.ERROR, "Stok Tidak Cukup",
+                            "Jumlah melebihi stok yang tersedia.\nStok tersedia: " + stokTersedia +
+                                    "\nSudah ada di keranjang: " + kuantitasDiKeranjang);
                     return;
                 }
-
                 Menu menuBase = menuDAO.getMenuById(menuTerpilih.getIdMenu());
-                UserSession.getInstance().addItemToCart(menuBase, kuantitas, menuTerpilih.getIdMenuHarian());
-
+                UserSession.getInstance().addItemToCart(menuBase, kuantitasDiminta, menuTerpilih.getIdMenuHarian());
             } catch (NumberFormatException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus berupa angka.");
             }
@@ -168,15 +229,13 @@ public class BuatPesananController implements Initializable {
         for (ItemKeranjang item : this.keranjangList) {
             subtotal += item.getSubtotal();
         }
-
-        Diskon diskonTerpilih = comboDiskon.getValue();
         double jumlahDiskon = 0;
-        if (diskonTerpilih != null) {
-            jumlahDiskon = subtotal * (diskonTerpilih.getPersenDiskon() / 100.0);
+        if (voucherTerpilih != null) {
+            jumlahDiskon = subtotal * (voucherTerpilih.getNilaiVoucher() / 100.0);
+        } else if (comboDiskon.getValue() != null) {
+            jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
         }
-
         double totalAkhir = subtotal - jumlahDiskon;
-
         lblSubtotal.setText(String.format("Rp %.0f", subtotal));
         lblJumlahDiskon.setText(String.format("- Rp %.0f", jumlahDiskon));
         lblTotalAkhir.setText(String.format("Rp %.0f", totalAkhir));
@@ -191,7 +250,9 @@ public class BuatPesananController implements Initializable {
         double subtotal = 0;
         for (ItemKeranjang item : keranjangList) { subtotal += item.getSubtotal(); }
         double jumlahDiskon = 0;
-        if (comboDiskon.getValue() != null) {
+        if (voucherTerpilih != null) {
+            jumlahDiskon = subtotal * (voucherTerpilih.getNilaiVoucher() / 100.0);
+        } else if (comboDiskon.getValue() != null) {
             jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
         }
         double totalHargaFinal = subtotal - jumlahDiskon;
@@ -200,22 +261,17 @@ public class BuatPesananController implements Initializable {
             Dialog<ButtonType> dialog = new Dialog<>();
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/PembayaranDialog.fxml"));
             Parent root = loader.load();
-
             PembayaranDialogController controller = loader.getController();
             controller.setTotal(totalHargaFinal);
-
             dialog.getDialogPane().setContent(root);
             dialog.showAndWait();
-
             MetodePembayaran metode = controller.getMetodeTerpilih();
-
             if (metode != null) {
                 Pesanan pesanan = new Pesanan();
                 pesanan.setIdPelanggan(pelangganAktif.getIdPelanggan());
                 pesanan.setAlamatTujuan(txtAlamat.getText());
                 pesanan.setStatusPembayaran("Lunas");
                 pesanan.setTotalHargaPesanan(totalHargaFinal);
-
                 List<DetailPesanan> detailList = new ArrayList<>();
                 for (ItemKeranjang item : this.keranjangList) {
                     DetailPesanan detail = new DetailPesanan();
@@ -224,15 +280,17 @@ public class BuatPesananController implements Initializable {
                     detail.setHargaProduk(item.getHargaMenu());
                     detailList.add(detail);
                 }
-
                 Pembayaran pembayaran = new Pembayaran();
                 pembayaran.setIdMetode(metode.getIdMetode());
-
                 pesananDAO.simpanPesananLengkap(pesanan, detailList, pembayaran);
-
+                if (voucherTerpilih != null) {
+                    voucherDAO.gunakanVoucher(voucherTerpilih.getIdVoucherPelanggan());
+                }
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
                 UserSession.getInstance().clearKeranjang();
                 clearAllForm();
+                refreshMenuTable();
+                refreshVoucherComboBox();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -254,6 +312,7 @@ public class BuatPesananController implements Initializable {
         menuTable.getSelectionModel().clearSelection();
         keranjangTable.getSelectionModel().clearSelection();
         comboDiskon.getSelectionModel().clearSelection();
+        comboVoucher.getSelectionModel().clearSelection();
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

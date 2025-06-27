@@ -22,6 +22,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException; // <-- Tambahkan import SQLException
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -48,7 +49,6 @@ public class ManajemenPelangganController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         setupTableColumns();
         setupTableSelectionListener();
         loadTableData();
@@ -97,7 +97,7 @@ public class ManajemenPelangganController implements Initializable {
             return;
         }
 
-        if (pelangganTerpilih == null) {
+        if (pelangganTerpilih == null) { // Mode Tambah
             if (password.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Error Validasi", "Password wajib diisi saat menambah pelanggan baru!");
                 return;
@@ -108,14 +108,24 @@ public class ManajemenPelangganController implements Initializable {
             newPelanggan.setPasswordPelanggan(password);
             newPelanggan.setAlamatPelanggan(alamat);
             newPelanggan.setNoTelpPelanggan(telepon);
-            pelangganDAO.addPelanggan(newPelanggan);
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pelanggan baru berhasil ditambahkan!");
-        } else {
+
+            // --- PERUBAHAN DI SINI ---
+            try {
+                // Mengganti addPelanggan dengan addPelangganAndCreateMember
+                pelangganDAO.addPelangganAndCreateMember(newPelanggan);
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pelanggan baru berhasil ditambahkan dan dijadikan member!");
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan pelanggan baru.");
+                e.printStackTrace();
+            }
+            // --- AKHIR PERUBAHAN ---
+
+        } else { // Mode Update
             pelangganTerpilih.setNamaPelanggan(nama);
             pelangganTerpilih.setEmailPelanggan(email);
             pelangganTerpilih.setAlamatPelanggan(alamat);
             pelangganTerpilih.setNoTelpPelanggan(telepon);
-            pelangganDAO.updatePelanggan(pelangganTerpilih);
+            pelangganDAO.updatePelanggan(pelangganTerpilih); // Fungsi update tidak perlu diubah
             showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data pelanggan berhasil diupdate!");
         }
 
@@ -149,7 +159,6 @@ public class ManajemenPelangganController implements Initializable {
         clearFormAndSelection();
     }
 
-    // === METHOD BARU UNTUK KEMBALI KE DASHBOARD ADMIN ===
     @FXML
     private void handleKembali(ActionEvent event) throws IOException {
         Navigasi.goBack(event, "DashboardView.fxml");
@@ -176,6 +185,4 @@ public class ManajemenPelangganController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
 }
