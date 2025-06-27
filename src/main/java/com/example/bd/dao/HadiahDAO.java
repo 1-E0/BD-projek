@@ -2,7 +2,7 @@ package com.example.bd.dao;
 
 import com.example.bd.model.Hadiah;
 import com.example.bd.util.DatabaseConnection;
-import java.math.BigDecimal; // <-- Tambahkan import ini
+import java.math.BigDecimal; // <-- Import yang diperlukan
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class HadiahDAO {
 
     public List<Hadiah> getAllHadiah() {
         List<Hadiah> hadiahList = new ArrayList<>();
-        String sql = "SELECT * FROM hadiah ORDER BY biaya_poin ASC"; // Mengambil semua, aktif maupun non-aktif untuk admin
+        String sql = "SELECT * FROM hadiah ORDER BY biaya_poin ASC";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 Hadiah h = new Hadiah();
@@ -23,15 +23,13 @@ public class HadiahDAO {
                 h.setBiayaPoin(rs.getInt("biaya_poin"));
                 h.setStatusHadiah(rs.getString("status_hadiah"));
 
-                // --- PERBAIKAN UTAMA DI SINI ---
-                // Ambil sebagai BigDecimal, lalu konversi ke Double jika tidak null
+                // Perbaikan: Ambil sebagai BigDecimal, lalu konversi ke Double
                 BigDecimal nilaiVoucherDecimal = rs.getBigDecimal("nilai_voucher");
                 if (nilaiVoucherDecimal != null) {
                     h.setNilaiVoucher(nilaiVoucherDecimal.doubleValue());
                 } else {
                     h.setNilaiVoucher(null);
                 }
-                // --- AKHIR PERBAIKAN ---
 
                 hadiahList.add(h);
             }
@@ -41,7 +39,6 @@ public class HadiahDAO {
         return hadiahList;
     }
 
-    // ... (Sisa metode di HadiahDAO tidak perlu diubah, sudah benar)
     public Hadiah getHadiahById(int idHadiah) {
         String sql = "SELECT * FROM hadiah WHERE id_hadiah = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -61,7 +58,9 @@ public class HadiahDAO {
                 h.setStatusHadiah(rs.getString("status_hadiah"));
                 return h;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -103,14 +102,13 @@ public class HadiahDAO {
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next() && rs.getInt(1) > 0) {
                 String updateSql = "UPDATE hadiah SET status_hadiah = 'NONAKTIF' WHERE id_hadiah = ?";
-                try(PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
                     updateStmt.setInt(1, idHadiah);
                     updateStmt.executeUpdate();
                 }
                 return;
             }
         }
-
         String deleteSql = "DELETE FROM hadiah WHERE id_hadiah = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
             pstmt.setInt(1, idHadiah);

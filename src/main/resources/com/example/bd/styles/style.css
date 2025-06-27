@@ -175,12 +175,26 @@
     -fx-background-color: #616161; /* Warna lebih gelap saat disentuh mouse */
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
 }
+/* ... (semua style yang sudah ada) ... */
+
+/* Gaya untuk kartu item di halaman kategori dan pencarian */
 .item-card {
     -fx-background-color: #FFFFFF;
     -fx-padding: 15px;
     -fx-background-radius: 10px;
     -fx-effect: dropshadow(gaussian, rgba(189,142,101,0.15), 10, 0, 0, 3);
     -fx-alignment: top-left;
+}
+
+/* === STYLE BARU UNTUK KARTU FAVORIT === */
+.favorit-item-card {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 12px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E0E0E0; /* Memberi garis batas tipis */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-effect: none; /* Menghilangkan shadow */
 }
 
 .item-name {
@@ -195,11 +209,26 @@
     -fx-font-weight: bold;
 }
 
-/* --- STYLE BARU UNTUK LABEL STOK --- */
 .item-stock {
     -fx-font-size: 12px;
-    -fx-text-fill: #795548; /* Warna coklat muda */
+    -fx-text-fill: #795548;
     -fx-background-color: #F5F5F5;
     -fx-padding: 2px 6px;
     -fx-background-radius: 5px;
 }
+
+.favorite-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 2px;
+}
+
+.favorite-button .glyph-icon {
+    -fx-fill: #BDBDBD;
+}
+
+.favorite-button:selected .glyph-icon {
+    -fx-fill: #E53935;
+}
+
+/* ... (sisa style) ... */

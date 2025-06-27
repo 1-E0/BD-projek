@@ -1,22 +1,24 @@
 package com.example.bd.controller;
 
+import com.example.bd.dao.FavoritDAO; // <-- IMPORT BARU
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.model.Menu;
 import com.example.bd.model.MenuHarian;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView; // <-- IMPORT BARU
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
+import javafx.geometry.Pos; // <-- IMPORT BARU
+import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox; // <-- IMPORT BARU
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set; // <-- IMPORT BARU
 
 public class SearchResultController {
 
@@ -25,9 +27,15 @@ public class SearchResultController {
     @FXML private FlowPane menuFlowPane;
 
     private final MenuDAO menuDAO = new MenuDAO();
+    private final FavoritDAO favoritDAO = new FavoritDAO(); // <-- DAO BARU
+    private Set<Integer> favoritIds; // <-- SET UNTUK MENYIMPAN ID FAVORIT
     private static final int ID_CABANG_PADRAO = 1;
 
     public void initializeData(String keyword) {
+        // Muat daftar favorit pelanggan saat halaman dibuka
+        int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
+        this.favoritIds = favoritDAO.getFavoritIdsByPelanggan(idPelanggan);
+
         lblSearchResult.setText("Hasil Pencarian untuk: \"" + keyword + "\"");
         loadMenuData(keyword);
     }
@@ -47,14 +55,40 @@ public class SearchResultController {
         card.getStyleClass().add("item-card");
         card.setPrefWidth(200);
 
+        // --- TOMBOL FAVORIT ---
+        ToggleButton favoriteButton = new ToggleButton();
+        FontAwesomeIconView heartIcon = new FontAwesomeIconView();
+        heartIcon.setGlyphName("HEART");
+        favoriteButton.setGraphic(heartIcon);
+        favoriteButton.getStyleClass().add("favorite-button");
+
+        if (favoritIds.contains(menuHarian.getIdMenu())) {
+            favoriteButton.setSelected(true);
+        }
+
+        favoriteButton.setOnAction(e -> {
+            int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
+            if (favoriteButton.isSelected()) {
+                favoritDAO.addFavorit(idPelanggan, menuHarian.getIdMenu());
+                favoritIds.add(menuHarian.getIdMenu());
+            } else {
+                favoritDAO.removeFavorit(idPelanggan, menuHarian.getIdMenu());
+                favoritIds.remove(menuHarian.getIdMenu());
+            }
+        });
+
+        HBox cardHeader = new HBox();
+        cardHeader.setAlignment(Pos.CENTER_LEFT);
         Label namaMenu = new Label(menuHarian.getNamaMenu());
         namaMenu.getStyleClass().add("item-name");
         namaMenu.setWrapText(true);
+        HBox.setHgrow(namaMenu, javafx.scene.layout.Priority.ALWAYS);
+        cardHeader.getChildren().addAll(namaMenu, favoriteButton);
+        // --- AKHIR TOMBOL FAVORIT ---
 
         Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));
         hargaMenu.getStyleClass().add("item-price");
 
-        // --- STOK LABEL DITAMBAHKAN DI SINI ---
         Label stokLabel = new Label("Stok: " + menuHarian.getStokMenuHarian());
         stokLabel.getStyleClass().add("item-stock");
 
@@ -62,7 +96,7 @@ public class SearchResultController {
         btnTambah.setPrefWidth(Double.MAX_VALUE);
         btnTambah.setOnAction(event -> handleTambahKeKeranjang(menuHarian));
 
-        card.getChildren().addAll(namaMenu, hargaMenu, stokLabel, btnTambah);
+        card.getChildren().addAll(cardHeader, hargaMenu, stokLabel, btnTambah);
         return card;
     }
 
@@ -80,8 +114,6 @@ public class SearchResultController {
                     showAlert(Alert.AlertType.ERROR, "Error", "Kuantitas harus lebih dari 0.");
                     return;
                 }
-
-                // --- LOGIKA STOK BARU ---
                 int stokTersedia = menuHarian.getStokMenuHarian();
                 int kuantitasDiKeranjang = 0;
                 for (var item : UserSession.getInstance().getKeranjang()) {
@@ -90,15 +122,12 @@ public class SearchResultController {
                         break;
                     }
                 }
-
                 if (kuantitasDiminta + kuantitasDiKeranjang > stokTersedia) {
                     showAlert(Alert.AlertType.ERROR, "Stok Tidak Cukup",
                             "Jumlah melebihi stok yang tersedia.\nStok tersedia: " + stokTersedia +
                                     "\nSudah ada di keranjang: " + kuantitasDiKeranjang);
                     return;
                 }
-                // --- AKHIR LOGIKA STOK BARU ---
-
                 Menu menuBase = menuDAO.getMenuById(menuHarian.getIdMenu());
                 UserSession.getInstance().addItemToCart(menuBase, kuantitasDiminta, menuHarian.getIdMenuHarian());
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", menuHarian.getNamaMenu() + " telah ditambahkan ke keranjang.");

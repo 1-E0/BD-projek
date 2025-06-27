@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="900.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.PelangganDashboardController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="950.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.PelangganDashboardController">
     <top>
         <VBox spacing="15.0" BorderPane.alignment="CENTER">
             <BorderPane.margin>
@@ -49,19 +49,29 @@
         </VBox>
     </top>
     <center>
-        <VBox spacing="15.0" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets bottom="20.0" left="30.0" right="30.0" />
-            </BorderPane.margin>
-            <children>
-                <Label styleClass="section-title" text="Pilih Kategori Menu" />
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                    <content>
-                        <FlowPane fx:id="kategoriFlowPane" hgap="20.0" vgap="20.0" />
-                    </content>
-                </ScrollPane>
-            </children>
-        </VBox>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" BorderPane.alignment="CENTER">
+            <content>
+                <VBox spacing="25.0">
+                    <padding>
+                        <Insets bottom="20.0" left="30.0" right="30.0" />
+                    </padding>
+                    <children>
+                        <VBox fx:id="favoritContainer" spacing="10.0" managed="false" visible="false">
+                            <children>
+                                <Label styleClass="section-title" text="Menu Favorit Anda" />
+                                <FlowPane fx:id="favoritFlowPane" hgap="20.0" vgap="20.0" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <Label styleClass="section-title" text="Pilih Kategori Menu" />
+                                <FlowPane fx:id="kategoriFlowPane" hgap="20.0" vgap="20.0" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
     </center>
     <bottom>
         <HBox alignment="CENTER" prefHeight="80.0" spacing="20.0" style="-fx-background-color: #FFFFFF; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, -5);" BorderPane.alignment="CENTER">
