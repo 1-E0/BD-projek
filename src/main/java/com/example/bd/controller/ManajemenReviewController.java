@@ -1,6 +1,5 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.ReviewDAO;
 import com.example.bd.model.Review;
 import com.example.bd.util.Navigasi;
@@ -9,23 +8,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.ResourceBundle;
 
 public class ManajemenReviewController implements Initializable {
@@ -36,7 +29,7 @@ public class ManajemenReviewController implements Initializable {
     @FXML private TableColumn<Review, String> colNamaPelanggan;
     @FXML private TableColumn<Review, Integer> colRating;
     @FXML private TableColumn<Review, String> colKomentar;
-    @FXML private TableColumn<Review, Timestamp> colTanggal;
+    @FXML private TableColumn<Review, Date> colTanggal;
 
     private final ReviewDAO reviewDAO = new ReviewDAO();
 
@@ -53,9 +46,8 @@ public class ManajemenReviewController implements Initializable {
         colKomentar.setCellValueFactory(new PropertyValueFactory<>("komentar"));
         colTanggal.setCellValueFactory(new PropertyValueFactory<>("tanggalReview"));
 
-        // --- Kustomisasi Tampilan Kolom Rating ---
-        colRating.setCellValueFactory(new PropertyValueFactory<>("reviewPesanan"));
-        colRating.setCellFactory(column -> new TableCell<Review, Integer>() {
+        colRating.setCellValueFactory(new PropertyValueFactory<>("rating"));
+        colRating.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Integer rating, boolean empty) {
                 super.updateItem(rating, empty);
@@ -70,10 +62,12 @@ public class ManajemenReviewController implements Initializable {
                         starIcon.setSize("1.2em");
                         if (i < rating) {
                             starIcon.setGlyphName("STAR");
-                            starIcon.setFill(Color.web("#FFC107"));
+                            // --- PERBAIKAN DI SINI: Menggunakan setStyle untuk prioritas lebih tinggi ---
+                            starIcon.setStyle("-fx-fill: #FFC107;"); // Warna kuning untuk bintang terisi
                         } else {
                             starIcon.setGlyphName("STAR_ALT");
-                            starIcon.setFill(Color.web("#BDBDBD"));
+                            // --- PERBAIKAN DI SINI: Menggunakan setStyle untuk prioritas lebih tinggi ---
+                            starIcon.setStyle("-fx-fill: #BDBDBD;"); // Warna abu-abu untuk bintang kosong
                         }
                         ratingBox.getChildren().add(starIcon);
                     }
