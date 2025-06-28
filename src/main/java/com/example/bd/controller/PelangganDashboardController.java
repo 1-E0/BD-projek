@@ -125,16 +125,16 @@ public class PelangganDashboardController implements Initializable {
         card.getStyleClass().add("favorit-item-card");
         card.setPrefWidth(220);
 
+        // Bagian Header Kartu (termasuk tombol favorit dan nama)
         ToggleButton favoriteButton = new ToggleButton();
         FontAwesomeIconView heartIcon = new FontAwesomeIconView();
         heartIcon.setGlyphName("HEART");
         favoriteButton.setGraphic(heartIcon);
         favoriteButton.getStyleClass().add("favorite-button");
         favoriteButton.setSelected(true); // Selalu terpilih karena ini daftar favorit
-
         favoriteButton.setOnAction(e -> handleUnfavorite(menuHarian));
 
-        HBox cardHeader = new HBox();
+        HBox cardHeader = new HBox(); // <-- Deklarasi yang sebelumnya terlewat
         cardHeader.setAlignment(Pos.CENTER_LEFT);
         Label namaMenu = new Label(menuHarian.getNamaMenu());
         namaMenu.getStyleClass().add("item-name");
@@ -144,12 +144,22 @@ public class PelangganDashboardController implements Initializable {
         Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));
         hargaMenu.getStyleClass().add("item-price");
 
-        Label stokLabel = new Label("Sisa Stok: " + menuHarian.getStokMenuHarian());
-        stokLabel.getStyleClass().add("item-stock");
-
+        // Logika untuk menampilkan stok dan menonaktifkan tombol
+        Label stokLabel = new Label();
         Button btnTambah = new Button("Tambah ke Keranjang");
         btnTambah.setPrefWidth(Double.MAX_VALUE);
-        btnTambah.setOnAction(event -> handleTambahFavoritKeKeranjang(menuHarian));
+
+        // Cek jika item tidak ada di menu harian (idMenuHarian = 0) atau stok habis
+        if (menuHarian.getIdMenuHarian() == 0 || menuHarian.getStokMenuHarian() <= 0) {
+            stokLabel.setText("Tidak Tersedia");
+            // Anda bisa menambahkan style khusus jika mau, misalnya dengan .getStyleClass().add("item-unavailable");
+            btnTambah.setDisable(true);
+            btnTambah.setText("Stok Habis");
+        } else {
+            stokLabel.setText("Sisa Stok: " + menuHarian.getStokMenuHarian());
+            stokLabel.getStyleClass().add("item-stock");
+            btnTambah.setOnAction(event -> handleTambahFavoritKeKeranjang(menuHarian));
+        }
 
         card.getChildren().addAll(cardHeader, hargaMenu, stokLabel, btnTambah);
         return card;

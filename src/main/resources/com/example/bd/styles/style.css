@@ -230,5 +230,15 @@
 .favorite-button:selected .glyph-icon {
     -fx-fill: #E53935;
 }
+/* ... (style yang sudah ada) ... */
 
+/* STYLE BARU UNTUK STOK TIDAK TERSEDIA */
+.item-unavailable {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #D32F2F; /* Warna merah untuk menandakan tidak tersedia */
+    -fx-background-color: #FFEBEE; /* Latar belakang merah muda */
+    -fx-padding: 2px 6px;
+    -fx-background-radius: 5px;
+}
 /* ... (sisa style) ... */

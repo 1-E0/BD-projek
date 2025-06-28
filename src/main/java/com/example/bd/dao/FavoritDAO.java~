@@ -46,8 +46,9 @@ public class FavoritDAO {
      */
     public List<MenuHarian> getFavoritMenuHarianByPelanggan(int idPelanggan, int idCabang) {
         List<MenuHarian> favoritList = new ArrayList<>();
-        // Query ini menggunakan LEFT JOIN untuk memastikan semua item favorit tetap muncul
-        // meskipun tidak tersedia di menu harian pada hari itu.
+        // Query diubah untuk menggunakan LEFT JOIN.
+        // Ini akan mengembalikan semua menu favorit, dan jika menu itu ada di menu_harian untuk hari ini,
+        // data stok dan id_menu_harian akan ikut terambil. Jika tidak, akan bernilai NULL.
         String sql = "SELECT m.id_menu, m.nama_menu, m.harga_menu, mh.id_menu_harian, mh.stok_menu_harian " +
                 "FROM favorit_pelanggan fp " +
                 "JOIN menu m ON fp.id_menu = m.id_menu " +
@@ -63,10 +64,9 @@ public class FavoritDAO {
                 mh.setIdMenu(rs.getInt("id_menu"));
                 mh.setNamaMenu(rs.getString("nama_menu"));
                 mh.setHargaMenu(rs.getDouble("harga_menu"));
-                // id_menu_harian atau stok_menu_harian bisa bernilai 0 atau NULL jika tidak tersedia
-                mh.setIdMenuHarian(rs.getInt("id_menu_harian"));
-                mh.setStokMenuHarian(rs.getInt("stok_menu_harian"));
-                mh.setIdCabang(idCabang);
+                mh.setIdMenuHarian(rs.getInt("id_menu_harian")); // Bisa jadi 0 jika tidak ada di menu harian
+                mh.setStokMenuHarian(rs.getInt("stok_menu_harian")); // Bisa jadi 0 jika tidak ada atau stok habis
+                mh.setIdCabang(idCabang); // Set idCabang secara manual
                 favoritList.add(mh);
             }
         } catch (SQLException e) {
