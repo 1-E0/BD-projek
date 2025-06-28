@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 
 public class DashboardController {
 
+    // ... (metode-metode lain yang sudah ada)
+
     @FXML
     void goToManajemenMenu(ActionEvent event) {
         Navigasi.switchScene(event, "ManajemenMenuView.fxml");
@@ -56,6 +58,13 @@ public class DashboardController {
     void goToManajemenVoucher(ActionEvent event) {
         Navigasi.switchScene(event, "ManajemenVoucherView.fxml");
     }
+
+    // --- METODE BARU ---
+    @FXML
+    void goToLaporanPerforma(ActionEvent event) {
+        Navigasi.switchScene(event, "LaporanPerformaView.fxml");
+    }
+    // --- AKHIR METODE BARU ---
 
     @FXML
     void handleLogout(ActionEvent event) {

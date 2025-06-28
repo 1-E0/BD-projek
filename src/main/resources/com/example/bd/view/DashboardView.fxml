@@ -107,6 +107,13 @@
                     </graphic>
                 </Button>
 
+                <!-- TOMBOL BARU DITAMBAHKAN DI SINI -->
+                <Button onAction="#goToLaporanPerforma" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" styleClass="admin-dashboard-card-button" text="Laporan Performa" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="LINE_CHART" styleClass="admin-dashboard-icon" size="3em" />
+                    </graphic>
+                </Button>
+
             </children>
         </GridPane>
     </VBox>
