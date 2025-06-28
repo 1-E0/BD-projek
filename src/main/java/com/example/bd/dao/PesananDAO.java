@@ -14,7 +14,6 @@ public class PesananDAO {
 
     private static final double RUPIAH_PER_POIN = 10000.0;
 
-    // ... (Metode lain seperti getPesananByPelanggan, getDetailByPesanan, dll tidak berubah)
     public List<Pesanan> getPesananByPelanggan(int idPelanggan) {
         List<Pesanan> pesananList = new ArrayList<>();
         String sql = "SELECT p.*, png.status_pengiriman FROM pesanan p " +
@@ -114,7 +113,6 @@ public class PesananDAO {
             e.printStackTrace();
         }
     }
-
 
     public void simpanPesananLengkap(Pesanan pesanan, List<DetailPesanan> detailList, Pembayaran pembayaran) throws SQLException {
         String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, tanggal_pesanan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, CURRENT_DATE, ?, ?, ?) RETURNING id_pesanan";

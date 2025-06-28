@@ -1,35 +1,28 @@
 package com.example.bd.dao;
 
-import com.example.bd.model.VoucherPelanggan;
+import com.example.bd.model.Voucher;
 import com.example.bd.util.DatabaseConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VoucherDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
-    public List<VoucherPelanggan> getVoucherTersediaByPelanggan(int idPelanggan) {
-        List<VoucherPelanggan> voucherList = new ArrayList<>();
-        String sql = "SELECT vp.*, h.nama_hadiah, h.nilai_voucher " +
-                "FROM voucher_pelanggan vp " +
-                "JOIN hadiah h ON vp.id_hadiah = h.id_hadiah " +
-                "WHERE vp.id_pelanggan = ? AND vp.status_voucher = 'TERSEDIA' " +
-                "AND (vp.tanggal_kadaluarsa IS NULL OR vp.tanggal_kadaluarsa >= CURRENT_DATE)";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, idPelanggan);
-            ResultSet rs = pstmt.executeQuery();
+    public List<Voucher> getAllVouchers() {
+        List<Voucher> voucherList = new ArrayList<>();
+        String sql = "SELECT * FROM voucher ORDER BY id_voucher ASC";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                VoucherPelanggan v = new VoucherPelanggan();
-                v.setIdVoucherPelanggan(rs.getInt("id_voucher_pelanggan"));
-                v.setKodeVoucher(rs.getString("kode_voucher"));
-                v.setNamaHadiah(rs.getString("nama_hadiah"));
-                v.setNilaiVoucher(rs.getDouble("nilai_voucher"));
-                v.setTanggalKadaluarsa(rs.getDate("tanggal_kadaluarsa"));
+                Voucher v = new Voucher();
+                v.setIdVoucher(rs.getInt("id_voucher"));
+                v.setNamaVoucher(rs.getString("nama_voucher"));
+                v.setDeskripsi(rs.getString("deskripsi"));
+                v.setPotonganHarga(rs.getDouble("potongan_harga"));
+                v.setPoinDibutuhkan(rs.getInt("poin_dibutuhkan"));
+                v.setAktif(rs.getBoolean("aktif"));
                 voucherList.add(v);
             }
         } catch (SQLException e) {
@@ -38,10 +31,50 @@ public class VoucherDAO {
         return voucherList;
     }
 
-    public void gunakanVoucher(int idVoucherPelanggan) {
-        String sql = "UPDATE voucher_pelanggan SET status_voucher = 'TERPAKAI' WHERE id_voucher_pelanggan = ?";
+    public List<Voucher> getAllVoucherAktif() {
+        List<Voucher> voucherList = new ArrayList<>();
+        String sql = "SELECT * FROM voucher WHERE aktif = TRUE ORDER BY poin_dibutuhkan ASC";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Voucher v = new Voucher();
+                v.setIdVoucher(rs.getInt("id_voucher"));
+                v.setNamaVoucher(rs.getString("nama_voucher"));
+                v.setDeskripsi(rs.getString("deskripsi"));
+                v.setPotonganHarga(rs.getDouble("potongan_harga"));
+                v.setPoinDibutuhkan(rs.getInt("poin_dibutuhkan"));
+                v.setAktif(rs.getBoolean("aktif"));
+                voucherList.add(v);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return voucherList;
+    }
+
+    public void addVoucher(Voucher voucher) {
+        String sql = "INSERT INTO voucher (nama_voucher, deskripsi, potongan_harga, poin_dibutuhkan, aktif) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, idVoucherPelanggan);
+            pstmt.setString(1, voucher.getNamaVoucher());
+            pstmt.setString(2, voucher.getDeskripsi());
+            pstmt.setDouble(3, voucher.getPotonganHarga());
+            pstmt.setInt(4, voucher.getPoinDibutuhkan());
+            pstmt.setBoolean(5, voucher.isAktif());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateVoucher(Voucher voucher) {
+        String sql = "UPDATE voucher SET nama_voucher = ?, deskripsi = ?, potongan_harga = ?, poin_dibutuhkan = ?, aktif = ? WHERE id_voucher = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, voucher.getNamaVoucher());
+            pstmt.setString(2, voucher.getDeskripsi());
+            pstmt.setDouble(3, voucher.getPotonganHarga());
+            pstmt.setInt(4, voucher.getPoinDibutuhkan());
+            pstmt.setBoolean(5, voucher.isAktif());
+            pstmt.setInt(6, voucher.getIdVoucher());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

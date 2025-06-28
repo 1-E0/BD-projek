@@ -3,8 +3,8 @@ package com.example.bd.controller;
 import com.example.bd.HelloApplication;
 import com.example.bd.dao.DiskonDAO;
 import com.example.bd.dao.MenuDAO;
+import com.example.bd.dao.PelangganDAO;
 import com.example.bd.dao.PesananDAO;
-import com.example.bd.dao.VoucherDAO;
 import com.example.bd.model.*;
 import com.example.bd.model.Menu;
 import com.example.bd.util.Navigasi;
@@ -32,7 +32,6 @@ import java.util.ResourceBundle;
 
 public class BuatPesananController implements Initializable {
 
-    // --- FXML Components ---
     @FXML private TableView<MenuHarian> menuTable;
     @FXML private TableColumn<MenuHarian, String> colNamaMenu;
     @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
@@ -44,22 +43,20 @@ public class BuatPesananController implements Initializable {
     @FXML private TextArea txtAlamat;
     @FXML private Label lblNamaPelanggan;
     @FXML private ComboBox<Diskon> comboDiskon;
-    @FXML private ComboBox<VoucherPelanggan> comboVoucher;
+    @FXML private ComboBox<PelangganVoucher> comboVoucher;
     @FXML private Label lblSubtotal;
     @FXML private Label lblJumlahDiskon;
     @FXML private Label lblTotalAkhir;
 
-    // --- DAOs ---
     private final MenuDAO menuDAO = new MenuDAO();
     private final PesananDAO pesananDAO = new PesananDAO();
     private final DiskonDAO diskonDAO = new DiskonDAO();
-    private final VoucherDAO voucherDAO = new VoucherDAO();
+    private final PelangganDAO pelangganDAO = new PelangganDAO();
 
-    // --- Data Lists & Models ---
     private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
-    private VoucherPelanggan voucherTerpilih = null;
+    private PelangganVoucher voucherTerpilih = null;
 
     private static final int ID_CABANG_PADRAO = 1;
 
@@ -112,25 +109,19 @@ public class BuatPesananController implements Initializable {
 
         comboDiskon.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             comboVoucher.setDisable(newVal != null);
-            if(newVal != null) comboVoucher.getSelectionModel().clearSelection();
+            if (newVal != null) comboVoucher.getSelectionModel().clearSelection();
             updateTotalHarga();
         });
     }
 
     private void setupVoucherComboBox() {
-        refreshVoucherComboBox();
-
         comboVoucher.setConverter(new StringConverter<>() {
             @Override
-            public String toString(VoucherPelanggan voucher) {
-                if (voucher == null) {
-                    return "Tanpa Voucher";
-                } else {
-                    return String.format("%s (Diskon %.0f%%)", voucher.getNamaHadiah(), voucher.getNilaiVoucher());
-                }
+            public String toString(PelangganVoucher voucher) {
+                return (voucher == null || voucher.getNamaVoucher() == null) ? "Tanpa Voucher" : voucher.getNamaVoucher();
             }
             @Override
-            public VoucherPelanggan fromString(String string) { return null; }
+            public PelangganVoucher fromString(String string) { return null; }
         });
 
         comboVoucher.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -150,17 +141,14 @@ public class BuatPesananController implements Initializable {
     }
 
     private void refreshVoucherComboBox() {
-        VoucherPelanggan selected = comboVoucher.getSelectionModel().getSelectedItem();
-        ObservableList<VoucherPelanggan> vouchers = FXCollections.observableArrayList(
-                voucherDAO.getVoucherTersediaByPelanggan(pelangganAktif.getIdPelanggan())
+        if (pelangganAktif == null) return;
+
+        ObservableList<PelangganVoucher> vouchers = FXCollections.observableArrayList(
+                pelangganDAO.getVoucherAktifByPelanggan(pelangganAktif.getIdPelanggan())
         );
         vouchers.add(0, null);
         comboVoucher.setItems(vouchers);
-        if (selected != null && comboVoucher.getItems().contains(selected)) {
-            comboVoucher.getSelectionModel().select(selected);
-        } else {
-            comboVoucher.getSelectionModel().select(null);
-        }
+        comboVoucher.getSelectionModel().selectFirst();
     }
 
     private void loadInitialData() {
@@ -229,13 +217,21 @@ public class BuatPesananController implements Initializable {
         for (ItemKeranjang item : this.keranjangList) {
             subtotal += item.getSubtotal();
         }
+
         double jumlahDiskon = 0;
+        Diskon diskonAktif = comboDiskon.getValue();
+
         if (voucherTerpilih != null) {
-            jumlahDiskon = subtotal * (voucherTerpilih.getNilaiVoucher() / 100.0);
-        } else if (comboDiskon.getValue() != null) {
-            jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
+            jumlahDiskon = voucherTerpilih.getPotonganHarga();
+        } else if (diskonAktif != null) {
+            jumlahDiskon = subtotal * (diskonAktif.getPersenDiskon() / 100.0);
         }
+
         double totalAkhir = subtotal - jumlahDiskon;
+        if (totalAkhir < 0) {
+            totalAkhir = 0;
+        }
+
         lblSubtotal.setText(String.format("Rp %.0f", subtotal));
         lblJumlahDiskon.setText(String.format("- Rp %.0f", jumlahDiskon));
         lblTotalAkhir.setText(String.format("Rp %.0f", totalAkhir));
@@ -249,13 +245,18 @@ public class BuatPesananController implements Initializable {
 
         double subtotal = 0;
         for (ItemKeranjang item : keranjangList) { subtotal += item.getSubtotal(); }
+
         double jumlahDiskon = 0;
         if (voucherTerpilih != null) {
-            jumlahDiskon = subtotal * (voucherTerpilih.getNilaiVoucher() / 100.0);
+            jumlahDiskon = voucherTerpilih.getPotonganHarga();
         } else if (comboDiskon.getValue() != null) {
             jumlahDiskon = subtotal * (comboDiskon.getValue().getPersenDiskon() / 100.0);
         }
+
         double totalHargaFinal = subtotal - jumlahDiskon;
+        if (totalHargaFinal < 0) {
+            totalHargaFinal = 0;
+        }
 
         try {
             Dialog<ButtonType> dialog = new Dialog<>();
@@ -283,19 +284,30 @@ public class BuatPesananController implements Initializable {
                 Pembayaran pembayaran = new Pembayaran();
                 pembayaran.setIdMetode(metode.getIdMetode());
                 pesananDAO.simpanPesananLengkap(pesanan, detailList, pembayaran);
+
                 if (voucherTerpilih != null) {
-                    voucherDAO.gunakanVoucher(voucherTerpilih.getIdVoucherPelanggan());
+                    pelangganDAO.gunakanVoucher(voucherTerpilih.getIdPelangganVoucher());
                 }
+
+                // --- PERBAIKAN UTAMA ADA DI SINI ---
+                // Setelah transaksi berhasil, ambil data pelanggan terbaru dari DB
+                Pelanggan pelangganTerbaru = pelangganDAO.getPelangganById(pelangganAktif.getIdPelanggan());
+                if (pelangganTerbaru != null) {
+                    // Perbarui sesi dengan data terbaru (termasuk poin yang baru ditambahkan)
+                    UserSession.getInstance().setLoggedInPelanggan(pelangganTerbaru);
+                    // Perbarui juga objek di controller ini untuk konsistensi
+                    this.pelangganAktif = pelangganTerbaru;
+                }
+                // --- AKHIR PERBAIKAN ---
+
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
                 UserSession.getInstance().clearKeranjang();
                 clearAllForm();
                 refreshMenuTable();
                 refreshVoucherComboBox();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan pesanan ke database.");
+        } catch (IOException | SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Gagal menyimpan pesanan.");
             e.printStackTrace();
         }
     }

@@ -1,11 +1,9 @@
 package com.example.bd.controller;
 
-import com.example.bd.util.Navigasi; // <-- Import kelas baru
+import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-
-import java.io.IOException;
 
 public class DashboardController {
 
@@ -49,15 +47,14 @@ public class DashboardController {
         Navigasi.switchScene(event, "ManajemenMenuHarianView.fxml");
     }
 
-
     @FXML
     void goToManajemenMetodePembayaran(ActionEvent event) {
         Navigasi.switchScene(event, "ManajemenMetodePembayaranView.fxml");
     }
 
     @FXML
-    void goToManajemenHadiah(ActionEvent event) {
-        Navigasi.switchScene(event, "ManajemenHadiahView.fxml");
+    void goToManajemenVoucher(ActionEvent event) {
+        Navigasi.switchScene(event, "ManajemenVoucherView.fxml");
     }
 
     @FXML

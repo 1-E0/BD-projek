@@ -1,17 +1,19 @@
 package com.example.bd.dao;
 
-import com.example.bd.model.Hadiah;
 import com.example.bd.model.Pelanggan;
-import com.example.bd.model.RiwayatPenukaran;
+import com.example.bd.model.PelangganVoucher;
+import com.example.bd.model.Voucher;
 import com.example.bd.util.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PelangganDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
+    // ... (Metode-metode lain seperti getAllPelanggan, updateProfil, dll. TIDAK PERLU DIUBAH)
     public List<Pelanggan> getAllPelanggan() {
         List<Pelanggan> pelangganList = new ArrayList<>();
         String sql = "SELECT * FROM pelanggan ORDER BY id_pelanggan ASC";
@@ -30,6 +32,7 @@ public class PelangganDAO {
         }
         return pelangganList;
     }
+
     public void updateProfil(Pelanggan pelanggan) {
         String sql = "UPDATE pelanggan SET nama_pelanggan = ?, email_pelanggan = ?, alamat_pelanggan = ?, no_telp_pelanggan = ? WHERE id_pelanggan = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -83,7 +86,6 @@ public class PelangganDAO {
         }
     }
 
-
     public void deletePelanggan(int idPelanggan) {
         String sql = "DELETE FROM pelanggan WHERE id_pelanggan = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -116,6 +118,7 @@ public class PelangganDAO {
         }
         return null;
     }
+
     public boolean isEmailRegistered(String email) {
         String sql = "SELECT COUNT(*) FROM pelanggan WHERE email_pelanggan = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -130,64 +133,142 @@ public class PelangganDAO {
         return false;
     }
 
-    public void tukarPoin(int idPelanggan, Hadiah hadiah) throws SQLException {
+    // --- METODE YANG DIPERBAIKI ---
+    public boolean tukarPoinDenganVoucher(int idPelanggan, Voucher voucher) throws SQLException {
+        String sqlCheckPoin = "SELECT jumlah_poin FROM pelanggan WHERE id_pelanggan = ?";
         String sqlUpdatePoin = "UPDATE pelanggan SET jumlah_poin = jumlah_poin - ? WHERE id_pelanggan = ?";
-        String sqlLogPenukaran = "INSERT INTO penukaran_hadiah (id_pelanggan, id_hadiah, tanggal_penukaran) VALUES (?, ?, CURRENT_DATE)";
-        String sqlBuatVoucher = "INSERT INTO voucher_pelanggan (id_pelanggan, id_hadiah, kode_voucher, tanggal_kadaluarsa) VALUES (?, ?, ?, ?)";
+        String sqlBuatVoucher = "INSERT INTO pelanggan_voucher (id_pelanggan, id_voucher, kode_voucher, tanggal_kadaluarsa) VALUES (?, ?, ?, ?)";
+
         try {
             conn.setAutoCommit(false);
 
+            // 1. Cek Poin Terlebih Dahulu
+            int poinSaatIni;
+            try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheckPoin)) {
+                pstmtCheck.setInt(1, idPelanggan);
+                ResultSet rs = pstmtCheck.executeQuery();
+                if (rs.next()) {
+                    poinSaatIni = rs.getInt("jumlah_poin");
+                } else {
+                    conn.rollback();
+                    return false; // Pelanggan tidak ditemukan
+                }
+            }
+
+            if (poinSaatIni < voucher.getPoinDibutuhkan()) {
+                conn.rollback(); // Batalkan transaksi
+                return false; // Poin tidak cukup
+            }
+
+            // 2. Jika poin cukup, kurangi poin
             try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePoin)) {
-                pstmtUpdate.setInt(1, hadiah.getBiayaPoin());
+                pstmtUpdate.setInt(1, voucher.getPoinDibutuhkan());
                 pstmtUpdate.setInt(2, idPelanggan);
                 pstmtUpdate.executeUpdate();
             }
 
-            try (PreparedStatement pstmtLog = conn.prepareStatement(sqlLogPenukaran)) {
-                pstmtLog.setInt(1, idPelanggan);
-                pstmtLog.setInt(2, hadiah.getIdHadiah());
-                pstmtLog.executeUpdate();
+            // 3. Buat voucher baru
+            try (PreparedStatement pstmtVoucher = conn.prepareStatement(sqlBuatVoucher)) {
+                String kodeVoucherUnik = "VC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                long tigaPuluhHariInMillis = 30L * 24 * 60 * 60 * 1000;
+                Date tglKadaluarsa = new Date(System.currentTimeMillis() + tigaPuluhHariInMillis);
+
+                pstmtVoucher.setInt(1, idPelanggan);
+                pstmtVoucher.setInt(2, voucher.getIdVoucher());
+                pstmtVoucher.setString(3, kodeVoucherUnik);
+                pstmtVoucher.setDate(4, tglKadaluarsa);
+                pstmtVoucher.executeUpdate();
             }
 
-            if ("VOUCHER".equals(hadiah.getJenisHadiah())) {
-                try (PreparedStatement pstmtVoucher = conn.prepareStatement(sqlBuatVoucher)) {
-                    String kodeVoucher = "VC" + System.currentTimeMillis();
-                    long tigaPuluhHariInMillis = 30L * 24 * 60 * 60 * 1000;
-                    Date tglKadaluarsa = new Date(System.currentTimeMillis() + tigaPuluhHariInMillis);
-                    pstmtVoucher.setInt(1, idPelanggan);
-                    pstmtVoucher.setInt(2, hadiah.getIdHadiah());
-                    pstmtVoucher.setString(3, kodeVoucher);
-                    pstmtVoucher.setDate(4, tglKadaluarsa);
-                    pstmtVoucher.executeUpdate();
-                }
-            }
-            conn.commit();
+            conn.commit(); // Selesaikan transaksi jika semua berhasil
+            return true; // Transaksi berhasil
+
         } catch (SQLException e) {
-            conn.rollback();
-            throw e;
+            conn.rollback(); // Batalkan jika ada error
+            throw e; // Lemparkan error untuk ditangani controller
         } finally {
-            conn.setAutoCommit(true);
+            conn.setAutoCommit(true); // Kembalikan ke mode auto-commit
         }
     }
 
-    public List<RiwayatPenukaran> getRiwayatPenukaran(int idPelanggan) {
-        List<RiwayatPenukaran> riwayatList = new ArrayList<>();
-        String sql = "SELECT h.nama_hadiah, h.biaya_poin, p.tanggal_penukaran " +
-                "FROM penukaran_hadiah p JOIN hadiah h ON p.id_hadiah = h.id_hadiah " +
-                "WHERE p.id_pelanggan = ? ORDER BY p.tanggal_penukaran DESC";
+    public List<PelangganVoucher> getRiwayatPenukaranVoucher(int idPelanggan) {
+        List<PelangganVoucher> riwayatList = new ArrayList<>();
+        String sql = "SELECT pv.*, v.nama_voucher, v.poin_dibutuhkan " +
+                "FROM pelanggan_voucher pv " +
+                "JOIN voucher v ON pv.id_voucher = v.id_voucher " +
+                "WHERE pv.id_pelanggan = ? ORDER BY pv.tanggal_penukaran DESC";
+
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPelanggan);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                RiwayatPenukaran riwayat = new RiwayatPenukaran();
-                riwayat.setNamaHadiah(rs.getString("nama_hadiah"));
-                riwayat.setPoinDigunakan(rs.getInt("biaya_poin"));
+                PelangganVoucher riwayat = new PelangganVoucher();
+                riwayat.setKodeVoucher(rs.getString("kode_voucher"));
                 riwayat.setTanggalPenukaran(rs.getDate("tanggal_penukaran"));
+                riwayat.setStatusVoucher(rs.getString("status_voucher"));
+                riwayat.setNamaVoucher(rs.getString("nama_voucher"));
+                riwayat.setPoinDigunakan(rs.getInt("poin_dibutuhkan"));
                 riwayatList.add(riwayat);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return riwayatList;
+    }
+
+    public List<PelangganVoucher> getVoucherAktifByPelanggan(int idPelanggan) {
+        List<PelangganVoucher> voucherList = new ArrayList<>();
+        String sql = "SELECT pv.*, v.nama_voucher, v.potongan_harga " +
+                "FROM pelanggan_voucher pv " +
+                "JOIN voucher v ON pv.id_voucher = v.id_voucher " +
+                "WHERE pv.id_pelanggan = ? AND pv.status_voucher = 'AKTIF' " +
+                "AND pv.tanggal_kadaluarsa >= CURRENT_DATE";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPelanggan);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                PelangganVoucher pv = new PelangganVoucher();
+                pv.setIdPelangganVoucher(rs.getInt("id_pelanggan_voucher"));
+                pv.setNamaVoucher(rs.getString("nama_voucher"));
+                pv.setPotonganHarga(rs.getDouble("potongan_harga"));
+                voucherList.add(pv);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return voucherList;
+    }
+
+    public void gunakanVoucher(int idPelangganVoucher) {
+        String sql = "UPDATE pelanggan_voucher SET status_voucher = 'DIGUNAKAN' WHERE id_pelanggan_voucher = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPelangganVoucher);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Pelanggan getPelangganById(int idPelanggan) {
+        String sql = "SELECT * FROM pelanggan WHERE id_pelanggan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPelanggan);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                Pelanggan p = new Pelanggan();
+                p.setIdPelanggan(rs.getInt("id_pelanggan"));
+                p.setNamaPelanggan(rs.getString("nama_pelanggan"));
+                p.setEmailPelanggan(rs.getString("email_pelanggan"));
+                p.setAlamatPelanggan(rs.getString("alamat_pelanggan"));
+                p.setNoTelpPelanggan(rs.getString("no_telp_pelanggan"));
+                p.setJumlahPoin(rs.getInt("jumlah_poin"));
+                p.setTanggalJoin(rs.getDate("tanggal_join"));
+                return p;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

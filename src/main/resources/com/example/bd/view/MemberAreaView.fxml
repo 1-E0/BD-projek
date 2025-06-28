@@ -1,54 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="720.0" prefWidth="950.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.MemberAreaController">
-    <VBox spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
-        <HBox alignment="CENTER_LEFT" spacing="15.0">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.MemberAreaController">
+    <children>
+        <VBox alignment="TOP_CENTER" layoutX="40.0" layoutY="20.0" spacing="10.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="20.0">
             <children>
-                <Button onAction="#handleKembali" styleClass="back-button" text="Kembali">
-                    <graphic>
-                        <FontAwesomeIconView glyphName="ARROW_LEFT" />
-                    </graphic>
-                </Button>
-                <Label styleClass="title-label" text="Poin &amp; Hadiah" />
-            </children>
-        </HBox>
-        <HBox spacing="20.0" VBox.vgrow="NEVER">
-            <children>
-                <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                    <HBox alignment="CENTER_LEFT" spacing="20.0">
-                        <VBox>
-                            <Label fx:id="lblNamaMember" text="Member: Nama Pelanggan" />
-                            <Label styleClass="input-label" text="Poin Anda Saat Ini:" />
-                            <Label fx:id="lblJumlahPoin" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #FF7043;" text="0" />
-                        </VBox>
-                    </HBox>
-                </VBox>
-                <VBox prefWidth="500.0" spacing="10.0" styleClass="card" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
-                        <Label styleClass="section-title" text="Riwayat Penukaran Terakhir" />
-                        <TableView fx:id="riwayatTable" prefHeight="120.0">
-                            <columns>
-                                <TableColumn fx:id="colNamaHadiah" prefWidth="200.0" text="Hadiah" />
-                                <TableColumn fx:id="colPoinDigunakan" prefWidth="120.0" text="Poin Digunakan" />
-                                <TableColumn fx:id="colTanggalTukar" prefWidth="150.0" text="Tanggal" />
-                            </columns>
-                        </TableView>
+                        <Label styleClass="title-label" text="Area Member" />
+                        <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="lblNamaMember" text="Member: Nama Pelanggan">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                            <children>
+                                <Label text="Poin Anda:">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblJumlahPoin" styleClass="title-label" text="0">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
                     </children>
-                </VBox>
+                </HBox>
+                <Label styleClass="section-title" text="Tukar Poin dengan Voucher" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="250.0">
+                    <content>
+                        <TilePane fx:id="voucherTilePane" hgap="15.0" vgap="15.0" />
+                    </content>
+                </ScrollPane>
+                <Label styleClass="section-title" text="Riwayat Penukaran" />
+                <TableView fx:id="riwayatTable" prefHeight="200.0">
+                    <columns>
+                        <TableColumn fx:id="colNamaVoucher" prefWidth="300.0" text="Nama Voucher" />
+                        <TableColumn fx:id="colPoinDigunakan" prefWidth="150.0" text="Poin Digunakan" />
+                        <TableColumn fx:id="colTanggalTukar" prefWidth="150.0" text="Tanggal Penukaran" />
+                        <TableColumn fx:id="colStatusVoucher" prefWidth="120.0" text="Status" />
+                    </columns>
+                </TableView>
             </children>
-        </HBox>
-        <Label styleClass="section-title" text="Katalog Hadiah &amp; Voucher" />
-        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-            <TilePane fx:id="hadiahTilePane" hgap="15.0" prefColumns="4" vgap="15.0">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                </padding>
-            </TilePane>
-        </ScrollPane>
-    </VBox>
+        </VBox>
+        <Button layoutX="40.0" layoutY="540.0" onAction="#handleKembali" styleClass="back-button" text="Kembali ke Dashboard" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="40.0" />
+    </children>
 </AnchorPane>

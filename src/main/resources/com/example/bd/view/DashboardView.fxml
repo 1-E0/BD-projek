@@ -13,20 +13,22 @@
 <AnchorPane prefHeight="720.0" prefWidth="1280.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.DashboardController">
     <VBox alignment="CENTER" layoutX="50.0" layoutY="30.0" spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0">
         <HBox alignment="CENTER_LEFT" styleClass="admin-dashboard-header">
-            <FontAwesomeIconView glyphName="GEARS" size="2.5em" styleClass="title-label" />
-            <VBox style="-fx-padding: 0 0 0 15px;">
-                <Label styleClass="title-label" text="Admin Dashboard" />
-                <Label styleClass="sub-title-label" text="Pusat Manajemen Aplikasi Catering" />
-            </VBox>
-            <HBox HBox.hgrow="ALWAYS" />
             <Button onAction="#handleLogout" styleClass="delete-button" text="Logout">
                 <graphic>
                     <FontAwesomeIconView fill="WHITE" glyphName="SIGN_OUT" />
                 </graphic>
             </Button>
+
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" style="-fx-padding: 0 0 0 20px;">
+                <FontAwesomeIconView glyphName="GEARS" size="2.5em" styleClass="title-label" />
+                <VBox style="-fx-padding: 0 0 0 15px;">
+                    <Label styleClass="title-label" text="Admin Dashboard" />
+                    <Label styleClass="sub-title-label" text="Pusat Manajemen Aplikasi Catering" />
+                </VBox>
+            </HBox>
         </HBox>
 
-        <GridPane fx:id="gridPane" styleClass="admin-dashboard-grid" VBox.vgrow="ALWAYS">
+        <GridPane fx:id="gridPane" hgap="25.0" styleClass="admin-dashboard-grid" vgap="25.0" VBox.vgrow="ALWAYS">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -99,9 +101,9 @@
                     </graphic>
                 </Button>
 
-                <Button onAction="#goToManajemenHadiah" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" styleClass="admin-dashboard-card-button" text="Manajemen Poin &amp; Hadiah" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                <Button onAction="#goToManajemenVoucher" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" styleClass="admin-dashboard-card-button" text="Manajemen Voucher" GridPane.columnIndex="2" GridPane.rowIndex="2">
                     <graphic>
-                        <FontAwesomeIconView glyphName="GIFT" styleClass="admin-dashboard-icon" size="3em" />
+                        <FontAwesomeIconView glyphName="TICKET" styleClass="admin-dashboard-icon" size="3em" />
                     </graphic>
                 </Button>
 

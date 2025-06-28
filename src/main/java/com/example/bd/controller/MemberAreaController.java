@@ -1,10 +1,10 @@
 package com.example.bd.controller;
 
-import com.example.bd.dao.HadiahDAO;
 import com.example.bd.dao.PelangganDAO;
-import com.example.bd.model.Hadiah;
+import com.example.bd.dao.VoucherDAO;
 import com.example.bd.model.Pelanggan;
-import com.example.bd.model.RiwayatPenukaran;
+import com.example.bd.model.PelangganVoucher;
+import com.example.bd.model.Voucher;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
@@ -27,15 +27,16 @@ public class MemberAreaController implements Initializable {
 
     @FXML private Label lblNamaMember;
     @FXML private Label lblJumlahPoin;
-    @FXML private TilePane hadiahTilePane;
+    @FXML private TilePane voucherTilePane;
 
-    @FXML private TableView<RiwayatPenukaran> riwayatTable;
-    @FXML private TableColumn<RiwayatPenukaran, String> colNamaHadiah;
-    @FXML private TableColumn<RiwayatPenukaran, Integer> colPoinDigunakan;
-    @FXML private TableColumn<RiwayatPenukaran, Date> colTanggalTukar;
+    @FXML private TableView<PelangganVoucher> riwayatTable;
+    @FXML private TableColumn<PelangganVoucher, String> colNamaVoucher;
+    @FXML private TableColumn<PelangganVoucher, Integer> colPoinDigunakan;
+    @FXML private TableColumn<PelangganVoucher, Date> colTanggalTukar;
+    @FXML private TableColumn<PelangganVoucher, String> colStatusVoucher;
 
     private final PelangganDAO pelangganDAO = new PelangganDAO();
-    private final HadiahDAO hadiahDAO = new HadiahDAO();
+    private final VoucherDAO voucherDAO = new VoucherDAO();
     private Pelanggan pelangganAktif;
 
     @Override
@@ -46,84 +47,88 @@ public class MemberAreaController implements Initializable {
             lblNamaMember.setText("Member: " + pelangganAktif.getNamaPelanggan());
             updatePoinDanRiwayat();
         }
-        loadHadiah();
+        loadVoucher();
     }
 
     private void setupRiwayatTable() {
-        colNamaHadiah.setCellValueFactory(new PropertyValueFactory<>("namaHadiah"));
+        colNamaVoucher.setCellValueFactory(new PropertyValueFactory<>("namaVoucher"));
         colPoinDigunakan.setCellValueFactory(new PropertyValueFactory<>("poinDigunakan"));
         colTanggalTukar.setCellValueFactory(new PropertyValueFactory<>("tanggalPenukaran"));
+        colStatusVoucher.setCellValueFactory(new PropertyValueFactory<>("statusVoucher"));
     }
 
     private void updatePoinDanRiwayat() {
         lblJumlahPoin.setText(String.valueOf(pelangganAktif.getJumlahPoin()));
         riwayatTable.setItems(FXCollections.observableArrayList(
-                pelangganDAO.getRiwayatPenukaran(pelangganAktif.getIdPelanggan())
+                pelangganDAO.getRiwayatPenukaranVoucher(pelangganAktif.getIdPelanggan())
         ));
     }
 
-    private void loadHadiah() {
-        hadiahTilePane.getChildren().clear();
-        for (Hadiah hadiah : hadiahDAO.getAllHadiah()) {
-            VBox card = createHadiahCard(hadiah);
-            hadiahTilePane.getChildren().add(card);
+    private void loadVoucher() {
+        voucherTilePane.getChildren().clear();
+        for (Voucher voucher : voucherDAO.getAllVoucherAktif()) {
+            VBox card = createVoucherCard(voucher);
+            voucherTilePane.getChildren().add(card);
         }
     }
 
-    private VBox createHadiahCard(Hadiah hadiah) {
+    private VBox createVoucherCard(Voucher voucher) {
         VBox card = new VBox(8);
         card.getStyleClass().add("card");
         card.setPrefWidth(200);
 
-        Label namaHadiah = new Label(hadiah.getNamaHadiah());
-        namaHadiah.getStyleClass().add("item-name");
-        namaHadiah.setWrapText(true);
+        Label namaVoucher = new Label(voucher.getNamaVoucher());
+        namaVoucher.getStyleClass().add("item-name");
+        namaVoucher.setWrapText(true);
 
-        Label jenisHadiahLabel = new Label(hadiah.getJenisHadiah());
-        jenisHadiahLabel.getStyleClass().add("item-stock");
+        Text deskripsiVoucher = new Text(voucher.getDeskripsi());
+        deskripsiVoucher.setWrappingWidth(170);
 
-        Text deskripsiHadiah = new Text(hadiah.getDeskripsiHadiah());
-        deskripsiHadiah.setWrappingWidth(170);
-
-        Label poinHadiah = new Label(hadiah.getBiayaPoin() + " Poin");
-        poinHadiah.getStyleClass().add("item-price");
+        Label poinVoucher = new Label(voucher.getPoinDibutuhkan() + " Poin");
+        poinVoucher.getStyleClass().add("item-price");
 
         Button btnTukar = new Button("Tukar Poin");
         btnTukar.setPrefWidth(Double.MAX_VALUE);
 
-        if (pelangganAktif == null || pelangganAktif.getJumlahPoin() < hadiah.getBiayaPoin()) {
+        if (pelangganAktif == null || pelangganAktif.getJumlahPoin() < voucher.getPoinDibutuhkan()) {
             btnTukar.setDisable(true);
         }
 
-        btnTukar.setOnAction(event -> handleTukarPoin(hadiah));
+        btnTukar.setOnAction(event -> handleTukarPoin(voucher));
 
-        card.getChildren().addAll(namaHadiah, jenisHadiahLabel, deskripsiHadiah, poinHadiah, btnTukar);
+        card.getChildren().addAll(namaVoucher, deskripsiVoucher, poinVoucher, btnTukar);
         return card;
     }
 
-    private void handleTukarPoin(Hadiah hadiah) {
+    private void handleTukarPoin(Voucher voucher) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
-                "Tukarkan " + hadiah.getBiayaPoin() + " poin dengan " + hadiah.getNamaHadiah() + "?",
+                "Tukarkan " + voucher.getPoinDibutuhkan() + " poin dengan voucher '" + voucher.getNamaVoucher() + "'?",
                 ButtonType.YES, ButtonType.NO);
         confirmation.setHeaderText("Konfirmasi Penukaran Poin");
         Optional<ButtonType> result = confirmation.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
-                pelangganDAO.tukarPoin(pelangganAktif.getIdPelanggan(), hadiah);
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Penukaran hadiah berhasil!");
+                // Metode DAO sekarang mengembalikan boolean
+                boolean sukses = pelangganDAO.tukarPoinDenganVoucher(pelangganAktif.getIdPelanggan(), voucher);
 
-                // Refresh data pelanggan dari database setelah tukar poin
-                Pelanggan pelangganTerbaru = pelangganDAO.validateLogin(pelangganAktif.getEmailPelanggan(), pelangganAktif.getPasswordPelanggan());
+                if (sukses) {
+                    showAlert(Alert.AlertType.INFORMATION, "Sukses", "Penukaran voucher berhasil!");
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "Gagal", "Poin Anda tidak mencukupi untuk menukar voucher ini.");
+                }
+
+                // Selalu refresh data setelah mencoba transaksi
+                Pelanggan pelangganTerbaru = pelangganDAO.getPelangganById(pelangganAktif.getIdPelanggan());
                 if (pelangganTerbaru != null) {
                     UserSession.getInstance().setLoggedInPelanggan(pelangganTerbaru);
-                    pelangganAktif = pelangganTerbaru; // Update pelanggan aktif di controller ini
+                    pelangganAktif = pelangganTerbaru;
                 }
 
                 updatePoinDanRiwayat();
-                loadHadiah();
+                loadVoucher();
             } catch (SQLException e) {
-                showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menukarkan poin.");
+                showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menukarkan poin karena terjadi masalah pada database.");
                 e.printStackTrace();
             }
         }
