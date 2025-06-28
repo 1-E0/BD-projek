@@ -1,6 +1,8 @@
 package com.example.bd.dao;
 
+import com.example.bd.model.Hadiah;
 import com.example.bd.model.Pelanggan;
+import com.example.bd.model.RiwayatPenukaran;
 import com.example.bd.util.DatabaseConnection;
 
 import java.sql.*;
@@ -45,7 +47,6 @@ public class PelangganDAO {
     public void updatePassword(int idPelanggan, String passwordBaru) {
         String sql = "UPDATE pelanggan SET password_pelanggan = ? WHERE id_pelanggan = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            // Di aplikasi nyata, passwordBaru harusnya sudah dalam bentuk hash
             pstmt.setString(1, passwordBaru);
             pstmt.setInt(2, idPelanggan);
             pstmt.executeUpdate();
@@ -54,40 +55,17 @@ public class PelangganDAO {
         }
     }
 
-    public void addPelangganAndCreateMember(Pelanggan pelanggan) throws SQLException {
-        String sqlPelanggan = "INSERT INTO pelanggan (nama_pelanggan, email_pelanggan, password_pelanggan, alamat_pelanggan, no_telp_pelanggan) VALUES (?, ?, ?, ?, ?) RETURNING id_pelanggan";
-        String sqlMember = "INSERT INTO member (id_pelanggan, nama_member, tanggal_join, jumlah_poin) VALUES (?, ?, CURRENT_DATE, 0)";
-
-        try {
-            conn.setAutoCommit(false);
-
-            int idPelangganBaru;
-            try (PreparedStatement pstmtPelanggan = conn.prepareStatement(sqlPelanggan)) {
-                pstmtPelanggan.setString(1, pelanggan.getNamaPelanggan());
-                pstmtPelanggan.setString(2, pelanggan.getEmailPelanggan());
-                pstmtPelanggan.setString(3, pelanggan.getPasswordPelanggan());
-                pstmtPelanggan.setString(4, pelanggan.getAlamatPelanggan());
-                pstmtPelanggan.setString(5, pelanggan.getNoTelpPelanggan());
-                ResultSet rs = pstmtPelanggan.executeQuery();
-                if (rs.next()) {
-                    idPelangganBaru = rs.getInt(1);
-                } else {
-                    throw new SQLException("Gagal membuat pelanggan baru.");
-                }
-            }
-
-            try (PreparedStatement pstmtMember = conn.prepareStatement(sqlMember)) {
-                pstmtMember.setInt(1, idPelangganBaru);
-                pstmtMember.setString(2, pelanggan.getNamaPelanggan());
-                pstmtMember.executeUpdate();
-            }
-
-            conn.commit();
+    public void addPelanggan(Pelanggan pelanggan) throws SQLException {
+        String sql = "INSERT INTO pelanggan (nama_pelanggan, email_pelanggan, password_pelanggan, alamat_pelanggan, no_telp_pelanggan, jumlah_poin, tanggal_join) VALUES (?, ?, ?, ?, ?, 0, CURRENT_DATE)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, pelanggan.getNamaPelanggan());
+            pstmt.setString(2, pelanggan.getEmailPelanggan());
+            pstmt.setString(3, pelanggan.getPasswordPelanggan());
+            pstmt.setString(4, pelanggan.getAlamatPelanggan());
+            pstmt.setString(5, pelanggan.getNoTelpPelanggan());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            conn.rollback();
             throw e;
-        } finally {
-            conn.setAutoCommit(true);
         }
     }
 
@@ -129,6 +107,8 @@ public class PelangganDAO {
                 p.setEmailPelanggan(rs.getString("email_pelanggan"));
                 p.setAlamatPelanggan(rs.getString("alamat_pelanggan"));
                 p.setNoTelpPelanggan(rs.getString("no_telp_pelanggan"));
+                p.setJumlahPoin(rs.getInt("jumlah_poin"));
+                p.setTanggalJoin(rs.getDate("tanggal_join"));
                 return p;
             }
         } catch (SQLException e) {
@@ -142,13 +122,72 @@ public class PelangganDAO {
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) > 0; // Jika count > 0, berarti email sudah ada
+                return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false; // Anggap belum terdaftar jika ada error
+        return false;
     }
 
+    public void tukarPoin(int idPelanggan, Hadiah hadiah) throws SQLException {
+        String sqlUpdatePoin = "UPDATE pelanggan SET jumlah_poin = jumlah_poin - ? WHERE id_pelanggan = ?";
+        String sqlLogPenukaran = "INSERT INTO penukaran_hadiah (id_pelanggan, id_hadiah, tanggal_penukaran) VALUES (?, ?, CURRENT_DATE)";
+        String sqlBuatVoucher = "INSERT INTO voucher_pelanggan (id_pelanggan, id_hadiah, kode_voucher, tanggal_kadaluarsa) VALUES (?, ?, ?, ?)";
+        try {
+            conn.setAutoCommit(false);
 
+            try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePoin)) {
+                pstmtUpdate.setInt(1, hadiah.getBiayaPoin());
+                pstmtUpdate.setInt(2, idPelanggan);
+                pstmtUpdate.executeUpdate();
+            }
+
+            try (PreparedStatement pstmtLog = conn.prepareStatement(sqlLogPenukaran)) {
+                pstmtLog.setInt(1, idPelanggan);
+                pstmtLog.setInt(2, hadiah.getIdHadiah());
+                pstmtLog.executeUpdate();
+            }
+
+            if ("VOUCHER".equals(hadiah.getJenisHadiah())) {
+                try (PreparedStatement pstmtVoucher = conn.prepareStatement(sqlBuatVoucher)) {
+                    String kodeVoucher = "VC" + System.currentTimeMillis();
+                    long tigaPuluhHariInMillis = 30L * 24 * 60 * 60 * 1000;
+                    Date tglKadaluarsa = new Date(System.currentTimeMillis() + tigaPuluhHariInMillis);
+                    pstmtVoucher.setInt(1, idPelanggan);
+                    pstmtVoucher.setInt(2, hadiah.getIdHadiah());
+                    pstmtVoucher.setString(3, kodeVoucher);
+                    pstmtVoucher.setDate(4, tglKadaluarsa);
+                    pstmtVoucher.executeUpdate();
+                }
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
+        }
+    }
+
+    public List<RiwayatPenukaran> getRiwayatPenukaran(int idPelanggan) {
+        List<RiwayatPenukaran> riwayatList = new ArrayList<>();
+        String sql = "SELECT h.nama_hadiah, h.biaya_poin, p.tanggal_penukaran " +
+                "FROM penukaran_hadiah p JOIN hadiah h ON p.id_hadiah = h.id_hadiah " +
+                "WHERE p.id_pelanggan = ? ORDER BY p.tanggal_penukaran DESC";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPelanggan);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                RiwayatPenukaran riwayat = new RiwayatPenukaran();
+                riwayat.setNamaHadiah(rs.getString("nama_hadiah"));
+                riwayat.setPoinDigunakan(rs.getInt("biaya_poin"));
+                riwayat.setTanggalPenukaran(rs.getDate("tanggal_penukaran"));
+                riwayatList.add(riwayat);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return riwayatList;
+    }
 }

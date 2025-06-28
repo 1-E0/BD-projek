@@ -1,9 +1,8 @@
 package com.example.bd.controller;
 
 import com.example.bd.dao.HadiahDAO;
-import com.example.bd.dao.MemberDAO;
+import com.example.bd.dao.PelangganDAO;
 import com.example.bd.model.Hadiah;
-import com.example.bd.model.Member;
 import com.example.bd.model.Pelanggan;
 import com.example.bd.model.RiwayatPenukaran;
 import com.example.bd.util.Navigasi;
@@ -35,20 +34,17 @@ public class MemberAreaController implements Initializable {
     @FXML private TableColumn<RiwayatPenukaran, Integer> colPoinDigunakan;
     @FXML private TableColumn<RiwayatPenukaran, Date> colTanggalTukar;
 
-    private final MemberDAO memberDAO = new MemberDAO();
+    private final PelangganDAO pelangganDAO = new PelangganDAO();
     private final HadiahDAO hadiahDAO = new HadiahDAO();
-    private Member memberAktif;
+    private Pelanggan pelangganAktif;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupRiwayatTable();
-        Pelanggan pelanggan = UserSession.getInstance().getLoggedInPelanggan();
-        if (pelanggan != null) {
-            memberAktif = memberDAO.getMemberByPelangganId(pelanggan.getIdPelanggan());
-            if (memberAktif != null) {
-                lblNamaMember.setText("Member: " + memberAktif.getNamaMember());
-                updatePoinDanRiwayat();
-            }
+        pelangganAktif = UserSession.getInstance().getLoggedInPelanggan();
+        if (pelangganAktif != null) {
+            lblNamaMember.setText("Member: " + pelangganAktif.getNamaPelanggan());
+            updatePoinDanRiwayat();
         }
         loadHadiah();
     }
@@ -60,9 +56,9 @@ public class MemberAreaController implements Initializable {
     }
 
     private void updatePoinDanRiwayat() {
-        lblJumlahPoin.setText(String.valueOf(memberAktif.getJumlahPoin()));
+        lblJumlahPoin.setText(String.valueOf(pelangganAktif.getJumlahPoin()));
         riwayatTable.setItems(FXCollections.observableArrayList(
-                memberDAO.getRiwayatPenukaranByIdMember(memberAktif.getIdMember())
+                pelangganDAO.getRiwayatPenukaran(pelangganAktif.getIdPelanggan())
         ));
     }
 
@@ -83,13 +79,11 @@ public class MemberAreaController implements Initializable {
         namaHadiah.getStyleClass().add("item-name");
         namaHadiah.setWrapText(true);
 
-        // Menampilkan jenis hadiah
         Label jenisHadiahLabel = new Label(hadiah.getJenisHadiah());
-        jenisHadiahLabel.getStyleClass().add("item-stock"); // Memakai style yang mirip
+        jenisHadiahLabel.getStyleClass().add("item-stock");
 
-        // Menampilkan deskripsi jika ada
         Text deskripsiHadiah = new Text(hadiah.getDeskripsiHadiah());
-        deskripsiHadiah.setWrappingWidth(170); // Agar teks tidak melebar
+        deskripsiHadiah.setWrappingWidth(170);
 
         Label poinHadiah = new Label(hadiah.getBiayaPoin() + " Poin");
         poinHadiah.getStyleClass().add("item-price");
@@ -97,7 +91,7 @@ public class MemberAreaController implements Initializable {
         Button btnTukar = new Button("Tukar Poin");
         btnTukar.setPrefWidth(Double.MAX_VALUE);
 
-        if (memberAktif == null || memberAktif.getJumlahPoin() < hadiah.getBiayaPoin()) {
+        if (pelangganAktif == null || pelangganAktif.getJumlahPoin() < hadiah.getBiayaPoin()) {
             btnTukar.setDisable(true);
         }
 
@@ -116,13 +110,18 @@ public class MemberAreaController implements Initializable {
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
-                // Mengirim idPelanggan ke metode tukarPoin
-                memberDAO.tukarPoin(memberAktif.getIdMember(), memberAktif.getIdPelanggan(), hadiah);
+                pelangganDAO.tukarPoin(pelangganAktif.getIdPelanggan(), hadiah);
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Penukaran hadiah berhasil!");
 
-                memberAktif = memberDAO.getMemberByPelangganId(memberAktif.getIdPelanggan());
+                // Refresh data pelanggan dari database setelah tukar poin
+                Pelanggan pelangganTerbaru = pelangganDAO.validateLogin(pelangganAktif.getEmailPelanggan(), pelangganAktif.getPasswordPelanggan());
+                if (pelangganTerbaru != null) {
+                    UserSession.getInstance().setLoggedInPelanggan(pelangganTerbaru);
+                    pelangganAktif = pelangganTerbaru; // Update pelanggan aktif di controller ini
+                }
+
                 updatePoinDanRiwayat();
-                loadHadiah(); // Refresh daftar hadiah untuk update status tombol
+                loadHadiah();
             } catch (SQLException e) {
                 showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menukarkan poin.");
                 e.printStackTrace();

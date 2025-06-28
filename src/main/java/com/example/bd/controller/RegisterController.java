@@ -41,7 +41,6 @@ public class RegisterController {
             return;
         }
 
-        // Validasi jika email sudah terdaftar
         if (pelangganDAO.isEmailRegistered(email)) {
             showAlert(Alert.AlertType.ERROR, "Error", "Email ini sudah terdaftar. Silakan gunakan email lain.");
             return;
@@ -50,14 +49,13 @@ public class RegisterController {
         Pelanggan newPelanggan = new Pelanggan();
         newPelanggan.setNamaPelanggan(nama);
         newPelanggan.setEmailPelanggan(email);
-        newPelanggan.setPasswordPelanggan(password); // Ingat untuk hash di aplikasi nyata
+        newPelanggan.setPasswordPelanggan(password);
         newPelanggan.setNoTelpPelanggan(telepon);
         newPelanggan.setAlamatPelanggan(alamat);
 
         try {
-            // Memanggil metode baru yang juga membuat entri di tabel member
-            pelangganDAO.addPelangganAndCreateMember(newPelanggan);
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Registrasi berhasil! Anda sekarang adalah member. Silakan login.");
+            pelangganDAO.addPelanggan(newPelanggan);
+            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Registrasi berhasil! Silakan login.");
             goToLogin(event);
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan data registrasi.");

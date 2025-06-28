@@ -121,17 +121,12 @@ public class PesananDAO {
         String sqlDetail = "INSERT INTO detail_pesanan (id_pesanan, id_menu_harian, jumlah, harga_produk) VALUES (?, ?, ?, ?)";
         String sqlPembayaran = "INSERT INTO pembayaran (id_pesanan, id_metode, total_pembayaran, tanggal_pembayaran) VALUES (?, ?, ?, CURRENT_DATE)";
         String sqlUpdateStok = "UPDATE menu_harian SET stok_menu_harian = stok_menu_harian - ? WHERE id_menu_harian = ?";
-
-        // --- QUERY BARU UNTUK LOGIKA POIN ---
-        String sqlCheckMember = "SELECT COUNT(*) FROM member WHERE id_pelanggan = ?";
-        String sqlCreateMember = "INSERT INTO member (id_pelanggan, nama_member, tanggal_join, jumlah_poin) SELECT id_pelanggan, nama_pelanggan, CURRENT_DATE, 0 FROM pelanggan WHERE id_pelanggan = ?";
-        String sqlUpdatePoin = "UPDATE member SET jumlah_poin = jumlah_poin + ? WHERE id_pelanggan = ?";
+        String sqlUpdatePoin = "UPDATE pelanggan SET jumlah_poin = jumlah_poin + ? WHERE id_pelanggan = ?";
 
         try {
             conn.setAutoCommit(false);
 
             int idPesananBaru;
-            // ... (Blok simpan pesanan, detail, dan pembayaran tidak berubah)
             try (PreparedStatement pstmtPesanan = conn.prepareStatement(sqlPesanan)) {
                 pstmtPesanan.setInt(1, pesanan.getIdPelanggan());
                 pstmtPesanan.setDouble(2, pesanan.getTotalHargaPesanan());
@@ -148,14 +143,12 @@ public class PesananDAO {
             try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail);
                  PreparedStatement pstmtStok = conn.prepareStatement(sqlUpdateStok)) {
                 for (DetailPesanan detail : detailList) {
-                    // Adicionar ao lote de detalhes do pedido
                     pstmtDetail.setInt(1, idPesananBaru);
                     pstmtDetail.setInt(2, detail.getIdMenuHarian());
                     pstmtDetail.setInt(3, detail.getJumlah());
                     pstmtDetail.setDouble(4, detail.getHargaProduk());
                     pstmtDetail.addBatch();
 
-                    // Adicionar ao lote de atualização de estoque
                     pstmtStok.setInt(1, detail.getJumlah());
                     pstmtStok.setInt(2, detail.getIdMenuHarian());
                     pstmtStok.addBatch();
@@ -167,34 +160,18 @@ public class PesananDAO {
             try (PreparedStatement pstmtPembayaran = conn.prepareStatement(sqlPembayaran)) {
                 pstmtPembayaran.setInt(1, idPesananBaru);
                 pstmtPembayaran.setInt(2, pembayaran.getIdMetode());
-                pstmtPembayaran.setDouble(3, pesanan.getTotalHargaPesanan()); // O total do pagamento é o total do pedido
+                pstmtPembayaran.setDouble(3, pesanan.getTotalHargaPesanan());
                 pstmtPembayaran.executeUpdate();
             }
 
-            // --- PERBAIKAN UTAMA DI SINI ---
             int poinDidapat = (int) (pesanan.getTotalHargaPesanan() / RUPIAH_PER_POIN);
             if (poinDidapat > 0) {
-                // 1. Cek apakah member sudah ada
-                try (PreparedStatement checkStmt = conn.prepareStatement(sqlCheckMember)) {
-                    checkStmt.setInt(1, pesanan.getIdPelanggan());
-                    ResultSet rs = checkStmt.executeQuery();
-                    if (rs.next() && rs.getInt(1) == 0) {
-                        // 2. Jika tidak ada, buatkan catatan member baru untuk pengguna lama
-                        try (PreparedStatement createStmt = conn.prepareStatement(sqlCreateMember)) {
-                            createStmt.setInt(1, pesanan.getIdPelanggan());
-                            createStmt.executeUpdate();
-                        }
-                    }
-                }
-
-                // 3. Sekarang, update poin. Catatan member dijamin sudah ada.
                 try (PreparedStatement updatePoinStmt = conn.prepareStatement(sqlUpdatePoin)) {
                     updatePoinStmt.setInt(1, poinDidapat);
                     updatePoinStmt.setInt(2, pesanan.getIdPelanggan());
                     updatePoinStmt.executeUpdate();
                 }
             }
-            // --- AKHIR PERBAIKAN ---
 
             conn.commit();
 

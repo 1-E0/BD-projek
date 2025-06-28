@@ -1,28 +1,20 @@
 package com.example.bd.controller;
 
-import com.example.bd.HelloApplication;
 import com.example.bd.dao.PelangganDAO;
 import com.example.bd.model.Pelanggan;
 import com.example.bd.util.Navigasi;
-import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException; // <-- Tambahkan import SQLException
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -109,23 +101,23 @@ public class ManajemenPelangganController implements Initializable {
             newPelanggan.setAlamatPelanggan(alamat);
             newPelanggan.setNoTelpPelanggan(telepon);
 
-            // --- PERUBAHAN DI SINI ---
+            // --- INI BAGIAN YANG DIPERBAIKI ---
             try {
-                // Mengganti addPelanggan dengan addPelangganAndCreateMember
-                pelangganDAO.addPelangganAndCreateMember(newPelanggan);
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pelanggan baru berhasil ditambahkan dan dijadikan member!");
+                // Mengganti addPelangganAndCreateMember dengan metode addPelanggan yang sudah disederhanakan
+                pelangganDAO.addPelanggan(newPelanggan);
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pelanggan baru berhasil ditambahkan!");
             } catch (SQLException e) {
                 showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan pelanggan baru.");
                 e.printStackTrace();
             }
-            // --- AKHIR PERUBAHAN ---
+            // --- AKHIR PERBAIKAN ---
 
         } else { // Mode Update
             pelangganTerpilih.setNamaPelanggan(nama);
             pelangganTerpilih.setEmailPelanggan(email);
             pelangganTerpilih.setAlamatPelanggan(alamat);
             pelangganTerpilih.setNoTelpPelanggan(telepon);
-            pelangganDAO.updatePelanggan(pelangganTerpilih); // Fungsi update tidak perlu diubah
+            pelangganDAO.updatePelanggan(pelangganTerpilih);
             showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data pelanggan berhasil diupdate!");
         }
 
