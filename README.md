@@ -1,7 +1,9 @@
 -- Hapus tabel-tabel lama jika ada untuk memastikan setup yang bersih
+
 DROP TABLE IF EXISTS laporan_performa, pelanggan_voucher, voucher, favorit_pelanggan, penukaran_hadiah, hadiah, member, detail_pesanan, pembayaran, pengiriman, review, status_pesanan, menu_harian, cabang_diskon, diskon, admin, staff, pesanan, menu, kategori, cabang, kota, metode_pembayaran, pelanggan CASCADE;
 
 -- Tabel PELANGGAN
+
 CREATE TABLE pelanggan (
     id_pelanggan SERIAL PRIMARY KEY,
     nama_pelanggan VARCHAR(50) NOT NULL,
@@ -14,12 +16,14 @@ CREATE TABLE pelanggan (
     CONSTRAINT check_poin_tidak_negatif CHECK (jumlah_poin >= 0)
 );
 -- Tabel KOTA
+
 CREATE TABLE kota (
     id_kota SERIAL PRIMARY KEY,
     nama_kota VARCHAR(50) NOT NULL
 );
 
 -- Tabel CABANG
+
 CREATE TABLE cabang (
     id_cabang SERIAL PRIMARY KEY,
     id_kota INT REFERENCES kota(id_kota) ON DELETE SET NULL,
@@ -28,6 +32,7 @@ CREATE TABLE cabang (
 );
 
 -- Tabel PESANAN
+
 CREATE TABLE pesanan (
     id_pesanan SERIAL PRIMARY KEY,
     id_pelanggan INT REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE,
@@ -38,12 +43,14 @@ CREATE TABLE pesanan (
 );
 
 -- Tabel KATEGORI
+
 CREATE TABLE kategori (
     id_kategori SERIAL PRIMARY KEY,
     nama_kategori VARCHAR(50) NOT NULL
 );
 
 -- Tabel MENU
+
 CREATE TABLE menu (
     id_menu SERIAL PRIMARY KEY,
     id_kategori INT REFERENCES kategori(id_kategori) ON DELETE SET NULL,
@@ -51,7 +58,10 @@ CREATE TABLE menu (
     harga_menu NUMERIC(12, 2) NOT NULL
 );
 
+
+
 -- Tabel MENU_HARIAN
+
 CREATE TABLE menu_harian (
     id_menu_harian SERIAL PRIMARY KEY,
     id_menu INT REFERENCES menu(id_menu) ON DELETE CASCADE,
@@ -61,6 +71,7 @@ CREATE TABLE menu_harian (
 );
 
 -- Tabel DETAIL_PESANAN
+
 CREATE TABLE detail_pesanan (
     id_detail_pesanan SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -71,12 +82,14 @@ CREATE TABLE detail_pesanan (
 );
 
 -- Tabel METODE_PEMBAYARAN
+
 CREATE TABLE metode_pembayaran (
     id_metode SERIAL PRIMARY KEY,
     cara_metode VARCHAR(50) NOT NULL
 );
 
 -- Tabel PEMBAYARAN
+
 CREATE TABLE pembayaran (
     id_pembayaran SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -86,6 +99,7 @@ CREATE TABLE pembayaran (
 );
 
 -- Tabel STAFF
+
 CREATE TABLE staff (
     id_staff SERIAL PRIMARY KEY,
     id_cabang INT REFERENCES cabang(id_cabang) ON DELETE SET NULL,
@@ -97,6 +111,7 @@ CREATE TABLE staff (
 );
 
 -- Tabel PENGIRIMAN
+
 CREATE TABLE pengiriman (
     id_pengiriman SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -107,6 +122,7 @@ CREATE TABLE pengiriman (
 );
 
 -- Tabel REVIEW
+
 CREATE TABLE review (
     id_review SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -117,6 +133,7 @@ CREATE TABLE review (
 );
 
 -- Tabel ADMIN
+
 CREATE TABLE admin (
     id_admin SERIAL PRIMARY KEY,
     id_cabang INT REFERENCES cabang(id_cabang) ON DELETE SET NULL,
@@ -129,6 +146,7 @@ CREATE TABLE admin (
 );
 
 -- Tabel DISKON
+
 CREATE TABLE diskon (
     id_diskon SERIAL PRIMARY KEY,
     nama_diskon VARCHAR(50) NOT NULL,
@@ -138,7 +156,11 @@ CREATE TABLE diskon (
     tanggal_akhir_diskon DATE NOT NULL
 );
 
+
+
+
 -- Tabel CABANG_DISKON
+
 CREATE TABLE cabang_diskon (
     id_cabang_diskon SERIAL PRIMARY KEY,
     id_diskon INT REFERENCES diskon(id_diskon) ON DELETE CASCADE,
@@ -147,6 +169,7 @@ CREATE TABLE cabang_diskon (
 );
 
 -- Tabel FAVORIT_PELANGGAN
+
 CREATE TABLE favorit_pelanggan (
     id_pelanggan INT NOT NULL REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE,
     id_menu INT NOT NULL REFERENCES menu(id_menu) ON DELETE CASCADE,
@@ -154,6 +177,7 @@ CREATE TABLE favorit_pelanggan (
 );
 
 -- Tabel VOUCHER
+
 CREATE TABLE voucher (
     id_voucher SERIAL PRIMARY KEY,
     nama_voucher VARCHAR(255) NOT NULL,
@@ -164,6 +188,7 @@ CREATE TABLE voucher (
 );
 
 -- Tabel PELANGGAN_VOUCHER
+
 CREATE TABLE pelanggan_voucher (
     id_pelanggan_voucher SERIAL PRIMARY KEY,
     id_pelanggan INT NOT NULL REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE,
@@ -175,6 +200,7 @@ CREATE TABLE pelanggan_voucher (
 );
 
 -- Tabel LAPORAN_PERFORMA
+
 CREATE TABLE laporan_performa (
     id_laporan_performa SERIAL PRIMARY KEY,
     id_cabang INT REFERENCES cabang(id_cabang) ON DELETE SET NULL,
@@ -185,6 +211,7 @@ CREATE TABLE laporan_performa (
 );
 
 -- Data Awal untuk Testing
+
 INSERT INTO kota (nama_kota) VALUES
 ('Ambon'), ('Balikpapan'), ('Banda Aceh'), ('Bandar Lampung'), ('Bandung'), ('Banjar'), ('Banjarbaru'), ('Banjarmasin'), ('Batam'), ('Batu'),
 ('Bau-Bau'), ('Bekasi'), ('Bengkulu'), ('Bima'), ('Binjai'), ('Bitung'), ('Blitar'), ('Bogor'), ('Bontang'), ('Bukittinggi'),
@@ -207,6 +234,7 @@ INSERT INTO voucher (nama_voucher, deskripsi, potongan_harga, poin_dibutuhkan, a
 ('Voucher Lawas', 'Voucher ini sudah tidak aktif.', 1000, 10, false);
 
 -- Data Akun Awal
+
 INSERT INTO admin (nama_admin, email_admin, password_admin, jenis_admin, status_admin) VALUES
 ('Super Admin', 'admin@gmail.com', '1', 'Super', 'Aktif');
 
