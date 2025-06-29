@@ -71,4 +71,29 @@ public class StaffDAO {
             e.printStackTrace();
         }
     }
+    public List<Staff> getStaffByCabang(int idCabang) {
+        List<Staff> staffList = new ArrayList<>();
+        String sql = "SELECT s.*, c.alamat_cabang as nama_cabang FROM staff s " +
+                "LEFT JOIN cabang c ON s.id_cabang = c.id_cabang " +
+                "WHERE s.id_cabang = ? ORDER BY s.id_staff ASC";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCabang);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Staff s = new Staff();
+                s.setIdStaff(rs.getInt("id_staff"));
+                s.setIdCabang(rs.getInt("id_cabang"));
+                s.setNamaStaff(rs.getString("nama_staff"));
+                s.setUmurStaff(rs.getInt("umur_staff"));
+                s.setJabatanStaff(rs.getString("jabatan_staff"));
+                s.setAlamatStaff(rs.getString("alamat_staff"));
+                s.setNoTelpStaff(rs.getString("no_telp_staff"));
+                s.setNamaCabang(rs.getString("nama_cabang"));
+                staffList.add(s);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return staffList;
+    }
 }

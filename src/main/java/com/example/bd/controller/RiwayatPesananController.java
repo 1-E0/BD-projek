@@ -43,7 +43,7 @@ public class RiwayatPesananController implements Initializable {
 
     private void loadPesananData() {
         ObservableList<Pesanan> pesananList = FXCollections.observableArrayList(
-                pesananDAO.getPesananByPelanggan(pelangganLogin.getIdPelanggan())
+                pesananDAO.getPesananByPelanggan(pelangganLogin.getIdPelanggan()) // Panggilan metode ada di sini
         );
         pesananListView.setItems(pesananList);
     }

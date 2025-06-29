@@ -49,7 +49,7 @@ public class ManajemenMenuHarianController implements Initializable {
         setupTables();
         populateControls();
         addListeners();
-
+        loadMenuHarianTable();
 
         Admin loggedInAdmin = UserSession.getInstance().getLoggedInAdmin();
         if (loggedInAdmin != null && "Cabang".equalsIgnoreCase(loggedInAdmin.getJenisAdmin())) {
@@ -61,7 +61,6 @@ public class ManajemenMenuHarianController implements Initializable {
             }
             comboCabang.setDisable(true); // Kunci pilihan cabang
         }
-        loadMenuHarianTable();
     }
 
     private void setupTables() {

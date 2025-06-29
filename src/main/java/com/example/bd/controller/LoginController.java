@@ -33,8 +33,9 @@ public class LoginController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        comboPeran.setItems(FXCollections.observableArrayList("Admin", "Pelanggan"));
-        comboPeran.setValue("Pelanggan");
+        // --- PERUBAHAN 1: Ganti item pada ComboBox ---
+        comboPeran.setItems(FXCollections.observableArrayList("Pelanggan", "Admin Cabang", "Admin Pusat"));
+        comboPeran.setValue("Pelanggan"); // Set default ke Pelanggan
         txtPasswordVisible.textProperty().bindBidirectional(txtPasswordHidden.textProperty());
     }
 
@@ -66,31 +67,54 @@ public class LoginController implements Initializable {
             return;
         }
 
-        if (peran.equals("Admin")) {
-            Admin admin = adminDAO.validateLogin(email, password);
-            if (admin != null) {
+        // --- PERUBAHAN 2: Logika login dipecah menjadi tiga kasus ---
+        switch (peran) {
+            case "Pelanggan":
+                loginSebagaiPelanggan(event, email, password);
+                break;
+            case "Admin Pusat":
+            case "Admin Cabang":
+                loginSebagaiAdmin(event, email, password, peran);
+                break;
+        }
+    }
 
-                // Gunakan Navigasi.switchScene untuk transisi maju
-                Navigasi.switchScene(event, "DashboardView.fxml");
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Login Gagal", "Email atau password admin salah.");
-            }
-        } else if (peran.equals("Pelanggan")) {
-            Pelanggan pelanggan = pelangganDAO.validateLogin(email, password);
-            if (pelanggan != null) {
-                UserSession.getInstance().setLoggedInPelanggan(pelanggan);
+    private void loginSebagaiPelanggan(ActionEvent event, String email, String password) {
+        Pelanggan pelanggan = pelangganDAO.validateLogin(email, password);
+        if (pelanggan != null) {
+            UserSession.getInstance().setLoggedInPelanggan(pelanggan);
+            UserSession.getInstance().setLoggedInAdmin(null);
+            Navigasi.switchScene(event, "PelangganDashboardView.fxml");
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Login Gagal", "Email atau password pelanggan salah.");
+        }
+    }
 
-                // Gunakan Navigasi.switchScene untuk transisi maju
-                Navigasi.switchScene(event, "PelangganDashboardView.fxml");
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Login Gagal", "Email atau password pelanggan salah.");
-            }
+    private void loginSebagaiAdmin(ActionEvent event, String email, String password, String peranDipilih) {
+        Admin admin = adminDAO.validateLogin(email, password);
+
+        if (admin == null) {
+            showAlert(Alert.AlertType.ERROR, "Login Gagal", "Email atau password admin salah.");
+            return;
+        }
+
+        // Validasi tambahan: Cocokkan peran yang dipilih dengan data di database
+        String peranDatabase = admin.getJenisAdmin(); // Misal: "Pusat" atau "Cabang"
+        boolean peranCocok = (peranDipilih.equals("Admin Pusat") && peranDatabase.equalsIgnoreCase("Pusat")) ||
+                (peranDipilih.equals("Admin Cabang") && peranDatabase.equalsIgnoreCase("Cabang"));
+
+        if (peranCocok) {
+            UserSession.getInstance().setLoggedInAdmin(admin);
+            UserSession.getInstance().setLoggedInPelanggan(null);
+            Navigasi.switchScene(event, "DashboardView.fxml");
+        } else {
+            // Jika akun ada tapi perannya salah (misal: login sebagai Admin Pusat dengan akun Admin Cabang)
+            showAlert(Alert.AlertType.ERROR, "Login Gagal", "Peran yang Anda pilih (" + peranDipilih + ") tidak sesuai dengan akun ini.");
         }
     }
 
     @FXML
     void goToRegister(ActionEvent event) {
-        // Ini juga transisi maju
         Navigasi.switchScene(event, "RegisterView.fxml");
     }
 

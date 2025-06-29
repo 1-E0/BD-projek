@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="720.0" prefWidth="1280.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.DashboardController">
+    <VBox alignment="CENTER" layoutX="50.0" layoutY="30.0" spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0">
+        <HBox alignment="CENTER_LEFT" styleClass="admin-dashboard-header">
+            <Button onAction="#handleLogout" styleClass="delete-button" text="Logout">
+                <graphic>
+                    <FontAwesomeIconView fill="WHITE" glyphName="SIGN_OUT" />
+                </graphic>
+            </Button>
+
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" style="-fx-padding: 0 0 0 20px;">
+                <FontAwesomeIconView glyphName="GEARS" size="2.5em" styleClass="title-label" />
+                <VBox style="-fx-padding: 0 0 0 15px;">
+                    <Label styleClass="title-label" text="Admin Dashboard" />
+                    <Label styleClass="sub-title-label" text="Pusat Manajemen Aplikasi Catering" />
+                </VBox>
+            </HBox>
+        </HBox>
+
+        <GridPane fx:id="gridPane" hgap="25.0" styleClass="admin-dashboard-grid" vgap="25.0" VBox.vgrow="ALWAYS">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenMenu" styleClass="admin-dashboard-card-button" text="Manajemen Menu" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CUTLERY" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenKategori" styleClass="admin-dashboard-card-button" text="Manajemen Kategori" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="BOOKMARK" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenPelanggan" styleClass="admin-dashboard-card-button" text="Manajemen Pelanggan" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="USERS" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenStaff" styleClass="admin-dashboard-card-button" text="Manajemen Staff" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="USER_SECRET" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenCabang" styleClass="admin-dashboard-card-button" text="Manajemen Cabang" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="BUILDING" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenPesanan" styleClass="admin-dashboard-card-button" text="Manajemen Pesanan" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CLIPBOARD" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenDiskon" styleClass="admin-dashboard-card-button" text="Manajemen Diskon" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="PERCENT" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenReview" styleClass="admin-dashboard-card-button" text="Lihat Review" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="STAR" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenMetodePembayaran" styleClass="admin-dashboard-card-button" text="Metode Pembayaran" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CREDIT_CARD" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnManajemenMenuHarian" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" onAction="#goToManajemenMenuHarian" styleClass="admin-dashboard-card-button" text="Manajemen Menu Harian" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CALENDAR_PLUS_ALT" size="3em" styleClass="admin-dashboard-icon" />
+                    </graphic>
+                </Button>
+
+                <Button onAction="#goToManajemenVoucher" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" styleClass="admin-dashboard-card-button" text="Manajemen Voucher" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TICKET" styleClass="admin-dashboard-icon" size="3em" />
+                    </graphic>
+                </Button>
+
+                <!-- TOMBOL BARU DITAMBAHKAN DI SINI -->
+                <Button onAction="#goToLaporanPerforma" contentDisplay="TOP" maxHeight="Infinity" maxWidth="Infinity" styleClass="admin-dashboard-card-button" text="Laporan Performa" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="LINE_CHART" styleClass="admin-dashboard-icon" size="3em" />
+                    </graphic>
+                </Button>
+
+            </children>
+        </GridPane>
+    </VBox>
+</AnchorPane>

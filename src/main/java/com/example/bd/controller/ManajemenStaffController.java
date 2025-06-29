@@ -2,9 +2,11 @@ package com.example.bd.controller;
 
 import com.example.bd.dao.CabangDAO;
 import com.example.bd.dao.StaffDAO;
+import com.example.bd.model.Admin;
 import com.example.bd.model.Cabang;
 import com.example.bd.model.Staff;
 import com.example.bd.util.Navigasi;
+import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -49,6 +51,18 @@ public class ManajemenStaffController implements Initializable {
         populateCabangComboBox();
         setupTableSelectionListener();
         loadStaffData();
+
+        // --- Tambahkan logika ini ---
+        Admin loggedInAdmin = UserSession.getInstance().getLoggedInAdmin();
+        if (loggedInAdmin != null && "Cabang".equalsIgnoreCase(loggedInAdmin.getJenisAdmin())) {
+            for (Cabang c : comboCabang.getItems()) {
+                if (c.getIdCabang() == loggedInAdmin.getIdCabang()) {
+                    comboCabang.setValue(c);
+                    break;
+                }
+            }
+            comboCabang.setDisable(true);
+        }
     }
 
     private void setupTableColumns() {
@@ -62,7 +76,12 @@ public class ManajemenStaffController implements Initializable {
 
     private void loadStaffData() {
         staffList.clear();
-        staffList.addAll(staffDAO.getAllStaff());
+        Admin loggedInAdmin = UserSession.getInstance().getLoggedInAdmin();
+        if (loggedInAdmin != null && "Cabang".equalsIgnoreCase(loggedInAdmin.getJenisAdmin())) {
+            staffList.addAll(staffDAO.getStaffByCabang(loggedInAdmin.getIdCabang()));
+        } else {
+            staffList.addAll(staffDAO.getAllStaff());
+        }
         staffTable.setItems(staffList);
     }
 

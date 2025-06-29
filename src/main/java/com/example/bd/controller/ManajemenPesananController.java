@@ -2,8 +2,10 @@ package com.example.bd.controller;
 
 import com.example.bd.HelloApplication;
 import com.example.bd.dao.PesananDAO;
+import com.example.bd.model.Admin;
 import com.example.bd.model.Pesanan;
 import com.example.bd.util.Navigasi;
+import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -57,7 +59,16 @@ public class ManajemenPesananController implements Initializable {
     }
 
     private void loadPesananData() {
-        ObservableList<Pesanan> pesananList = FXCollections.observableArrayList(pesananDAO.getAllPesanan());
+        Admin loggedInAdmin = UserSession.getInstance().getLoggedInAdmin();
+        ObservableList<Pesanan> pesananList;
+
+        if (loggedInAdmin != null && "Cabang".equalsIgnoreCase(loggedInAdmin.getJenisAdmin())) {
+            // Admin Cabang hanya melihat pesanan cabangnya
+            pesananList = FXCollections.observableArrayList(pesananDAO.getPesananByCabang(loggedInAdmin.getIdCabang()));
+        } else {
+            // Admin Pusat melihat semua pesanan
+            pesananList = FXCollections.observableArrayList(pesananDAO.getAllPesanan());
+        }
         pesananTable.setItems(pesananList);
     }
 

@@ -12,13 +12,19 @@ import java.util.List;
 public class PesananDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
-    private static final double RUPIAH_PER_POIN = 10000.0;
+    private static final double RUPIAH_PER_POIN = 10000.0; // Rp 10.000 untuk 1 poin
 
+    /**
+     * Mengambil riwayat pesanan untuk satu pelanggan spesifik.
+     * Digunakan di halaman Riwayat Pesanan pelanggan.
+     * @param idPelanggan ID pelanggan yang login.
+     * @return Daftar pesanan milik pelanggan tersebut.
+     */
     public List<Pesanan> getPesananByPelanggan(int idPelanggan) {
         List<Pesanan> pesananList = new ArrayList<>();
         String sql = "SELECT p.*, png.status_pengiriman FROM pesanan p " +
                 "LEFT JOIN pengiriman png ON p.id_pesanan = png.id_pesanan " +
-                "WHERE p.id_pelanggan = ? ORDER BY p.tanggal_pesanan DESC";
+                "WHERE p.id_pelanggan = ? ORDER BY p.tanggal_pesanan DESC, p.id_pesanan DESC";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPelanggan);
             ResultSet rs = pstmt.executeQuery();
@@ -39,6 +45,81 @@ public class PesananDAO {
         return pesananList;
     }
 
+    /**
+     * Mengambil semua pesanan dari semua cabang.
+     * Digunakan oleh Admin Pusat di halaman Manajemen Pesanan.
+     * @return Daftar semua pesanan.
+     */
+    public List<Pesanan> getAllPesanan() {
+        List<Pesanan> pesananList = new ArrayList<>();
+        String sql = "SELECT p.*, pl.nama_pelanggan, png.status_pengiriman " +
+                "FROM pesanan p " +
+                "JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan " +
+                "LEFT JOIN pengiriman png ON p.id_pesanan = png.id_pesanan " +
+                "ORDER BY p.tanggal_pesanan DESC, p.id_pesanan DESC";
+
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Pesanan p = new Pesanan();
+                p.setIdPesanan(rs.getInt("id_pesanan"));
+                p.setIdPelanggan(rs.getInt("id_pelanggan"));
+                p.setTanggalPesanan(rs.getDate("tanggal_pesanan"));
+                p.setTotalHargaPesanan(rs.getDouble("total_harga_pesanan"));
+                p.setStatusPembayaran(rs.getString("status_pembayaran"));
+                p.setAlamatTujuan(rs.getString("alamat_tujuan"));
+                p.setNamaPelanggan(rs.getString("nama_pelanggan"));
+                p.setStatusPengiriman(rs.getString("status_pengiriman"));
+                pesananList.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pesananList;
+    }
+
+    /**
+     * Mengambil pesanan yang relevan untuk satu cabang spesifik.
+     * Digunakan oleh Admin Cabang di halaman Manajemen Pesanan.
+     * @param idCabang ID cabang dari admin yang login.
+     * @return Daftar pesanan yang ditangani oleh cabang tersebut.
+     */
+    public List<Pesanan> getPesananByCabang(int idCabang) {
+        List<Pesanan> pesananList = new ArrayList<>();
+        String sql = "SELECT DISTINCT p.*, pl.nama_pelanggan, png.status_pengiriman " +
+                "FROM pesanan p " +
+                "JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan " +
+                "JOIN detail_pesanan dp ON p.id_pesanan = dp.id_pesanan " +
+                "JOIN menu_harian mh ON dp.id_menu_harian = mh.id_menu_harian " +
+                "LEFT JOIN pengiriman png ON p.id_pesanan = png.id_pesanan " +
+                "WHERE mh.id_cabang = ? " +
+                "ORDER BY p.tanggal_pesanan DESC, p.id_pesanan DESC";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCabang);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Pesanan p = new Pesanan();
+                p.setIdPesanan(rs.getInt("id_pesanan"));
+                p.setIdPelanggan(rs.getInt("id_pelanggan"));
+                p.setTanggalPesanan(rs.getDate("tanggal_pesanan"));
+                p.setTotalHargaPesanan(rs.getDouble("total_harga_pesanan"));
+                p.setStatusPembayaran(rs.getString("status_pembayaran"));
+                p.setAlamatTujuan(rs.getString("alamat_tujuan"));
+                p.setNamaPelanggan(rs.getString("nama_pelanggan"));
+                p.setStatusPengiriman(rs.getString("status_pengiriman"));
+                pesananList.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pesananList;
+    }
+
+    /**
+     * Mengambil item-item detail dari sebuah pesanan.
+     * @param idPesanan ID pesanan yang ingin dilihat detailnya.
+     * @return Daftar item detail dari pesanan tersebut.
+     */
     public List<DetailPesanan> getDetailByPesanan(int idPesanan) {
         List<DetailPesanan> detailList = new ArrayList<>();
         String sql = "SELECT dp.*, m.nama_menu, mh.id_menu FROM detail_pesanan dp " +
@@ -66,54 +147,14 @@ public class PesananDAO {
         return detailList;
     }
 
-    public List<Pesanan> getAllPesanan() {
-        List<Pesanan> pesananList = new ArrayList<>();
-        String sql = "SELECT p.*, pl.nama_pelanggan, png.status_pengiriman " +
-                "FROM pesanan p " +
-                "JOIN pelanggan pl ON p.id_pelanggan = pl.id_pelanggan " +
-                "LEFT JOIN pengiriman png ON p.id_pesanan = png.id_pesanan " +
-                "ORDER BY p.tanggal_pesanan DESC";
-
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                Pesanan p = new Pesanan();
-                p.setIdPesanan(rs.getInt("id_pesanan"));
-                p.setIdPelanggan(rs.getInt("id_pelanggan"));
-                p.setTanggalPesanan(rs.getDate("tanggal_pesanan"));
-                p.setTotalHargaPesanan(rs.getDouble("total_harga_pesanan"));
-                p.setStatusPembayaran(rs.getString("status_pembayaran"));
-                p.setAlamatTujuan(rs.getString("alamat_tujuan"));
-                p.setNamaPelanggan(rs.getString("nama_pelanggan"));
-                p.setStatusPengiriman(rs.getString("status_pengiriman"));
-                pesananList.add(p);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return pesananList;
-    }
-
-    public void updateStatusPembayaran(int idPesanan, String status) {
-        String sql = "UPDATE pesanan SET status_pembayaran = ? WHERE id_pesanan = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, status);
-            pstmt.setInt(2, idPesanan);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public void updateAlamatTujuan(int idPesanan, String alamatBaru) {
-        String sql = "UPDATE pesanan SET alamat_tujuan = ? WHERE id_pesanan = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, alamatBaru);
-            pstmt.setInt(2, idPesanan);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Menyimpan seluruh data pesanan dalam satu transaksi database.
+     * Ini mencakup pembuatan pesanan, detail pesanan, pembayaran, pengurangan stok, dan penambahan poin.
+     * @param pesanan Objek pesanan utama.
+     * @param detailList Daftar item detail pesanan.
+     * @param pembayaran Objek pembayaran.
+     * @throws SQLException Jika terjadi kegagalan transaksi.
+     */
     public void simpanPesananLengkap(Pesanan pesanan, List<DetailPesanan> detailList, Pembayaran pembayaran) throws SQLException {
         String sqlPesanan = "INSERT INTO pesanan (id_pelanggan, tanggal_pesanan, total_harga_pesanan, status_pembayaran, alamat_tujuan) VALUES (?, CURRENT_DATE, ?, ?, ?) RETURNING id_pesanan";
         String sqlDetail = "INSERT INTO detail_pesanan (id_pesanan, id_menu_harian, jumlah, harga_produk) VALUES (?, ?, ?, ?)";
@@ -122,8 +163,9 @@ public class PesananDAO {
         String sqlUpdatePoin = "UPDATE pelanggan SET jumlah_poin = jumlah_poin + ? WHERE id_pelanggan = ?";
 
         try {
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Memulai transaksi
 
+            // 1. Simpan pesanan utama dan dapatkan ID-nya
             int idPesananBaru;
             try (PreparedStatement pstmtPesanan = conn.prepareStatement(sqlPesanan)) {
                 pstmtPesanan.setInt(1, pesanan.getIdPelanggan());
@@ -134,27 +176,31 @@ public class PesananDAO {
                 if (rs.next()) {
                     idPesananBaru = rs.getInt(1);
                 } else {
-                    throw new SQLException("Gagal membuat pesanan.");
+                    throw new SQLException("Gagal membuat pesanan, tidak mendapatkan ID.");
                 }
             }
 
+            // 2. Simpan detail pesanan dan kurangi stok
             try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail);
                  PreparedStatement pstmtStok = conn.prepareStatement(sqlUpdateStok)) {
                 for (DetailPesanan detail : detailList) {
+                    // Tambahkan detail ke batch
                     pstmtDetail.setInt(1, idPesananBaru);
                     pstmtDetail.setInt(2, detail.getIdMenuHarian());
                     pstmtDetail.setInt(3, detail.getJumlah());
                     pstmtDetail.setDouble(4, detail.getHargaProduk());
                     pstmtDetail.addBatch();
 
+                    // Tambahkan update stok ke batch
                     pstmtStok.setInt(1, detail.getJumlah());
                     pstmtStok.setInt(2, detail.getIdMenuHarian());
                     pstmtStok.addBatch();
                 }
-                pstmtDetail.executeBatch();
-                pstmtStok.executeBatch();
+                pstmtDetail.executeBatch(); // Eksekusi batch untuk detail
+                pstmtStok.executeBatch();   // Eksekusi batch untuk stok
             }
 
+            // 3. Simpan data pembayaran
             try (PreparedStatement pstmtPembayaran = conn.prepareStatement(sqlPembayaran)) {
                 pstmtPembayaran.setInt(1, idPesananBaru);
                 pstmtPembayaran.setInt(2, pembayaran.getIdMetode());
@@ -162,6 +208,7 @@ public class PesananDAO {
                 pstmtPembayaran.executeUpdate();
             }
 
+            // 4. Tambahkan poin untuk pelanggan
             int poinDidapat = (int) (pesanan.getTotalHargaPesanan() / RUPIAH_PER_POIN);
             if (poinDidapat > 0) {
                 try (PreparedStatement updatePoinStmt = conn.prepareStatement(sqlUpdatePoin)) {
@@ -171,13 +218,45 @@ public class PesananDAO {
                 }
             }
 
-            conn.commit();
+            conn.commit(); // Jika semua berhasil, selesaikan transaksi
 
         } catch (SQLException e) {
-            conn.rollback();
-            throw e;
+            conn.rollback(); // Jika ada kesalahan, batalkan semua perubahan
+            throw e; // Lemparkan error untuk ditangani oleh controller
         } finally {
-            conn.setAutoCommit(true);
+            conn.setAutoCommit(true); // Kembalikan koneksi ke mode auto-commit
+        }
+    }
+
+    /**
+     * Memperbarui status pembayaran sebuah pesanan.
+     * @param idPesanan ID pesanan yang akan diupdate.
+     * @param status Status baru ('Lunas', 'Belum Lunas', 'Dibatalkan').
+     */
+    public void updateStatusPembayaran(int idPesanan, String status) {
+        String sql = "UPDATE pesanan SET status_pembayaran = ? WHERE id_pesanan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, idPesanan);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Memperbarui alamat tujuan pengiriman sebuah pesanan.
+     * @param idPesanan ID pesanan yang akan diupdate.
+     * @param alamatBaru Alamat baru.
+     */
+    public void updateAlamatTujuan(int idPesanan, String alamatBaru) {
+        String sql = "UPDATE pesanan SET alamat_tujuan = ? WHERE id_pesanan = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, alamatBaru);
+            pstmt.setInt(2, idPesanan);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
