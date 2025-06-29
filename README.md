@@ -1,8 +1,32 @@
--- Hapus tabel-tabel lama jika ada untuk memastikan setup yang bersih
 
+
+-- Hapus tabel-tabel lama jika ada untuk memastikan setup yang bersih
 DROP TABLE IF EXISTS laporan_performa, pelanggan_voucher, voucher, favorit_pelanggan, penukaran_hadiah, hadiah, member, detail_pesanan, pembayaran, pengiriman, review, status_pesanan, menu_harian, cabang_diskon, diskon, admin, staff, pesanan, menu, kategori, cabang, kota, metode_pembayaran, pelanggan CASCADE;
 
+-- =================================================================
+-- BAGIAN 1: PEMBUATAN STRUKTUR TABEL (CREATE TABLES)
+-- =================================================================
+
+-- Tabel KOTA
+
+
+CREATE TABLE kota (
+    id_kota SERIAL PRIMARY KEY,
+    nama_kota VARCHAR(50) NOT NULL
+);
+
+-- Tabel CABANG
+
+
+CREATE TABLE cabang (
+    id_cabang SERIAL PRIMARY KEY,
+    id_kota INT REFERENCES kota(id_kota) ON DELETE SET NULL,
+    alamat_cabang VARCHAR(100) NOT NULL,
+    no_telp_cabang VARCHAR(15)
+);
+
 -- Tabel PELANGGAN
+
 
 CREATE TABLE pelanggan (
     id_pelanggan SERIAL PRIMARY KEY,
@@ -15,23 +39,9 @@ CREATE TABLE pelanggan (
     tanggal_join DATE,
     CONSTRAINT check_poin_tidak_negatif CHECK (jumlah_poin >= 0)
 );
--- Tabel KOTA
-
-CREATE TABLE kota (
-    id_kota SERIAL PRIMARY KEY,
-    nama_kota VARCHAR(50) NOT NULL
-);
-
--- Tabel CABANG
-
-CREATE TABLE cabang (
-    id_cabang SERIAL PRIMARY KEY,
-    id_kota INT REFERENCES kota(id_kota) ON DELETE SET NULL,
-    alamat_cabang VARCHAR(100) NOT NULL,
-    no_telp_cabang VARCHAR(15)
-);
 
 -- Tabel PESANAN
+
 
 CREATE TABLE pesanan (
     id_pesanan SERIAL PRIMARY KEY,
@@ -44,12 +54,14 @@ CREATE TABLE pesanan (
 
 -- Tabel KATEGORI
 
+
 CREATE TABLE kategori (
     id_kategori SERIAL PRIMARY KEY,
     nama_kategori VARCHAR(50) NOT NULL
 );
 
 -- Tabel MENU
+
 
 CREATE TABLE menu (
     id_menu SERIAL PRIMARY KEY,
@@ -58,9 +70,8 @@ CREATE TABLE menu (
     harga_menu NUMERIC(12, 2) NOT NULL
 );
 
-
-
 -- Tabel MENU_HARIAN
+
 
 CREATE TABLE menu_harian (
     id_menu_harian SERIAL PRIMARY KEY,
@@ -72,6 +83,7 @@ CREATE TABLE menu_harian (
 
 -- Tabel DETAIL_PESANAN
 
+
 CREATE TABLE detail_pesanan (
     id_detail_pesanan SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -81,7 +93,10 @@ CREATE TABLE detail_pesanan (
     catatan VARCHAR(100)
 );
 
+
+
 -- Tabel METODE_PEMBAYARAN
+
 
 CREATE TABLE metode_pembayaran (
     id_metode SERIAL PRIMARY KEY,
@@ -89,6 +104,7 @@ CREATE TABLE metode_pembayaran (
 );
 
 -- Tabel PEMBAYARAN
+
 
 CREATE TABLE pembayaran (
     id_pembayaran SERIAL PRIMARY KEY,
@@ -99,6 +115,7 @@ CREATE TABLE pembayaran (
 );
 
 -- Tabel STAFF
+
 
 CREATE TABLE staff (
     id_staff SERIAL PRIMARY KEY,
@@ -112,6 +129,7 @@ CREATE TABLE staff (
 
 -- Tabel PENGIRIMAN
 
+
 CREATE TABLE pengiriman (
     id_pengiriman SERIAL PRIMARY KEY,
     id_pesanan INT REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
@@ -122,6 +140,7 @@ CREATE TABLE pengiriman (
 );
 
 -- Tabel REVIEW
+
 
 CREATE TABLE review (
     id_review SERIAL PRIMARY KEY,
@@ -134,10 +153,11 @@ CREATE TABLE review (
 
 -- Tabel ADMIN
 
+
 CREATE TABLE admin (
     id_admin SERIAL PRIMARY KEY,
     id_cabang INT REFERENCES cabang(id_cabang) ON DELETE SET NULL,
-    jenis_admin VARCHAR(50),
+    jenis_admin VARCHAR(50) CHECK (jenis_admin IN ('Pusat', 'Cabang')),
     nama_admin VARCHAR(50) NOT NULL,
     email_admin VARCHAR(50) UNIQUE NOT NULL,
     password_admin VARCHAR(255) NOT NULL,
@@ -146,6 +166,7 @@ CREATE TABLE admin (
 );
 
 -- Tabel DISKON
+
 
 CREATE TABLE diskon (
     id_diskon SERIAL PRIMARY KEY,
@@ -156,10 +177,8 @@ CREATE TABLE diskon (
     tanggal_akhir_diskon DATE NOT NULL
 );
 
-
-
-
 -- Tabel CABANG_DISKON
+
 
 CREATE TABLE cabang_diskon (
     id_cabang_diskon SERIAL PRIMARY KEY,
@@ -170,6 +189,7 @@ CREATE TABLE cabang_diskon (
 
 -- Tabel FAVORIT_PELANGGAN
 
+
 CREATE TABLE favorit_pelanggan (
     id_pelanggan INT NOT NULL REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE,
     id_menu INT NOT NULL REFERENCES menu(id_menu) ON DELETE CASCADE,
@@ -177,6 +197,7 @@ CREATE TABLE favorit_pelanggan (
 );
 
 -- Tabel VOUCHER
+
 
 CREATE TABLE voucher (
     id_voucher SERIAL PRIMARY KEY,
@@ -188,6 +209,7 @@ CREATE TABLE voucher (
 );
 
 -- Tabel PELANGGAN_VOUCHER
+
 
 CREATE TABLE pelanggan_voucher (
     id_pelanggan_voucher SERIAL PRIMARY KEY,
@@ -201,6 +223,7 @@ CREATE TABLE pelanggan_voucher (
 
 -- Tabel LAPORAN_PERFORMA
 
+
 CREATE TABLE laporan_performa (
     id_laporan_performa SERIAL PRIMARY KEY,
     id_cabang INT REFERENCES cabang(id_cabang) ON DELETE SET NULL,
@@ -210,33 +233,83 @@ CREATE TABLE laporan_performa (
     tahun INT NOT NULL
 );
 
--- Data Awal untuk Testing
+-- =================================================================
+-- BAGIAN 2: PENGISIAN DATA AWAL (INITIAL DATA)
+-- =================================================================
 
-INSERT INTO kota (nama_kota) VALUES
-('Ambon'), ('Balikpapan'), ('Banda Aceh'), ('Bandar Lampung'), ('Bandung'), ('Banjar'), ('Banjarbaru'), ('Banjarmasin'), ('Batam'), ('Batu'),
-('Bau-Bau'), ('Bekasi'), ('Bengkulu'), ('Bima'), ('Binjai'), ('Bitung'), ('Blitar'), ('Bogor'), ('Bontang'), ('Bukittinggi'),
-('Cilegon'), ('Cimahi'), ('Cirebon'), ('Denpasar'), ('Depok'), ('Dumai'), ('Gorontalo'), ('Gunungsitoli'), ('Jakarta Barat'), ('Jakarta Pusat'),
-('Jakarta Selatan'), ('Jakarta Timur'), ('Jakarta Utara'), ('Jambi'), ('Jayapura'), ('Jember'), ('Kediri'), ('Kendari'), ('Kotamobagu'), ('Kupang'),
-('Langsa'), ('Lhokseumawe'), ('Lubuklinggau'), ('Madiun'), ('Magelang'), ('Makassar'), ('Malang'), ('Manado'), ('Mataram'), ('Medan'),
-('Metro'), ('Mojokerto'), ('Padang'), ('Padang Panjang'), ('Padang Sidempuan'), ('Pagar Alam'), ('Palangkaraya'), ('Palembang'), ('Palopo'), ('Palu'),
-('Pangkal Pinang'), ('Parepare'), ('Pariaman'), ('Pasuruan'), ('Payakumbuh'), ('Pekalongan'), ('Pekanbaru'), ('Pematangsiantar'), ('Pontianak'), ('Prabumulih'),
-('Probolinggo'), ('Sabang'), ('Salatiga'), ('Samarinda'), ('Sawahlunto'), ('Semarang'), ('Serang'), ('Sibolga'), ('Singkawang'), ('Solok'),
-('Sorong'), ('Subulussalam'), ('Sukabumi'), ('Sungai Penuh'), ('Surabaya'), ('Surakarta'), ('Tangerang'), ('Tangerang Selatan'), ('Tanjungbalai'), ('Tanjungpinang'),
-('Tarakan'), ('Tasikmalaya'), ('Tebing Tinggi'), ('Tegal'), ('Ternate'), ('Tidore Kepulauan'), ('Tomohon'), ('Tual'), ('Yogyakarta');
+-- Data Master
 
+
+INSERT INTO kota (nama_kota) VALUES ('Surabaya'), ('Jakarta'), ('Bandung'), ('Yogyakarta');
 INSERT INTO kategori (nama_kategori) VALUES ('Makanan Utama'), ('Minuman'), ('Dessert'), ('Paket Hemat');
 INSERT INTO metode_pembayaran (cara_metode) VALUES ('Cash'), ('Transfer Bank'), ('QRIS');
 
+-- Data Contoh Cabang
+
+
+INSERT INTO cabang (id_kota, alamat_cabang, no_telp_cabang) VALUES
+(1, 'Jl. Raya Darmo Permai III No. 5, Surabaya', '0315551234'),
+(2, 'Jl. Jend. Sudirman Kav. 52-53, Jakarta Selatan', '0215555678');
+
+-- Data Master Voucher
+
+
 INSERT INTO voucher (nama_voucher, deskripsi, potongan_harga, poin_dibutuhkan, aktif) VALUES
-('Potongan Ongkir Rp 5.000', 'Gratis ongkos kirim hingga Rp 5.000 untuk pesanan Anda berikutnya.', 5000, 50, true),
+('Potongan Ongkir Rp 5.000', 'Gratis ongkos kirim hingga Rp 5.000.', 5000, 50, true),
 ('Diskon Belanja Rp 15.000', 'Dapatkan diskon belanja sebesar Rp 15.000.', 15000, 150, true),
-('Voucher Cashback Rp 20.000', 'Cashback sebesar Rp 20.000 untuk pesanan di atas Rp 100.000.', 20000, 200, true),
-('Voucher Lawas', 'Voucher ini sudah tidak aktif.', 1000, 10, false);
+('Voucher Cashback Rp 20.000', 'Cashback Rp 20.000 untuk min. belanja Rp 100.000.', 20000, 200, true);
 
--- Data Akun Awal
+-- Data Akun Awal (Admin & Pelanggan)
 
-INSERT INTO admin (nama_admin, email_admin, password_admin, jenis_admin, status_admin) VALUES
-('Super Admin', 'admin@gmail.com', '1', 'Super', 'Aktif');
+
+INSERT INTO admin (nama_admin, email_admin, password_admin, jenis_admin, status_admin, id_cabang) VALUES
+('Admin Pusat Utama', 'adminpusat@gmail.com', '1', 'Pusat', 'Aktif', NULL),
+('Admin Cabang Surabaya', 'admincabang@gmail.com', '1', 'Cabang', 'Aktif', 1);
 
 INSERT INTO pelanggan (nama_pelanggan, email_pelanggan, password_pelanggan, alamat_pelanggan, no_telp_pelanggan, tanggal_join) VALUES
 ('Budi Santoso', 'budi@gmail.com', '1', 'Jl. Merdeka No. 10, Surabaya', '081234567890', CURRENT_DATE);
+
+-- =================================================================
+-- BAGIAN 3: PENGISIAN DATA CONTOH (SAMPLE DATA)
+-- =================================================================
+
+-- Data Master Menu
+-- Kategori 1: Makanan Utama
+
+
+INSERT INTO menu (id_kategori, nama_menu, harga_menu) VALUES
+(1, 'Nasi Goreng Spesial', 35000),
+(1, 'Ayam Bakar Madu', 45000),
+(1, 'Sate Ayam (10 tusuk)', 40000),
+(1, 'Rawon Daging Sapi', 55000),
+(1, 'Iga Bakar Saus BBQ', 85000),
+(1, 'Sop Buntut', 75000);
+
+-- Kategori 2: Minuman
+
+
+INSERT INTO menu (id_kategori, nama_menu, harga_menu) VALUES
+(2, 'Es Teh Manis', 8000),
+(2, 'Es Jeruk', 10000),
+(2, 'Jus Alpukat', 20000),
+(2, 'Kopi Susu Gula Aren', 22000),
+(2, 'Air Mineral', 5000);
+
+
+
+
+
+-- Kategori 3: Dessert
+
+
+INSERT INTO menu (id_kategori, nama_menu, harga_menu) VALUES
+(3, 'Puding Coklat Vla', 18000),
+(3, 'Es Krim Vanila', 15000),
+(3, 'Salad Buah Segar', 25000);
+
+-- Kategori 4: Paket Hemat
+
+
+INSERT INTO menu (id_kategori, nama_menu, harga_menu) VALUES
+(4, 'Paket Nasi Ayam Goreng + Es Teh', 50000),
+(4, 'Paket Nasi Rawon + Es Jeruk', 60000);
