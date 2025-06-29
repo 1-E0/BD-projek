@@ -6,9 +6,9 @@ import java.sql.*;
 public class PengirimanDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
-    // Method ini akan INSERT jika belum ada, atau UPDATE jika sudah ada.
+
     public void saveOrUpdatePengiriman(int idPesanan, String status, String catatan) {
-        // Pertama, cek apakah data pengiriman untuk pesanan ini sudah ada
+
         String checkSql = "SELECT COUNT(*) FROM pengiriman WHERE id_pesanan = ?";
         String updateSql = "UPDATE pengiriman SET status_pengiriman = ?, catatan_pengiriman = ? WHERE id_pesanan = ?";
         String insertSql = "INSERT INTO pengiriman (id_pesanan, status_pengiriman, catatan_pengiriman) VALUES (?, ?, ?)";

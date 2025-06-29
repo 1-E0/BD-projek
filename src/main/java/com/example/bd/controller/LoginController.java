@@ -33,9 +33,9 @@ public class LoginController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // --- PERUBAHAN 1: Ganti item pada ComboBox ---
+
         comboPeran.setItems(FXCollections.observableArrayList("Pelanggan", "Admin Cabang", "Admin Pusat"));
-        comboPeran.setValue("Pelanggan"); // Set default ke Pelanggan
+        comboPeran.setValue("Pelanggan");
         txtPasswordVisible.textProperty().bindBidirectional(txtPasswordHidden.textProperty());
     }
 
@@ -67,7 +67,7 @@ public class LoginController implements Initializable {
             return;
         }
 
-        // --- PERUBAHAN 2: Logika login dipecah menjadi tiga kasus ---
+
         switch (peran) {
             case "Pelanggan":
                 loginSebagaiPelanggan(event, email, password);
@@ -98,8 +98,8 @@ public class LoginController implements Initializable {
             return;
         }
 
-        // Validasi tambahan: Cocokkan peran yang dipilih dengan data di database
-        String peranDatabase = admin.getJenisAdmin(); // Misal: "Pusat" atau "Cabang"
+
+        String peranDatabase = admin.getJenisAdmin();
         boolean peranCocok = (peranDipilih.equals("Admin Pusat") && peranDatabase.equalsIgnoreCase("Pusat")) ||
                 (peranDipilih.equals("Admin Cabang") && peranDatabase.equalsIgnoreCase("Cabang"));
 
@@ -108,7 +108,7 @@ public class LoginController implements Initializable {
             UserSession.getInstance().setLoggedInPelanggan(null);
             Navigasi.switchScene(event, "DashboardView.fxml");
         } else {
-            // Jika akun ada tapi perannya salah (misal: login sebagai Admin Pusat dengan akun Admin Cabang)
+
             showAlert(Alert.AlertType.ERROR, "Login Gagal", "Peran yang Anda pilih (" + peranDipilih + ") tidak sesuai dengan akun ini.");
         }
     }

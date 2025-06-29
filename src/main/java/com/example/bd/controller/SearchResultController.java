@@ -29,7 +29,7 @@ public class SearchResultController {
     private final MenuDAO menuDAO = new MenuDAO();
     private final FavoritDAO favoritDAO = new FavoritDAO();
     private Set<Integer> favoritIds;
-    // HAPUS: private static final int ID_CABANG_PADRAO = 1;
+
 
     public void initializeData(String keyword) {
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
@@ -41,7 +41,7 @@ public class SearchResultController {
 
     private void loadMenuData(String keyword) {
         menuFlowPane.getChildren().clear();
-        int idCabang = UserSession.getInstance().getSelectedCabangId(); // <-- GUNAKAN ID CABANG DARI SESI
+        int idCabang = UserSession.getInstance().getSelectedCabangId();
         List<MenuHarian> resultList = menuDAO.searchMenuHarian(keyword, idCabang);
         lblJumlahHasil.setText("Ditemukan " + resultList.size() + " hasil");
         for (MenuHarian menuHarian : resultList) {
@@ -50,13 +50,13 @@ public class SearchResultController {
         }
     }
 
-    // ... (Sisa kode TIDAK BERUBAH) ...
+
     private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");
         card.setPrefWidth(200);
 
-        // --- TOMBOL FAVORIT ---
+
         ToggleButton favoriteButton = new ToggleButton();
         FontAwesomeIconView heartIcon = new FontAwesomeIconView();
         heartIcon.setGlyphName("HEART");

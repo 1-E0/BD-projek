@@ -8,7 +8,7 @@ public class Voucher {
     private int poinDibutuhkan;
     private boolean aktif;
 
-    // Getters and Setters
+
     public int getIdVoucher() { return idVoucher; }
     public void setIdVoucher(int idVoucher) { this.idVoucher = idVoucher; }
 

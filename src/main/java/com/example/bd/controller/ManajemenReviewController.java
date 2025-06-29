@@ -62,12 +62,12 @@ public class ManajemenReviewController implements Initializable {
                         starIcon.setSize("1.2em");
                         if (i < rating) {
                             starIcon.setGlyphName("STAR");
-                            // --- PERBAIKAN DI SINI: Menggunakan setStyle untuk prioritas lebih tinggi ---
-                            starIcon.setStyle("-fx-fill: #FFC107;"); // Warna kuning untuk bintang terisi
+
+                            starIcon.setStyle("-fx-fill: #FFC107;");
                         } else {
                             starIcon.setGlyphName("STAR_ALT");
-                            // --- PERBAIKAN DI SINI: Menggunakan setStyle untuk prioritas lebih tinggi ---
-                            starIcon.setStyle("-fx-fill: #BDBDBD;"); // Warna abu-abu untuk bintang kosong
+
+                            starIcon.setStyle("-fx-fill: #BDBDBD;");
                         }
                         ratingBox.getChildren().add(starIcon);
                     }

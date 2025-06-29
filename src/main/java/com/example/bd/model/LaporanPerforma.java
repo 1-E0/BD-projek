@@ -47,7 +47,7 @@ public class LaporanPerforma {
         return totalPendapatan;
     }
 
-    // Getter khusus untuk format tampilan Rupiah
+
     public String getTotalPendapatanFormatted() {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         return formatter.format(totalPendapatan);

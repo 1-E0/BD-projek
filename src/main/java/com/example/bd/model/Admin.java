@@ -3,15 +3,15 @@ package com.example.bd.model;
 public class Admin {
 
     private int idAdmin;
-    private int idCabang; // Adicionado
-    private String jenisAdmin; // Adicionado
+    private int idCabang;
+    private String jenisAdmin;
     private String namaAdmin;
     private String emailAdmin;
     private String passwordAdmin;
-    private String noTelpAdmin; // Renomeado
+    private String noTelpAdmin;
     private String statusAdmin;
 
-    // Getters e Setters
+
     public int getIdAdmin() {
         return idAdmin;
     }

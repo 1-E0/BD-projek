@@ -9,7 +9,7 @@ public class Staff {
     private String noTelpStaff;
     private String namaCabang;
 
-    // Getters dan Setters (umurStaff sudah dihapus)
+
     public int getIdStaff() { return idStaff; }
     public void setIdStaff(int idStaff) { this.idStaff = idStaff; }
     public int getIdCabang() { return idCabang; }

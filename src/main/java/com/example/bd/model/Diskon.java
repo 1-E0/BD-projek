@@ -9,14 +9,14 @@ public class Diskon {
     private String syaratDanKetentuanDiskon;
     private LocalDate tanggalMulaiDiskon;
     private LocalDate tanggalAkhirDiskon;
-    // O campo min_pembelian foi removido
+
 
     @Override
     public String toString() {
         return namaDiskon + " (" + persenDiskon + "%)";
     }
 
-    // Getters e Setters
+
     public int getIdDiskon() { return idDiskon; }
     public void setIdDiskon(int idDiskon) { this.idDiskon = idDiskon; }
 

@@ -4,7 +4,7 @@ public class Kategori {
     private int idKategori;
     private String namaKategori;
 
-    // Getters and Setters
+
     public int getIdKategori() {
         return idKategori;
     }

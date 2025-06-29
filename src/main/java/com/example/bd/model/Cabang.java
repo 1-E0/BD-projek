@@ -6,16 +6,16 @@ public class Cabang {
     private String alamatCabang;
     private String noTelpCabang;
 
-    // Field baru untuk menampung nama kota dari hasil JOIN
+
     private String namaKota;
 
     @Override
     public String toString() {
-        // Ini akan ditampilkan di ComboBox pada form Staff
+
         return alamatCabang;
     }
 
-    // --- Getters and Setters ---
+
     public int getIdCabang() { return idCabang; }
     public void setIdCabang(int idCabang) { this.idCabang = idCabang; }
 

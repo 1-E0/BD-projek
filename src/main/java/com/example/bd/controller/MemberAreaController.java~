@@ -109,7 +109,7 @@ public class MemberAreaController implements Initializable {
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
-
+                // Metode DAO sekarang mengembalikan boolean
                 boolean sukses = pelangganDAO.tukarPoinDenganVoucher(pelangganAktif.getIdPelanggan(), voucher);
 
                 if (sukses) {
@@ -118,7 +118,7 @@ public class MemberAreaController implements Initializable {
                     showAlert(Alert.AlertType.WARNING, "Gagal", "Poin Anda tidak mencukupi untuk menukar voucher ini.");
                 }
 
-
+                // Selalu refresh data setelah mencoba transaksi
                 Pelanggan pelangganTerbaru = pelangganDAO.getPelangganById(pelangganAktif.getIdPelanggan());
                 if (pelangganTerbaru != null) {
                     UserSession.getInstance().setLoggedInPelanggan(pelangganTerbaru);

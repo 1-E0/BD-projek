@@ -60,7 +60,7 @@ public class ManajemenPesananController implements Initializable {
         colStatusKirim.setCellValueFactory(new PropertyValueFactory<>("statusPengiriman"));
         colJadwal.setCellValueFactory(new PropertyValueFactory<>("jadwalPengiriman"));
 
-        // PERBAIKAN: Logika diubah agar tidak menampilkan teks pada baris kosong
+
         colJadwal.setCellFactory(column -> new TableCell<>() {
             private final SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy, HH:mm");
 
@@ -68,9 +68,9 @@ public class ManajemenPesananController implements Initializable {
             protected void updateItem(Timestamp item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty) {
-                    setText(null); // Jika baris kosong, jangan tampilkan apa-apa
+                    setText(null);
                 } else {
-                    // Jika baris berisi data, baru periksa isinya
+
                     if (item == null) {
                         setText("Langsung Kirim");
                     } else {
@@ -140,7 +140,7 @@ public class ManajemenPesananController implements Initializable {
             dialogStage.showAndWait();
 
             if (controller.isSaved()) {
-                loadPesananData(); // Refresh tabel jika ada data yang disimpan
+                loadPesananData();
             }
 
         } catch (IOException e) {

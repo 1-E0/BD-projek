@@ -10,11 +10,11 @@ public class Pelanggan {
     private String alamatPelanggan;
     private String noTelpPelanggan;
 
-    // --- FIELD BARU DARI TABEL MEMBER ---
+
     private int jumlahPoin;
     private Date tanggalJoin;
 
-    // Getters and Setters (termasuk untuk field baru)
+
     public int getIdPelanggan() { return idPelanggan; }
     public void setIdPelanggan(int idPelanggan) { this.idPelanggan = idPelanggan; }
 

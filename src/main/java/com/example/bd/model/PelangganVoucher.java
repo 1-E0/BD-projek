@@ -13,9 +13,9 @@ public class PelangganVoucher {
 
     private String namaVoucher;
     private int poinDigunakan;
-    private double potonganHarga; // Field ini penting
+    private double potonganHarga;
 
-    // Getters and Setters
+
     public int getIdPelangganVoucher() { return idPelangganVoucher; }
     public void setIdPelangganVoucher(int idPelangganVoucher) { this.idPelangganVoucher = idPelangganVoucher; }
 

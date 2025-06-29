@@ -28,7 +28,7 @@ public class MenuListByCategoryController {
     private final MenuDAO menuDAO = new MenuDAO();
     private final FavoritDAO favoritDAO = new FavoritDAO();
     private Set<Integer> favoritIds;
-    // HAPUS: private static final int ID_CABANG_PADRAO = 1;
+
 
     public void initializeData(Kategori kategori) {
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
@@ -40,27 +40,27 @@ public class MenuListByCategoryController {
 
     private void loadMenuData(int idKategori) {
         menuFlowPane.getChildren().clear();
-        int idCabang = UserSession.getInstance().getSelectedCabangId(); // <-- GUNAKAN ID CABANG DARI SESI
+        int idCabang = UserSession.getInstance().getSelectedCabangId();
         for (MenuHarian menuHarian : menuDAO.getMenuHarianByKategori(idKategori, idCabang)) {
             VBox card = createMenuCard(menuHarian);
             menuFlowPane.getChildren().add(card);
         }
     }
 
-    // ... (Sisa kode TIDAK BERUBAH) ...
+
     private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");
         card.setPrefWidth(200);
 
-        // --- TOMBOL FAVORIT ---
+
         ToggleButton favoriteButton = new ToggleButton();
         FontAwesomeIconView heartIcon = new FontAwesomeIconView();
         heartIcon.setGlyphName("HEART");
         favoriteButton.setGraphic(heartIcon);
         favoriteButton.getStyleClass().add("favorite-button");
 
-        // Set status tombol berdasarkan daftar favorit
+
         if (favoritIds.contains(menuHarian.getIdMenu())) {
             favoriteButton.setSelected(true);
         }
@@ -83,7 +83,7 @@ public class MenuListByCategoryController {
         namaMenu.setWrapText(true);
         HBox.setHgrow(namaMenu, javafx.scene.layout.Priority.ALWAYS);
         cardHeader.getChildren().addAll(namaMenu, favoriteButton);
-        // --- AKHIR TOMBOL FAVORIT ---
+
 
 
         Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));

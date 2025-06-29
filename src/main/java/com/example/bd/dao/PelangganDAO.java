@@ -13,7 +13,7 @@ import java.util.UUID;
 public class PelangganDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
-    // ... (Metode-metode lain seperti getAllPelanggan, updateProfil, dll. TIDAK PERLU DIUBAH)
+
     public List<Pelanggan> getAllPelanggan() {
         List<Pelanggan> pelangganList = new ArrayList<>();
         String sql = "SELECT * FROM pelanggan ORDER BY id_pelanggan ASC";
@@ -133,7 +133,7 @@ public class PelangganDAO {
         return false;
     }
 
-    // --- METODE YANG DIPERBAIKI ---
+
     public boolean tukarPoinDenganVoucher(int idPelanggan, Voucher voucher) throws SQLException {
         String sqlCheckPoin = "SELECT jumlah_poin FROM pelanggan WHERE id_pelanggan = ?";
         String sqlUpdatePoin = "UPDATE pelanggan SET jumlah_poin = jumlah_poin - ? WHERE id_pelanggan = ?";
@@ -142,7 +142,7 @@ public class PelangganDAO {
         try {
             conn.setAutoCommit(false);
 
-            // 1. Cek Poin Terlebih Dahulu
+
             int poinSaatIni;
             try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheckPoin)) {
                 pstmtCheck.setInt(1, idPelanggan);
@@ -151,23 +151,23 @@ public class PelangganDAO {
                     poinSaatIni = rs.getInt("jumlah_poin");
                 } else {
                     conn.rollback();
-                    return false; // Pelanggan tidak ditemukan
+                    return false;
                 }
             }
 
             if (poinSaatIni < voucher.getPoinDibutuhkan()) {
-                conn.rollback(); // Batalkan transaksi
-                return false; // Poin tidak cukup
+                conn.rollback();
+                return false;
             }
 
-            // 2. Jika poin cukup, kurangi poin
+
             try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePoin)) {
                 pstmtUpdate.setInt(1, voucher.getPoinDibutuhkan());
                 pstmtUpdate.setInt(2, idPelanggan);
                 pstmtUpdate.executeUpdate();
             }
 
-            // 3. Buat voucher baru
+
             try (PreparedStatement pstmtVoucher = conn.prepareStatement(sqlBuatVoucher)) {
                 String kodeVoucherUnik = "VC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
                 long tigaPuluhHariInMillis = 30L * 24 * 60 * 60 * 1000;
@@ -180,14 +180,14 @@ public class PelangganDAO {
                 pstmtVoucher.executeUpdate();
             }
 
-            conn.commit(); // Selesaikan transaksi jika semua berhasil
-            return true; // Transaksi berhasil
+            conn.commit();
+            return true;
 
         } catch (SQLException e) {
-            conn.rollback(); // Batalkan jika ada error
-            throw e; // Lemparkan error untuk ditangani controller
+            conn.rollback();
+            throw e;
         } finally {
-            conn.setAutoCommit(true); // Kembalikan ke mode auto-commit
+            conn.setAutoCommit(true);
         }
     }
 

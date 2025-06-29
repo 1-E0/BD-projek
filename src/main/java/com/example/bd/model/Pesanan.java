@@ -10,13 +10,13 @@ public class Pesanan {
     private double totalHargaPesanan;
     private String statusPembayaran;
     private String alamatTujuan;
-    private Timestamp jadwalPengiriman; // Field baru
+    private Timestamp jadwalPengiriman;
 
-    // Campos auxiliares
+
     private String namaPelanggan;
     private String statusPengiriman;
 
-    // Getters e Setters
+
     public int getIdPesanan() { return idPesanan; }
     public void setIdPesanan(int idPesanan) { this.idPesanan = idPesanan; }
     public int getIdPelanggan() { return idPelanggan; }
@@ -34,7 +34,7 @@ public class Pesanan {
     public String getStatusPengiriman() { return statusPengiriman; }
     public void setStatusPengiriman(String statusPengiriman) { this.statusPengiriman = statusPengiriman; }
 
-    // Getter & Setter untuk field baru
+
     public Timestamp getJadwalPengiriman() { return jadwalPengiriman; }
     public void setJadwalPengiriman(Timestamp jadwalPengiriman) { this.jadwalPengiriman = jadwalPengiriman; }
 }

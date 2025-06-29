@@ -17,7 +17,7 @@ public class LaporanDAO {
 
     public List<LaporanPerforma> getLaporanPerformaByYear(int tahun) {
         List<LaporanPerforma> laporanList = new ArrayList<>();
-        // Query ini akan mengagregasi data pesanan per bulan dan per cabang
+
         String sql = "SELECT " +
                 "    EXTRACT(MONTH FROM p.tanggal_pesanan) AS bulan, " +
                 "    EXTRACT(YEAR FROM p.tanggal_pesanan) AS tahun, " +
@@ -39,7 +39,7 @@ public class LaporanDAO {
                 LaporanPerforma laporan = new LaporanPerforma();
                 int monthNumber = rs.getInt("bulan");
 
-                // Konversi nomor bulan (1-12) ke nama bulan dalam Bahasa Indonesia
+
                 DateFormatSymbols dfs = new DateFormatSymbols(new Locale("id", "ID"));
                 laporan.setNamaBulan(dfs.getMonths()[monthNumber-1]);
 

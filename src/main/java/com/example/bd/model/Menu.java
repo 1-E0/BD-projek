@@ -5,9 +5,9 @@ public class Menu {
     private String namaMenu;
     private double hargaMenu;
     private int idKategori;
-    // O campo gambar_menu foi removido do esquema principal do menu
 
-    // Getters e Setters
+
+
     public int getIdMenu() {
         return idMenu;
     }

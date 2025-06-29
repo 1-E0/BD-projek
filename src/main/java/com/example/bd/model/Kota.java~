@@ -6,10 +6,10 @@ public class Kota {
 
     @Override
     public String toString() {
-        return namaKota;
+        return namaKota; // Untuk ditampilkan di ComboBox
     }
 
-
+    // Generate Getters & Setters
     public int getIdKota() { return idKota; }
     public void setIdKota(int idKota) { this.idKota = idKota; }
     public String getNamaKota() { return namaKota; }

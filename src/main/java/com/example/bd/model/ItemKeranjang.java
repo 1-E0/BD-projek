@@ -10,7 +10,7 @@ public class ItemKeranjang {
     private IntegerProperty kuantitas;
     private DoubleProperty subtotal;
 
-    // Adicionado para rastrear qual item de menu diário está sendo pedido
+
     private int idMenuHarian;
 
     public ItemKeranjang(Menu menu, int kuantitas, int idMenuHarian) {

@@ -78,10 +78,10 @@ public class MenuDAO {
     }
     public void saveOrUpdateMenuHarian(MenuHarian menuHarian) {
         if (checkIfMenuHarianExists(menuHarian.getIdMenu(), menuHarian.getIdCabang(), menuHarian.getTanggalMenuHarian())) {
-            // Jika ada, update stoknya
+
             updateStokMenuHarian(menuHarian);
         } else {
-            // Jika tidak ada, buat entri baru
+
             addMenuHarian(menuHarian);
         }
     }
@@ -124,7 +124,7 @@ public class MenuDAO {
             e.printStackTrace();
         }
     }
-    // METHOD BARU: Untuk menghapus menu dari daftar harian berdasarkan ID-nya
+
     public void deleteMenuHarian(int idMenuHarian) {
         String sql = "DELETE FROM menu_harian WHERE id_menu_harian = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -223,7 +223,7 @@ public class MenuDAO {
         return null;
     }
 
-    // --- METODE BARU DITAMBAHKAN DI SINI ---
+
     public MenuHarian findMenuHarianByMenuId(int idMenu, int idCabang) {
         String sql = "SELECT * FROM menu_harian " +
                 "WHERE id_menu = ? AND id_cabang = ? AND tanggal_menu_harian = CURRENT_DATE";
@@ -243,6 +243,6 @@ public class MenuDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // Mengembalikan null jika menu tidak tersedia hari ini
+        return null;
     }
 }

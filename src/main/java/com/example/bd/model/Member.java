@@ -9,7 +9,7 @@ public class Member {
     private Date tanggalJoin;
     private int jumlahPoin;
 
-    // Getters and Setters
+
     public int getIdMember() { return idMember; }
     public void setIdMember(int idMember) { this.idMember = idMember; }
 

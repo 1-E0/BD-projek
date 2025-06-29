@@ -8,7 +8,7 @@ public class Pembayaran {
     private int idMetode;
     private Timestamp tanggalPembayaran;
 
-    // Generate Getters and Setters untuk semua field
+
     public int getIdPembayaran() { return idPembayaran; }
     public void setIdPembayaran(int idPembayaran) { this.idPembayaran = idPembayaran; }
 

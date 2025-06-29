@@ -11,7 +11,7 @@ public class StaffDAO {
 
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();
-        // Query diubah, umur_staff dihapus
+
         String sql = "SELECT s.*, c.alamat_cabang as nama_cabang FROM staff s LEFT JOIN cabang c ON s.id_cabang = c.id_cabang ORDER BY s.id_staff ASC";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -32,7 +32,7 @@ public class StaffDAO {
     }
 
     public void addStaff(Staff staff) {
-        // Query diubah, umur_staff dihapus
+
         String sql = "INSERT INTO staff (id_cabang, nama_staff, jabatan_staff, alamat_staff, no_telp_staff) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, staff.getIdCabang());
@@ -47,7 +47,7 @@ public class StaffDAO {
     }
 
     public void updateStaff(Staff staff) {
-        // Query diubah, umur_staff dihapus
+
         String sql = "UPDATE staff SET id_cabang = ?, nama_staff = ?, jabatan_staff = ?, alamat_staff = ?, no_telp_staff = ? WHERE id_staff = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, staff.getIdCabang());

@@ -74,8 +74,7 @@ public class RiwayatPesananItemController {
 
             dialog.showAndWait();
 
-            // --- PERUBAHAN LOGIKA UTAMA ADA DI SINI ---
-            // Sekarang kita periksa apakah tombol "Kirim" yang benar-benar ditekan
+
             if (controller.isSubmitted()) {
                 Review review = new Review();
                 review.setIdPelanggan(UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan());
@@ -89,7 +88,7 @@ public class RiwayatPesananItemController {
                 btnBeriReview.setVisible(false);
                 btnBeriReview.setManaged(false);
             }
-            // Jika dialog ditutup dengan "X", controller.isSubmitted() akan false, dan blok ini akan dilewati.
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,14 +103,14 @@ public class RiwayatPesananItemController {
         StringBuilder itemTidakTersedia = new StringBuilder();
         int itemDitambahkan = 0;
 
-        // HAPUS: final int ID_CABANG_PADRAO = 1;
-        int idCabangAktif = UserSession.getInstance().getSelectedCabangId(); // <-- AMBIL CABANG DARI SESI
+
+        int idCabangAktif = UserSession.getInstance().getSelectedCabangId();
 
         for (DetailPesanan detail : detailLama) {
             Menu menuLama = menuDAO.getMenuById(detail.getIdMenu());
             if (menuLama == null) continue;
 
-            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), idCabangAktif); // <-- GUNAKAN idCabangAktif
+            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), idCabangAktif);
 
             if (menuHariIni == null) {
                 itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (tidak tersedia di cabang ini)\n");

@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 
 public class ManajemenMenuController implements Initializable {
 
-    // FXML fields
+
     @FXML private TableView<Menu> menuTable;
     @FXML private TableColumn<Menu, Integer> colIdMenu;
     @FXML private TableColumn<Menu, String> colNamaMenu;
@@ -32,7 +32,7 @@ public class ManajemenMenuController implements Initializable {
 
     @FXML private ChoiceBox<Kategori> choiceKategori;
 
-    // DAOs dan list
+
     private final MenuDAO menuDAO = new MenuDAO();
     private final KategoriDAO kategoriDAO = new KategoriDAO();
     private final ObservableList<Menu> menuList = FXCollections.observableArrayList();

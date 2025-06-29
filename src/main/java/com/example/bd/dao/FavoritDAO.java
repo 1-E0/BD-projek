@@ -17,10 +17,8 @@ public class FavoritDAO {
     private final Connection conn = DatabaseConnection.getConnection();
 
     /**
-     * Mengambil daftar ID menu yang difavoritkan oleh seorang pelanggan.
-     * Menggunakan Set untuk performa pengecekan yang lebih cepat.
-     * @param idPelanggan ID pelanggan
-     * @return Set berisi ID menu favorit.
+     @param idPelanggan
+     @return
      */
     public Set<Integer> getFavoritIdsByPelanggan(int idPelanggan) {
         Set<Integer> favoritIds = new HashSet<>();
@@ -38,16 +36,15 @@ public class FavoritDAO {
     }
 
     /**
-     * Mengambil daftar objek MenuHarian yang tersedia hari ini
-     * dari menu yang difavoritkan pelanggan.
-     * @param idPelanggan ID pelanggan
-     * @param idCabang ID cabang saat ini
-     * @return List dari objek MenuHarian.
+     *
+     *
+     * @param idPelanggan
+     * @param idCabang
+     * @return
      */
     public List<MenuHarian> getFavoritMenuHarianByPelanggan(int idPelanggan, int idCabang) {
         List<MenuHarian> favoritList = new ArrayList<>();
-        // Query ini menggunakan LEFT JOIN untuk memastikan semua item favorit tetap muncul
-        // meskipun tidak tersedia di menu harian pada hari itu.
+
         String sql = "SELECT m.id_menu, m.nama_menu, m.harga_menu, mh.id_menu_harian, mh.stok_menu_harian " +
                 "FROM favorit_pelanggan fp " +
                 "JOIN menu m ON fp.id_menu = m.id_menu " +
@@ -63,7 +60,7 @@ public class FavoritDAO {
                 mh.setIdMenu(rs.getInt("id_menu"));
                 mh.setNamaMenu(rs.getString("nama_menu"));
                 mh.setHargaMenu(rs.getDouble("harga_menu"));
-                // id_menu_harian atau stok_menu_harian bisa bernilai 0 atau NULL jika tidak tersedia
+
                 mh.setIdMenuHarian(rs.getInt("id_menu_harian"));
                 mh.setStokMenuHarian(rs.getInt("stok_menu_harian"));
                 mh.setIdCabang(idCabang);
@@ -76,10 +73,10 @@ public class FavoritDAO {
     }
 
     /**
-     * Menambahkan item ke daftar favorit.
-     * ON CONFLICT DO NOTHING memastikan tidak ada error jika data sudah ada.
-     * @param idPelanggan ID pelanggan
-     * @param idMenu ID menu
+     *
+     *
+     * @param idPelanggan
+     * @param idMenu
      */
     public void addFavorit(int idPelanggan, int idMenu) {
         String sql = "INSERT INTO favorit_pelanggan (id_pelanggan, id_menu) VALUES (?, ?) ON CONFLICT DO NOTHING";
@@ -93,9 +90,9 @@ public class FavoritDAO {
     }
 
     /**
-     * Menghapus item dari daftar favorit.
-     * @param idPelanggan ID pelanggan
-     * @param idMenu ID menu
+     *
+     * @param idPelanggan
+     * @param idMenu
      */
     public void removeFavorit(int idPelanggan, int idMenu) {
         String sql = "DELETE FROM favorit_pelanggan WHERE id_pelanggan = ? AND id_menu = ?";

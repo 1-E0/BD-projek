@@ -39,17 +39,17 @@ public class LaporanPerformaController implements Initializable {
         colBulan.setCellValueFactory(new PropertyValueFactory<>("namaBulan"));
         colCabang.setCellValueFactory(new PropertyValueFactory<>("namaCabang"));
         colJumlahPesanan.setCellValueFactory(new PropertyValueFactory<>("jumlahPesanan"));
-        // Menggunakan getter khusus untuk format Rupiah
+
         colTotalPendapatan.setCellValueFactory(new PropertyValueFactory<>("totalPendapatanFormatted"));
     }
 
     private void populateYearChooser() {
         int currentYear = Year.now().getValue();
-        // Menampilkan pilihan tahun dari 2023 hingga tahun sekarang
+
         yearChooser.setItems(FXCollections.observableList(
                 IntStream.rangeClosed(2023, currentYear).boxed().collect(Collectors.toList())
         ));
-        // Set nilai default ke tahun sekarang
+
         yearChooser.setValue(currentYear);
     }
 

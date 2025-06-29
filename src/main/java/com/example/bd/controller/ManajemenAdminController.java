@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 
 public class ManajemenAdminController implements Initializable {
 
-    // FXML Table and Columns
+
     @FXML private TableView<Admin> adminTable;
     @FXML private TableColumn<Admin, Integer> colId;
     @FXML private TableColumn<Admin, String> colNama;
@@ -29,7 +29,6 @@ public class ManajemenAdminController implements Initializable {
     @FXML private TableColumn<Admin, Integer> colCabang;
     @FXML private TableColumn<Admin, String> colStatus;
 
-    // FXML Form Fields
     @FXML private Label formTitleLabel;
     @FXML private TextField txtNama;
     @FXML private TextField txtEmail;
@@ -39,7 +38,7 @@ public class ManajemenAdminController implements Initializable {
     @FXML private ComboBox<Cabang> comboCabang;
     @FXML private Button btnSimpan;
 
-    // DAOs and Data Lists
+
     private final AdminDAO adminDAO = new AdminDAO();
     private final CabangDAO cabangDAO = new CabangDAO();
     private Admin adminTerpilih = null;
@@ -75,7 +74,7 @@ public class ManajemenAdminController implements Initializable {
             public Cabang fromString(String s) { return null; }
         });
 
-        // Hanya aktifkan pilihan cabang jika jenisnya "Cabang"
+
         comboJenis.valueProperty().addListener((obs, oldVal, newVal) -> {
             comboCabang.setDisable(!"Cabang".equals(newVal));
             if (!"Cabang".equals(newVal)) {
@@ -102,7 +101,7 @@ public class ManajemenAdminController implements Initializable {
         formTitleLabel.setText("Form Edit Admin");
         txtNama.setText(admin.getNamaAdmin());
         txtEmail.setText(admin.getEmailAdmin());
-        txtEmail.setDisable(true); // Email tidak boleh diubah, sebagai primary key login
+        txtEmail.setDisable(true);
         txtTelepon.setText(admin.getNoTelpAdmin());
         comboJenis.setValue(admin.getJenisAdmin());
 
@@ -129,7 +128,7 @@ public class ManajemenAdminController implements Initializable {
         }
 
         try {
-            if (adminTerpilih == null) { // Mode Tambah
+            if (adminTerpilih == null) {
                 if (txtPassword.getText().isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, "Validasi Gagal", "Password wajib diisi untuk admin baru.");
                     return;
@@ -139,10 +138,10 @@ public class ManajemenAdminController implements Initializable {
                 newAdmin.setPasswordAdmin(txtPassword.getText());
                 adminDAO.addAdmin(newAdmin);
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Admin baru berhasil ditambahkan.");
-            } else { // Mode Update
+            } else {
                 fillAdminFromForm(adminTerpilih);
                 adminDAO.updateAdmin(adminTerpilih);
-                // Update password jika diisi
+
                 if (!txtPassword.getText().isEmpty()) {
                     adminDAO.updatePasswordAdmin(adminTerpilih.getIdAdmin(), txtPassword.getText());
                 }
@@ -161,7 +160,7 @@ public class ManajemenAdminController implements Initializable {
         admin.setEmailAdmin(txtEmail.getText());
         admin.setNoTelpAdmin(txtTelepon.getText());
         admin.setJenisAdmin(comboJenis.getValue());
-        admin.setStatusAdmin("Aktif"); // Default status
+        admin.setStatusAdmin("Aktif");
         if (comboCabang.getValue() != null) {
             admin.setIdCabang(comboCabang.getValue().getIdCabang());
         } else {

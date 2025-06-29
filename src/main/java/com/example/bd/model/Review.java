@@ -1,19 +1,19 @@
 package com.example.bd.model;
 
-import java.sql.Date; // Alterado de Timestamp
+import java.sql.Date;
 
 public class Review {
     private int idReview;
     private int idPelanggan;
     private int idPesanan;
-    private int rating; // Renomeado de reviewPesanan
+    private int rating;
     private String komentar;
-    private Date tanggalReview; // Alterado para Date
+    private Date tanggalReview;
 
-    // Campo auxiliar
+
     private String namaPelanggan;
 
-    // Getters e Setters
+
     public int getIdReview() { return idReview; }
     public void setIdReview(int idReview) { this.idReview = idReview; }
 

@@ -3,16 +3,16 @@ package com.example.bd.model;
 public class DetailPesanan {
     private int idDetailPesanan;
     private int idPesanan;
-    private int idMenuHarian; // Alterado de idMenu
-    private int jumlah; // Alterado de kuantitas
+    private int idMenuHarian;
+    private int jumlah;
     private double hargaProduk;
-    private String catatan; // Adicionado
+    private String catatan;
 
-    // Campo auxiliar para exibição
+
     private String namaMenu;
-    private int idMenu; // Adicionado para referência
+    private int idMenu;
 
-    // Getters e Setters
+
     public int getIdDetailPesanan() { return idDetailPesanan; }
     public void setIdDetailPesanan(int idDetailPesanan) { this.idDetailPesanan = idDetailPesanan; }
 

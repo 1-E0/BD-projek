@@ -19,22 +19,22 @@ public class Navigasi {
 
     private static final Duration DURATION = Duration.millis(350);
 
-    // Navigasi maju dari klik tombol
+
     public static void switchScene(ActionEvent event, String fxmlFile) {
         animateAndSwitch((Node) event.getSource(), fxmlFile, true);
     }
 
-    // Navigasi mundur dari klik tombol
+
     public static void goBack(ActionEvent event, String fxmlFile) {
         animateAndSwitch((Node) event.getSource(), fxmlFile, false);
     }
 
-    // === METHOD BARU UNTUK NAVIGASI DARI KLIK MOUSE ===
+
     public static void switchSceneFromMouse(MouseEvent event, String fxmlFile) {
         animateAndSwitch((Node) event.getSource(), fxmlFile, true);
     }
 
-    // Method private diubah agar bisa menerima Node secara umum
+
     private static void animateAndSwitch(Node sourceNode, String fxmlFile, boolean dariKanan) {
         try {
             Scene scene = sourceNode.getScene();

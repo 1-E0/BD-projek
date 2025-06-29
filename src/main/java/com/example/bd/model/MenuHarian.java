@@ -9,7 +9,7 @@ public class MenuHarian {
     private LocalDate tanggalMenuHarian;
     private int stokMenuHarian;
 
-    // Campos auxiliares para exibição
+
     private String namaMenu;
     private double hargaMenu;
 
@@ -29,7 +29,7 @@ public class MenuHarian {
         this.hargaMenu = hargaMenu;
     }
 
-    // Getters e Setters
+
     public int getIdMenuHarian() {
         return idMenuHarian;
     }

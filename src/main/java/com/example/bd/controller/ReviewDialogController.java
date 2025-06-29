@@ -16,7 +16,7 @@ public class ReviewDialogController {
     @FXML private Button btnKirim;
 
     private int rating = 0;
-    private boolean submitted = false; // PENANDA BARU DITAMBAHKAN
+    private boolean submitted = false;
 
     public void initialize() {
         for (int i = 1; i <= 5; i++) {
@@ -57,12 +57,12 @@ public class ReviewDialogController {
 
     @FXML
     private void handleKirim() {
-        // Hanya tandai sebagai "submitted" jika rating sudah dipilih
+
         if (rating > 0) {
             this.submitted = true;
             closeDialog();
         } else {
-            // Beri peringatan jika pengguna mencoba mengirim tanpa rating
+
             showAlert(Alert.AlertType.WARNING, "Peringatan", "Silakan pilih rating bintang terlebih dahulu sebelum mengirim.");
         }
     }
@@ -70,11 +70,11 @@ public class ReviewDialogController {
     @FXML
     private void handleBatal() {
         this.rating = 0;
-        this.submitted = false; // Pastikan statusnya tidak terkirim
+        this.submitted = false;
         closeDialog();
     }
 
-    // Metode getter baru untuk penanda
+
     public boolean isSubmitted() {
         return this.submitted;
     }

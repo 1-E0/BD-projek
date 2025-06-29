@@ -14,7 +14,7 @@ import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
 
-    // Tambahkan @FXML untuk semua tombol manajemen
+
     @FXML private Button btnManajemenMenu;
     @FXML private Button btnManajemenKategori;
     @FXML private Button btnManajemenPelanggan;
@@ -27,31 +27,31 @@ public class DashboardController implements Initializable {
     @FXML private Button btnManajemenVoucher;
     @FXML private Button btnLaporanPerforma;
     @FXML private Button btnManajemenPesanan;
-    @FXML private Button btnManajemenAdmin; // Tombol baru untuk manajemen admin
+    @FXML private Button btnManajemenAdmin;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         Admin loggedInAdmin = UserSession.getInstance().getLoggedInAdmin();
         if (loggedInAdmin == null) {
-            // Seharusnya tidak terjadi, tapi sebagai pengaman
+
             System.err.println("Tidak ada admin yang login, kembali ke halaman login.");
-            // Di aplikasi nyata, Anda bisa langsung navigasi kembali ke login
+
             return;
         }
 
         String jenisAdmin = loggedInAdmin.getJenisAdmin();
 
         if ("Pusat".equalsIgnoreCase(jenisAdmin)) {
-            // Admin Pusat: Tampilkan semua kecuali tombol yang tidak relevan (jika ada)
+
             setButtonVisibility(true, btnManajemenMenu, btnManajemenKategori, btnManajemenPelanggan,
                     btnManajemenStaff, btnManajemenCabang, btnManajemenReview, btnManajemenDiskon,
                     btnManajemenMenuHarian, btnManajemenMetodePembayaran, btnManajemenVoucher,
                     btnLaporanPerforma, btnManajemenPesanan, btnManajemenAdmin);
         } else if ("Cabang".equalsIgnoreCase(jenisAdmin)) {
-            // Admin Cabang: Hanya tampilkan yang relevan
+
             setButtonVisibility(true, btnManajemenMenuHarian, btnManajemenPesanan, btnManajemenStaff);
 
-            // Sembunyikan sisanya
+
             setButtonVisibility(false, btnManajemenMenu, btnManajemenKategori, btnManajemenPelanggan,
                     btnManajemenCabang, btnManajemenReview, btnManajemenDiskon,
                     btnManajemenMetodePembayaran, btnManajemenVoucher, btnLaporanPerforma, btnManajemenAdmin);
@@ -65,7 +65,7 @@ public class DashboardController implements Initializable {
         }
     }
 
-    // --- METODE NAVIGASI (Sebagian besar sudah ada) ---
+
     @FXML void goToManajemenMenu(ActionEvent event) { Navigasi.switchScene(event, "ManajemenMenuView.fxml"); }
     @FXML void goToManajemenKategori(ActionEvent event) { Navigasi.switchScene(event, "ManajemenKategoriView.fxml"); }
     @FXML void goToManajemenPelanggan(ActionEvent event) { Navigasi.switchScene(event, "ManajemenPelangganView.fxml"); }
@@ -79,7 +79,7 @@ public class DashboardController implements Initializable {
     @FXML void goToLaporanPerforma(ActionEvent event) { Navigasi.switchScene(event, "LaporanPerformaView.fxml"); }
     @FXML void goToManajemenPesanan(ActionEvent event) { Navigasi.switchScene(event, "ManajemenPesananView.fxml"); }
 
-    // --- METODE BARU untuk navigasi ke manajemen admin ---
+
     @FXML
     void goToManajemenAdmin(ActionEvent event) {
         Navigasi.switchScene(event, "ManajemenAdminView.fxml");

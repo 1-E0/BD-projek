@@ -36,7 +36,7 @@ public class AdminDAO {
         return null;
     }
 
-    // --- METODE-METODE BARU DI BAWAH INI ---
+
 
     public List<Admin> getAllAdmins() {
         List<Admin> adminList = new ArrayList<>();
@@ -95,7 +95,7 @@ public class AdminDAO {
         }
     }
 
-    // Opsional: Jika Anda ingin bisa mengganti password dari form ini
+
     public void updatePasswordAdmin(int idAdmin, String newPassword) throws SQLException {
         String sql = "UPDATE admin SET password_admin = ? WHERE id_admin = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)) {

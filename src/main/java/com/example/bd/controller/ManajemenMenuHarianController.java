@@ -37,7 +37,7 @@ public class ManajemenMenuHarianController implements Initializable {
     @FXML private ComboBox<Cabang> comboCabang;
     @FXML private TextField txtStok;
 
-    // PERUBAHAN: Menambahkan FXML reference untuk tombol hapus
+
     @FXML private Button btnHapus;
 
     private final MenuDAO menuDAO = new MenuDAO();
@@ -59,7 +59,7 @@ public class ManajemenMenuHarianController implements Initializable {
                     break;
                 }
             }
-            comboCabang.setDisable(true); // Kunci pilihan cabang
+            comboCabang.setDisable(true);
         }
         loadMenuHarianTable();
     }
@@ -92,7 +92,7 @@ public class ManajemenMenuHarianController implements Initializable {
         datePicker.valueProperty().addListener((obs, oldDate, newDate) -> loadMenuHarianTable());
         comboCabang.valueProperty().addListener((obs, oldCabang, newCabang) -> loadMenuHarianTable());
 
-        // PERUBAHAN: Listener untuk mengaktifkan/menonaktifkan tombol hapus
+
         menuHarianTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             btnHapus.setDisable(newSelection == null);
         });
@@ -143,7 +143,7 @@ public class ManajemenMenuHarianController implements Initializable {
         }
     }
 
-    // PERUBAHAN: Method baru untuk handle tombol hapus
+
     @FXML
     void handleHapusMenuHarian(ActionEvent event) {
         MenuHarian selectedMenuHarian = menuHarianTable.getSelectionModel().getSelectedItem();
@@ -159,7 +159,7 @@ public class ManajemenMenuHarianController implements Initializable {
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
             menuDAO.deleteMenuHarian(selectedMenuHarian.getIdMenuHarian());
-            loadMenuHarianTable(); // Refresh tabel
+            loadMenuHarianTable();
             showAlert(Alert.AlertType.INFORMATION, "Sukses", "Menu berhasil dihapus dari daftar harian.");
         }
     }

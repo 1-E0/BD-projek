@@ -23,12 +23,12 @@ public class PembayaranDialogController {
         comboMetode.setItems(FXCollections.observableArrayList(metodeDAO.getAll()));
     }
 
-    // Menerima data total harga dari controller pemanggil
+
     public void setTotal(double total) {
         lblTotalBayar.setText(String.format("Rp %.0f", total));
     }
 
-    // Mengembalikan metode yang dipilih ke controller pemanggil
+
     public MetodePembayaran getMetodeTerpilih() {
         return metodeTerpilih;
     }
@@ -47,7 +47,7 @@ public class PembayaranDialogController {
 
     @FXML
     private void handleBatal() {
-        this.metodeTerpilih = null; // Menandakan pembatalan
+        this.metodeTerpilih = null;
         closeDialog();
     }
 

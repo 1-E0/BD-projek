@@ -35,8 +35,6 @@ public class ManajemenDiskonController implements Initializable {
     @FXML private Label formTitleLabel;
     @FXML private Button btnSimpan;
 
-    // O campo txtMinPembelian foi removido da UI
-
     private final DiskonDAO diskonDAO = new DiskonDAO();
     private final ObservableList<Diskon> diskonList = FXCollections.observableArrayList();
     private Diskon diskonTerpilih;
@@ -72,8 +70,8 @@ public class ManajemenDiskonController implements Initializable {
                 txtSyarat.setText(newVal.getSyaratDanKetentuanDiskon());
                 dateMulai.setValue(newVal.getTanggalMulaiDiskon());
                 dateAkhir.setValue(newVal.getTanggalAkhirDiskon());
-                formTitleLabel.setText("Formulário de Edição de Desconto");
-                btnSimpan.setText("Atualizar");
+                formTitleLabel.setText("Formulir Edit Diskon");
+                btnSimpan.setText("Perbarui");
             }
         });
     }
@@ -81,7 +79,7 @@ public class ManajemenDiskonController implements Initializable {
     @FXML
     private void handleSimpan(ActionEvent event) {
         if (txtNama.getText().isEmpty() || txtPersen.getText().isEmpty() || dateMulai.getValue() == null || dateAkhir.getValue() == null) {
-            showAlert(Alert.AlertType.ERROR, "Erro de Validação", "Todos os campos são obrigatórios!");
+            showAlert(Alert.AlertType.ERROR, "Kesalahan Validasi", "Semua kolom wajib diisi!");
             return;
         }
 
@@ -95,30 +93,30 @@ public class ManajemenDiskonController implements Initializable {
 
             if (diskonTerpilih == null) {
                 diskonDAO.addDiskon(diskon);
-                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Novo desconto adicionado com sucesso.");
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon baru berhasil ditambahkan.");
             } else {
                 diskonDAO.updateDiskon(diskon);
-                showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Desconto atualizado com sucesso.");
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon berhasil diperbarui.");
             }
             loadDiskonData();
             clearForm();
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Erro de Entrada", "A porcentagem deve ser um número.");
+            showAlert(Alert.AlertType.ERROR, "Kesalahan Input", "Persentase harus berupa angka.");
         }
     }
 
     @FXML
     private void handleHapus(ActionEvent event) {
         if (diskonTerpilih == null) {
-            showAlert(Alert.AlertType.ERROR, "Erro", "Selecione um desconto para deletar.");
+            showAlert(Alert.AlertType.ERROR, "Kesalahan", "Pilih diskon untuk dihapus.");
             return;
         }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Tem certeza que deseja deletar o desconto: " + diskonTerpilih.getNamaDiskon() + "?", ButtonType.YES, ButtonType.NO);
-        confirm.setHeaderText("Confirmar Exclusão");
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Apakah Anda yakin ingin menghapus diskon: " + diskonTerpilih.getNamaDiskon() + "?", ButtonType.YES, ButtonType.NO);
+        confirm.setHeaderText("Konfirmasi Penghapusan");
         Optional<ButtonType> response = confirm.showAndWait();
         if (response.isPresent() && response.get() == ButtonType.YES) {
             diskonDAO.deleteDiskon(diskonTerpilih.getIdDiskon());
-            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Desconto deletado com sucesso.");
+            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Diskon berhasil dihapus.");
             loadDiskonData();
             clearForm();
         }
@@ -137,8 +135,8 @@ public class ManajemenDiskonController implements Initializable {
         dateMulai.setValue(null);
         dateAkhir.setValue(null);
         diskonTable.getSelectionModel().clearSelection();
-        formTitleLabel.setText("Formulário de Adição de Novo Desconto");
-        btnSimpan.setText("Salvar");
+        formTitleLabel.setText("Formulir Penambahan Diskon Baru");
+        btnSimpan.setText("Simpan");
     }
 
     @FXML

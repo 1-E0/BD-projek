@@ -89,7 +89,7 @@ public class ManajemenPelangganController implements Initializable {
             return;
         }
 
-        if (pelangganTerpilih == null) { // Mode Tambah
+        if (pelangganTerpilih == null) {
             if (password.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Error Validasi", "Password wajib diisi saat menambah pelanggan baru!");
                 return;
@@ -101,18 +101,18 @@ public class ManajemenPelangganController implements Initializable {
             newPelanggan.setAlamatPelanggan(alamat);
             newPelanggan.setNoTelpPelanggan(telepon);
 
-            // --- INI BAGIAN YANG DIPERBAIKI ---
+
             try {
-                // Mengganti addPelangganAndCreateMember dengan metode addPelanggan yang sudah disederhanakan
+
                 pelangganDAO.addPelanggan(newPelanggan);
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pelanggan baru berhasil ditambahkan!");
             } catch (SQLException e) {
                 showAlert(Alert.AlertType.ERROR, "Database Error", "Gagal menyimpan pelanggan baru.");
                 e.printStackTrace();
             }
-            // --- AKHIR PERBAIKAN ---
 
-        } else { // Mode Update
+
+        } else {
             pelangganTerpilih.setNamaPelanggan(nama);
             pelangganTerpilih.setEmailPelanggan(email);
             pelangganTerpilih.setAlamatPelanggan(alamat);

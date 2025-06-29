@@ -45,7 +45,7 @@ public class EditPesananDialogController {
         comboStatusBayar.setValue(pesanan.getStatusPembayaran());
         comboStatusKirim.setValue(pesanan.getStatusPengiriman());
 
-
+        // Muat detail item ke ListView
         List<DetailPesanan> detailItems = pesananDAO.getDetailByPesanan(pesanan.getIdPesanan());
         itemListView.setItems(FXCollections.observableArrayList(
                 detailItems.stream()
@@ -60,18 +60,18 @@ public class EditPesananDialogController {
         String statusBayarBaru = comboStatusBayar.getValue();
         String statusKirimBaru = comboStatusKirim.getValue();
 
-
+        // Update alamat jika berubah
         if (alamatBaru != null && !alamatBaru.trim().isEmpty() && !alamatBaru.equals(pesanan.getAlamatTujuan())) {
             pesananDAO.updateAlamatTujuan(pesanan.getIdPesanan(), alamatBaru);
         }
 
-
+        // Update status pembayaran jika berubah
         if (statusBayarBaru != null && !statusBayarBaru.equals(pesanan.getStatusPembayaran())) {
             pesananDAO.updateStatusPembayaran(pesanan.getIdPesanan(), statusBayarBaru);
         }
 
-
-        pengirimanDAO.saveOrUpdatePengiriman(pesanan.getIdPesanan(), statusKirimBaru, "");
+        // Update pengiriman
+        pengirimanDAO.saveOrUpdatePengiriman(pesanan.getIdPesanan(), statusKirimBaru, ""); // Catatan dikosongkan untuk simplicity
 
         this.saved = true;
         closeStage(event);

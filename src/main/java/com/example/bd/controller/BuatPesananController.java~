@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 
 public class BuatPesananController implements Initializable {
 
-
+    // FXML Fields
     @FXML private TableView<MenuHarian> menuTable;
     @FXML private TableColumn<MenuHarian, String> colNamaMenu;
     @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
@@ -55,14 +55,14 @@ public class BuatPesananController implements Initializable {
     @FXML private DatePicker tanggalPicker;
     @FXML private ComboBox<String> jamComboBox;
 
-
+    // DAOs
     private final MenuDAO menuDAO = new MenuDAO();
     private final PesananDAO pesananDAO = new PesananDAO();
     private final DiskonDAO diskonDAO = new DiskonDAO();
     private final PelangganDAO pelangganDAO = new PelangganDAO();
     private final CabangDAO cabangDAO = new CabangDAO();
 
-
+    // Data Collections
     private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
@@ -86,7 +86,7 @@ public class BuatPesananController implements Initializable {
         setupCabangComboBox();
         setupJadwalControls();
 
-
+        // Tambahkan listener untuk memperbarui menu secara dinamis
         tanggalPicker.valueProperty().addListener((obs, oldDate, newDate) -> {
             if (newDate != null) {
                 refreshMenuTable(newDate);
@@ -98,14 +98,14 @@ public class BuatPesananController implements Initializable {
     }
 
     private void setupJadwalControls() {
-
+        // Jam mulai dari 06:00 pagi hingga 20:00 malam
         ObservableList<String> jamList = FXCollections.observableArrayList();
         for (int i = 6; i <= 20; i++) {
             jamList.add(String.format("%02d:00", i));
         }
         jamComboBox.setItems(jamList);
 
-
+        // Nonaktifkan tanggal sebelum hari ini
         tanggalPicker.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -114,7 +114,7 @@ public class BuatPesananController implements Initializable {
             }
         });
 
-
+        // Atur tanggal default ke hari ini
         tanggalPicker.setValue(LocalDate.now());
     }
 
@@ -333,7 +333,7 @@ public class BuatPesananController implements Initializable {
             LocalTime waktuDipilih = LocalTime.parse(jamDipilih);
             LocalDateTime jadwalLengkap = LocalDateTime.of(tanggalDipilih, waktuDipilih);
 
-
+            // PERUBAHAN: Validasi minimal 1 jam ke depan jika di hari yang sama
             if (tanggalDipilih.isEqual(LocalDate.now()) && jadwalLengkap.isBefore(LocalDateTime.now().plusHours(1))) {
                 showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Valid", "Untuk pengiriman hari ini, waktu pengiriman minimal 1 jam dari sekarang.");
                 return;

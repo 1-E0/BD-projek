@@ -23,7 +23,7 @@ public class UserSession {
         return instance;
     }
 
-    // --- GETTER & SETTER BARU UNTUK ADMIN ---
+
     public Admin getLoggedInAdmin() {
         return loggedInAdmin;
     }
@@ -31,7 +31,7 @@ public class UserSession {
     public void setLoggedInAdmin(Admin loggedInAdmin) {
         this.loggedInAdmin = loggedInAdmin;
     }
-    // --- AKHIR GETTER & SETTER BARU ---
+
 
     public Pelanggan getLoggedInPelanggan() {
         return loggedInPelanggan;
@@ -76,7 +76,7 @@ public class UserSession {
 
     public void cleanUserSession() {
         loggedInPelanggan = null;
-        loggedInAdmin = null; // <-- BERSIHKAN ADMIN SAAT LOGOUT
+        loggedInAdmin = null;
         selectedCabang = null;
         clearKeranjang();
     }

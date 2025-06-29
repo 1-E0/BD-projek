@@ -72,12 +72,12 @@ public class ManajemenKategoriController implements Initializable {
             return;
         }
 
-        if (kategoriTerpilih == null) { // Tambah baru
+        if (kategoriTerpilih == null) {
             Kategori newKategori = new Kategori();
             newKategori.setNamaKategori(namaKategori);
             kategoriDAO.addKategori(newKategori);
             showAlert(Alert.AlertType.INFORMATION, "Sukses", "Kategori baru berhasil ditambahkan.");
-        } else { // Update
+        } else {
             kategoriTerpilih.setNamaKategori(namaKategori);
             kategoriDAO.updateKategori(kategoriTerpilih);
             showAlert(Alert.AlertType.INFORMATION, "Sukses", "Kategori berhasil diupdate.");

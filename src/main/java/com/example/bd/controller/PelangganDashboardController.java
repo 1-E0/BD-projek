@@ -125,7 +125,7 @@ public class PelangganDashboardController implements Initializable {
 
     private VBox createKategoriCard(Kategori kategori) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("category-card"); // Anda mungkin perlu menambahkan style ini di CSS Anda
+        card.getStyleClass().add("category-card");
         card.setAlignment(Pos.CENTER);
         card.setPrefSize(140, 120);
 

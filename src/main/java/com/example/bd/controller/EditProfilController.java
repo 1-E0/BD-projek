@@ -62,7 +62,7 @@ public class EditProfilController implements Initializable {
         pelangganAktif.setAlamatPelanggan(txtAlamat.getText());
 
         pelangganDAO.updateProfil(pelangganAktif);
-        UserSession.getInstance().setLoggedInPelanggan(pelangganAktif); // Perbarui data di sesi
+        UserSession.getInstance().setLoggedInPelanggan(pelangganAktif);
 
         showAlert(Alert.AlertType.INFORMATION, "Sukses", "Profil berhasil diperbarui.");
     }
@@ -82,14 +82,14 @@ public class EditProfilController implements Initializable {
             return;
         }
 
-        // Verifikasi password lama
+
         Pelanggan verifikasi = pelangganDAO.validateLogin(pelangganAktif.getEmailPelanggan(), passLama);
         if (verifikasi == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "Password lama yang Anda masukkan salah.");
             return;
         }
 
-        // Jika verifikasi berhasil, update password
+
         pelangganDAO.updatePassword(pelangganAktif.getIdPelanggan(), passBaru);
         showAlert(Alert.AlertType.INFORMATION, "Sukses", "Password berhasil diubah.");
         txtPasswordLama.clear();
