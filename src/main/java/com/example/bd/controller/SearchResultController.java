@@ -1,24 +1,24 @@
 package com.example.bd.controller;
 
-import com.example.bd.dao.FavoritDAO; // <-- IMPORT BARU
+import com.example.bd.dao.FavoritDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.model.Menu;
 import com.example.bd.model.MenuHarian;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView; // <-- IMPORT BARU
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos; // <-- IMPORT BARU
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox; // <-- IMPORT BARU
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set; // <-- IMPORT BARU
+import java.util.Set;
 
 public class SearchResultController {
 
@@ -27,12 +27,11 @@ public class SearchResultController {
     @FXML private FlowPane menuFlowPane;
 
     private final MenuDAO menuDAO = new MenuDAO();
-    private final FavoritDAO favoritDAO = new FavoritDAO(); // <-- DAO BARU
-    private Set<Integer> favoritIds; // <-- SET UNTUK MENYIMPAN ID FAVORIT
-    private static final int ID_CABANG_PADRAO = 1;
+    private final FavoritDAO favoritDAO = new FavoritDAO();
+    private Set<Integer> favoritIds;
+    // HAPUS: private static final int ID_CABANG_PADRAO = 1;
 
     public void initializeData(String keyword) {
-        // Muat daftar favorit pelanggan saat halaman dibuka
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
         this.favoritIds = favoritDAO.getFavoritIdsByPelanggan(idPelanggan);
 
@@ -42,7 +41,8 @@ public class SearchResultController {
 
     private void loadMenuData(String keyword) {
         menuFlowPane.getChildren().clear();
-        List<MenuHarian> resultList = menuDAO.searchMenuHarian(keyword, ID_CABANG_PADRAO);
+        int idCabang = UserSession.getInstance().getSelectedCabangId(); // <-- GUNAKAN ID CABANG DARI SESI
+        List<MenuHarian> resultList = menuDAO.searchMenuHarian(keyword, idCabang);
         lblJumlahHasil.setText("Ditemukan " + resultList.size() + " hasil");
         for (MenuHarian menuHarian : resultList) {
             VBox card = createMenuCard(menuHarian);
@@ -50,6 +50,7 @@ public class SearchResultController {
         }
     }
 
+    // ... (Sisa kode TIDAK BERUBAH) ...
     private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");

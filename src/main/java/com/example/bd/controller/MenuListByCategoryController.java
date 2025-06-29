@@ -1,24 +1,24 @@
 package com.example.bd.controller;
 
-import com.example.bd.dao.FavoritDAO; // <-- IMPORT BARU
+import com.example.bd.dao.FavoritDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.model.Kategori;
 import com.example.bd.model.Menu;
 import com.example.bd.model.MenuHarian;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView; // <-- IMPORT BARU
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox; // <-- IMPORT BARU
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Set; // <-- IMPORT BARU
+import java.util.Set;
 
 public class MenuListByCategoryController {
 
@@ -26,12 +26,11 @@ public class MenuListByCategoryController {
     @FXML private FlowPane menuFlowPane;
 
     private final MenuDAO menuDAO = new MenuDAO();
-    private final FavoritDAO favoritDAO = new FavoritDAO(); // <-- DAO BARU
-    private Set<Integer> favoritIds; // <-- SET UNTUK MENYIMPAN ID FAVORIT
-    private static final int ID_CABANG_PADRAO = 1;
+    private final FavoritDAO favoritDAO = new FavoritDAO();
+    private Set<Integer> favoritIds;
+    // HAPUS: private static final int ID_CABANG_PADRAO = 1;
 
     public void initializeData(Kategori kategori) {
-        // Muat daftar favorit pelanggan saat halaman dibuka
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
         this.favoritIds = favoritDAO.getFavoritIdsByPelanggan(idPelanggan);
 
@@ -41,12 +40,14 @@ public class MenuListByCategoryController {
 
     private void loadMenuData(int idKategori) {
         menuFlowPane.getChildren().clear();
-        for (MenuHarian menuHarian : menuDAO.getMenuHarianByKategori(idKategori, ID_CABANG_PADRAO)) {
+        int idCabang = UserSession.getInstance().getSelectedCabangId(); // <-- GUNAKAN ID CABANG DARI SESI
+        for (MenuHarian menuHarian : menuDAO.getMenuHarianByKategori(idKategori, idCabang)) {
             VBox card = createMenuCard(menuHarian);
             menuFlowPane.getChildren().add(card);
         }
     }
 
+    // ... (Sisa kode TIDAK BERUBAH) ...
     private VBox createMenuCard(MenuHarian menuHarian) {
         VBox card = new VBox(8);
         card.getStyleClass().add("item-card");
@@ -99,7 +100,6 @@ public class MenuListByCategoryController {
         return card;
     }
 
-    // ... (sisa kode controller tidak berubah, salin dari kode Anda yang sudah ada)
     private void handleTambahKeKeranjang(MenuHarian menuHarian) {
         TextInputDialog dialog = new TextInputDialog("1");
         dialog.setTitle("Input Kuantitas");

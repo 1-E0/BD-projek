@@ -1,12 +1,22 @@
 package com.example.bd.controller;
 
 import com.example.bd.HelloApplication;
+import com.example.bd.dao.CabangDAO;
 import com.example.bd.dao.DiskonDAO;
 import com.example.bd.dao.MenuDAO;
 import com.example.bd.dao.PelangganDAO;
 import com.example.bd.dao.PesananDAO;
-import com.example.bd.model.*;
+import com.example.bd.model.Cabang;
+import com.example.bd.model.DetailPesanan;
+import com.example.bd.model.Diskon;
+import com.example.bd.model.ItemKeranjang;
 import com.example.bd.model.Menu;
+import com.example.bd.model.MenuHarian;
+import com.example.bd.model.MetodePembayaran;
+import com.example.bd.model.Pelanggan;
+import com.example.bd.model.PelangganVoucher;
+import com.example.bd.model.Pembayaran;
+import com.example.bd.model.Pesanan;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
 import javafx.collections.FXCollections;
@@ -17,14 +27,23 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +51,7 @@ import java.util.ResourceBundle;
 
 public class BuatPesananController implements Initializable {
 
+    // --- FXML Fields ---
     @FXML private TableView<MenuHarian> menuTable;
     @FXML private TableColumn<MenuHarian, String> colNamaMenu;
     @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
@@ -44,31 +64,32 @@ public class BuatPesananController implements Initializable {
     @FXML private Label lblNamaPelanggan;
     @FXML private ComboBox<Diskon> comboDiskon;
     @FXML private ComboBox<PelangganVoucher> comboVoucher;
+    @FXML private ComboBox<Cabang> comboCabang; // ComboBox untuk ganti cabang
     @FXML private Label lblSubtotal;
     @FXML private Label lblJumlahDiskon;
     @FXML private Label lblTotalAkhir;
 
+    // --- DAOs ---
     private final MenuDAO menuDAO = new MenuDAO();
     private final PesananDAO pesananDAO = new PesananDAO();
     private final DiskonDAO diskonDAO = new DiskonDAO();
     private final PelangganDAO pelangganDAO = new PelangganDAO();
+    private final CabangDAO cabangDAO = new CabangDAO();
 
+    // --- Data Collections and Session ---
     private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
     private PelangganVoucher voucherTerpilih = null;
 
-    private static final int ID_CABANG_PADRAO = 1;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         pelangganAktif = UserSession.getInstance().getLoggedInPelanggan();
         this.keranjangList = UserSession.getInstance().getKeranjang();
-
         keranjangList.addListener((ListChangeListener<ItemKeranjang>) c -> updateTotalHarga());
 
         if (pelangganAktif != null) {
-            lblNamaPelanggan.setText(pelangganAktif.getNamaPelanggan());
+            lblNamaPelanggan.setText("Pemesan: " + pelangganAktif.getNamaPelanggan());
             if (txtAlamat.getText() == null || txtAlamat.getText().isEmpty()) {
                 txtAlamat.setText(pelangganAktif.getAlamatPelanggan());
             }
@@ -80,8 +101,47 @@ public class BuatPesananController implements Initializable {
         setupKeranjangTable();
         setupDiskonComboBox();
         setupVoucherComboBox();
+        setupCabangComboBox(); // Panggil setup untuk ComboBox cabang
+
         loadInitialData();
         updateTotalHarga();
+    }
+
+    private void setupCabangComboBox() {
+        comboCabang.setItems(FXCollections.observableArrayList(cabangDAO.getAllCabang()));
+        comboCabang.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Cabang cabang) {
+                return cabang == null ? "Pilih Cabang" : cabang.getAlamatCabang() + " - " + cabang.getNamaKota();
+            }
+            @Override
+            public Cabang fromString(String string) { return null; }
+        });
+
+        comboCabang.getSelectionModel().selectedItemProperty().addListener((obs, oldCabang, newCabang) -> {
+            if (newCabang != null) {
+                UserSession.getInstance().setSelectedCabang(newCabang);
+                if (oldCabang != null && !oldCabang.equals(newCabang) && !keranjangList.isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Mengganti cabang akan mengosongkan keranjang Anda. Lanjutkan?", ButtonType.YES, ButtonType.NO);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        UserSession.getInstance().clearKeranjang();
+                        refreshMenuTable();
+                    } else {
+                        comboCabang.setValue(oldCabang);
+                    }
+                } else {
+                    refreshMenuTable();
+                }
+            }
+        });
+
+        Cabang cabangSesi = UserSession.getInstance().getSelectedCabang();
+        if (cabangSesi != null && comboCabang.getItems().contains(cabangSesi)) {
+            comboCabang.setValue(cabangSesi);
+        } else if (!comboCabang.getItems().isEmpty()) {
+            comboCabang.getSelectionModel().selectFirst();
+        }
     }
 
     private void setupMenuTable() {
@@ -134,15 +194,17 @@ public class BuatPesananController implements Initializable {
 
     private void refreshMenuTable() {
         menuList.clear();
-        menuList.addAll(menuDAO.getMenuHarianByKategori(1, ID_CABANG_PADRAO));
-        menuList.addAll(menuDAO.getMenuHarianByKategori(2, ID_CABANG_PADRAO));
-        menuList.addAll(menuDAO.getMenuHarianByKategori(3, ID_CABANG_PADRAO));
+        Cabang cabangTerpilih = comboCabang.getValue();
+        if (cabangTerpilih != null) {
+            menuList.addAll(menuDAO.getMenuHarianByDateAndBranch(LocalDate.now(), cabangTerpilih.getIdCabang()));
+        } else {
+            menuTable.setPlaceholder(new Label("Silakan pilih cabang untuk melihat menu."));
+        }
         menuTable.setItems(menuList);
     }
 
     private void refreshVoucherComboBox() {
         if (pelangganAktif == null) return;
-
         ObservableList<PelangganVoucher> vouchers = FXCollections.observableArrayList(
                 pelangganDAO.getVoucherAktifByPelanggan(pelangganAktif.getIdPelanggan())
         );
@@ -152,7 +214,6 @@ public class BuatPesananController implements Initializable {
     }
 
     private void loadInitialData() {
-        refreshMenuTable();
         refreshVoucherComboBox();
         ObservableList<Diskon> diskonAktifList = FXCollections.observableArrayList(diskonDAO.getActiveDiscounts());
         diskonAktifList.add(0, null);
@@ -239,6 +300,10 @@ public class BuatPesananController implements Initializable {
 
     @FXML
     void handleBuatPesanan(ActionEvent event) {
+        if (UserSession.getInstance().getSelectedCabang() == null) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Silakan pilih cabang terlebih dahulu.");
+            return;
+        }
         if (pelangganAktif == null) { showAlert(Alert.AlertType.ERROR, "Error Kritis", "Tidak ada data pelanggan yang login."); return; }
         if (keranjangList.isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Keranjang pesanan tidak boleh kosong."); return; }
         if (txtAlamat.getText().trim().isEmpty()) { showAlert(Alert.AlertType.ERROR, "Error", "Alamat pengiriman harus diisi."); return; }
@@ -289,16 +354,11 @@ public class BuatPesananController implements Initializable {
                     pelangganDAO.gunakanVoucher(voucherTerpilih.getIdPelangganVoucher());
                 }
 
-                // --- PERBAIKAN UTAMA ADA DI SINI ---
-                // Setelah transaksi berhasil, ambil data pelanggan terbaru dari DB
                 Pelanggan pelangganTerbaru = pelangganDAO.getPelangganById(pelangganAktif.getIdPelanggan());
                 if (pelangganTerbaru != null) {
-                    // Perbarui sesi dengan data terbaru (termasuk poin yang baru ditambahkan)
                     UserSession.getInstance().setLoggedInPelanggan(pelangganTerbaru);
-                    // Perbarui juga objek di controller ini untuk konsistensi
                     this.pelangganAktif = pelangganTerbaru;
                 }
-                // --- AKHIR PERBAIKAN ---
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
                 UserSession.getInstance().clearKeranjang();
@@ -307,7 +367,7 @@ public class BuatPesananController implements Initializable {
                 refreshVoucherComboBox();
             }
         } catch (IOException | SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gagal menyimpan pesanan.");
+            showAlert(Alert.AlertType.ERROR, "Error Database", "Gagal menyimpan pesanan. Terjadi kesalahan pada database.");
             e.printStackTrace();
         }
     }

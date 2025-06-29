@@ -1,12 +1,14 @@
 package com.example.bd.controller;
 
 import com.example.bd.HelloApplication;
+import com.example.bd.dao.CabangDAO;
 import com.example.bd.dao.FavoritDAO;
 import com.example.bd.dao.KategoriDAO;
 import com.example.bd.dao.MenuDAO;
+import com.example.bd.model.Menu;
+import com.example.bd.model.Cabang;
 import com.example.bd.model.ItemKeranjang;
 import com.example.bd.model.Kategori;
-import com.example.bd.model.Menu;
 import com.example.bd.model.MenuHarian;
 import com.example.bd.model.Pelanggan;
 import com.example.bd.util.Navigasi;
@@ -14,6 +16,7 @@ import com.example.bd.util.UserSession;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +27,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
@@ -34,6 +38,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.net.URL;
@@ -48,21 +53,51 @@ public class PelangganDashboardController implements Initializable {
     @FXML private FlowPane favoritFlowPane;
     @FXML private VBox favoritContainer;
     @FXML private TextField txtSearch;
+    @FXML private ComboBox<Cabang> comboCabang;
 
     private final KategoriDAO kategoriDAO = new KategoriDAO();
     private final FavoritDAO favoritDAO = new FavoritDAO();
     private final MenuDAO menuDAO = new MenuDAO();
-    private static final int ID_CABANG_PADRAO = 1; // Asumsi cabang default
+    private final CabangDAO cabangDAO = new CabangDAO();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         Pelanggan pelanggan = UserSession.getInstance().getLoggedInPelanggan();
         if (pelanggan != null) {
             String namaDepan = pelanggan.getNamaPelanggan().split(" ")[0];
-            lblWelcome.setText("Selamat Pagi, " + namaDepan + "!");
+            lblWelcome.setText("Selamat Datang, " + namaDepan + "!");
         }
         loadKategori();
-        loadFavorit();
+        setupCabangComboBox();
+    }
+
+    private void setupCabangComboBox() {
+        comboCabang.setItems(FXCollections.observableArrayList(cabangDAO.getAllCabang()));
+        comboCabang.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Cabang cabang) {
+                return cabang == null ? "Pilih Cabang" : cabang.getAlamatCabang();
+            }
+
+            @Override
+            public Cabang fromString(String string) {
+                return null;
+            }
+        });
+
+        comboCabang.getSelectionModel().selectedItemProperty().addListener((obs, oldCabang, newCabang) -> {
+            if (newCabang != null) {
+                UserSession.getInstance().setSelectedCabang(newCabang);
+                loadFavorit();
+            }
+        });
+
+        if (!comboCabang.getItems().isEmpty()) {
+            comboCabang.getSelectionModel().selectFirst();
+        } else {
+            UserSession.getInstance().setSelectedCabang(null);
+            loadFavorit();
+        }
     }
 
     private void loadKategori() {
@@ -76,7 +111,9 @@ public class PelangganDashboardController implements Initializable {
     private void loadFavorit() {
         favoritFlowPane.getChildren().clear();
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
-        List<MenuHarian> favoritList = favoritDAO.getFavoritMenuHarianByPelanggan(idPelanggan, ID_CABANG_PADRAO);
+        int idCabang = UserSession.getInstance().getSelectedCabangId();
+
+        List<MenuHarian> favoritList = favoritDAO.getFavoritMenuHarianByPelanggan(idPelanggan, idCabang);
 
         favoritContainer.setVisible(!favoritList.isEmpty());
         favoritContainer.setManaged(!favoritList.isEmpty());
@@ -88,7 +125,7 @@ public class PelangganDashboardController implements Initializable {
 
     private VBox createKategoriCard(Kategori kategori) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("category-card");
+        card.getStyleClass().add("category-card"); // Anda mungkin perlu menambahkan style ini di CSS Anda
         card.setAlignment(Pos.CENTER);
         card.setPrefSize(140, 120);
 
@@ -125,16 +162,15 @@ public class PelangganDashboardController implements Initializable {
         card.getStyleClass().add("favorit-item-card");
         card.setPrefWidth(220);
 
-        // Bagian Header Kartu (termasuk tombol favorit dan nama)
         ToggleButton favoriteButton = new ToggleButton();
         FontAwesomeIconView heartIcon = new FontAwesomeIconView();
         heartIcon.setGlyphName("HEART");
         favoriteButton.setGraphic(heartIcon);
         favoriteButton.getStyleClass().add("favorite-button");
-        favoriteButton.setSelected(true); // Selalu terpilih karena ini daftar favorit
+        favoriteButton.setSelected(true);
         favoriteButton.setOnAction(e -> handleUnfavorite(menuHarian));
 
-        HBox cardHeader = new HBox(); // <-- Deklarasi yang sebelumnya terlewat
+        HBox cardHeader = new HBox();
         cardHeader.setAlignment(Pos.CENTER_LEFT);
         Label namaMenu = new Label(menuHarian.getNamaMenu());
         namaMenu.getStyleClass().add("item-name");
@@ -144,15 +180,13 @@ public class PelangganDashboardController implements Initializable {
         Label hargaMenu = new Label(String.format("Rp %.0f", menuHarian.getHargaMenu()));
         hargaMenu.getStyleClass().add("item-price");
 
-        // Logika untuk menampilkan stok dan menonaktifkan tombol
         Label stokLabel = new Label();
         Button btnTambah = new Button("Tambah ke Keranjang");
         btnTambah.setPrefWidth(Double.MAX_VALUE);
 
-        // Cek jika item tidak ada di menu harian (idMenuHarian = 0) atau stok habis
         if (menuHarian.getIdMenuHarian() == 0 || menuHarian.getStokMenuHarian() <= 0) {
             stokLabel.setText("Tidak Tersedia");
-            // Anda bisa menambahkan style khusus jika mau, misalnya dengan .getStyleClass().add("item-unavailable");
+            stokLabel.getStyleClass().add("item-unavailable");
             btnTambah.setDisable(true);
             btnTambah.setText("Stok Habis");
         } else {
@@ -168,7 +202,7 @@ public class PelangganDashboardController implements Initializable {
     private void handleUnfavorite(MenuHarian menuHarian) {
         int idPelanggan = UserSession.getInstance().getLoggedInPelanggan().getIdPelanggan();
         favoritDAO.removeFavorit(idPelanggan, menuHarian.getIdMenu());
-        loadFavorit(); // Langsung refresh daftar favorit
+        loadFavorit();
     }
 
     private void handleTambahFavoritKeKeranjang(MenuHarian menuHarian) {
@@ -256,31 +290,11 @@ public class PelangganDashboardController implements Initializable {
         }
     }
 
-    @FXML
-    void goToBuatPesanan(ActionEvent event) {
-        Navigasi.switchScene(event, "BuatPesananView.fxml");
-    }
-
-    @FXML
-    void goToRiwayatPesanan(ActionEvent event) {
-        Navigasi.switchScene(event, "RiwayatPesananView.fxml");
-    }
-
-    @FXML
-    void goToMemberArea(ActionEvent event) {
-        Navigasi.switchScene(event, "MemberAreaView.fxml");
-    }
-
-    @FXML
-    void handleLogout(ActionEvent event) {
-        UserSession.getInstance().cleanUserSession();
-        Navigasi.goBack(event, "LoginView.fxml");
-    }
-
-    @FXML
-    void goToEditProfil(ActionEvent event) {
-        Navigasi.switchScene(event, "EditProfilView.fxml");
-    }
+    @FXML void goToBuatPesanan(ActionEvent event) { Navigasi.switchScene(event, "BuatPesananView.fxml"); }
+    @FXML void goToRiwayatPesanan(ActionEvent event) { Navigasi.switchScene(event, "RiwayatPesananView.fxml"); }
+    @FXML void goToMemberArea(ActionEvent event) { Navigasi.switchScene(event, "MemberAreaView.fxml"); }
+    @FXML void handleLogout(ActionEvent event) { UserSession.getInstance().cleanUserSession(); Navigasi.goBack(event, "LoginView.fxml"); }
+    @FXML void goToEditProfil(ActionEvent event) { Navigasi.switchScene(event, "EditProfilView.fxml"); }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);

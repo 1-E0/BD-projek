@@ -83,21 +83,9 @@
     <bottom>
         <HBox alignment="CENTER" prefHeight="80.0" spacing="20.0" style="-fx-background-color: #FFFFFF; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, -5);" BorderPane.alignment="CENTER">
             <children>
-                <Button mnemonicParsing="false" onAction="#goToBuatPesanan" prefHeight="45.0" prefWidth="180.0" text="Pesan">
-                    <graphic>
-                        <FontAwesomeIconView fill="WHITE" glyphName="PLUS" size="1.2em" />
-                    </graphic>
-                </Button>
-                <Button mnemonicParsing="false" onAction="#goToRiwayatPesanan" prefHeight="45.0" prefWidth="180.0" text="Riwayat Pesanan">
-                    <graphic>
-                        <FontAwesomeIconView fill="WHITE" glyphName="LIST_ALT" size="1.2em" />
-                    </graphic>
-                </Button>
-                <Button mnemonicParsing="false" onAction="#goToMemberArea" prefHeight="45.0" prefWidth="180.0" text="Poin">
-                    <graphic>
-                        <FontAwesomeIconView fill="WHITE" glyphName="STAR" size="1.2em" />
-                    </graphic>
-                </Button>
+                <Button mnemonicParsing="false" onAction="#goToBuatPesanan" prefHeight="45.0" prefWidth="180.0" text="Buat Pesanan Baru" />
+                <Button mnemonicParsing="false" onAction="#goToRiwayatPesanan" prefHeight="45.0" prefWidth="180.0" text="Riwayat Pesanan" />
+                <Button mnemonicParsing="false" onAction="#goToMemberArea" prefHeight="45.0" prefWidth="180.0" text="Poin &amp; Hadiah" />
             </children>
         </HBox>
     </bottom>

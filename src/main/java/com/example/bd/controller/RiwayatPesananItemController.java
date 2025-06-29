@@ -103,16 +103,18 @@ public class RiwayatPesananItemController {
 
         StringBuilder itemTidakTersedia = new StringBuilder();
         int itemDitambahkan = 0;
-        final int ID_CABANG_PADRAO = 1;
+
+        // HAPUS: final int ID_CABANG_PADRAO = 1;
+        int idCabangAktif = UserSession.getInstance().getSelectedCabangId(); // <-- AMBIL CABANG DARI SESI
 
         for (DetailPesanan detail : detailLama) {
             Menu menuLama = menuDAO.getMenuById(detail.getIdMenu());
             if (menuLama == null) continue;
 
-            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), ID_CABANG_PADRAO);
+            MenuHarian menuHariIni = menuDAO.findMenuHarianByMenuId(detail.getIdMenu(), idCabangAktif); // <-- GUNAKAN idCabangAktif
 
             if (menuHariIni == null) {
-                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (tidak tersedia hari ini)\n");
+                itemTidakTersedia.append("- ").append(menuLama.getNamaMenu()).append(" (tidak tersedia di cabang ini)\n");
                 continue;
             }
 
@@ -138,6 +140,7 @@ public class RiwayatPesananItemController {
         }
         Navigasi.switchScene(event, "BuatPesananView.fxml");
     }
+
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
