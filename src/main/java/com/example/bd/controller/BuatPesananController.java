@@ -1,7 +1,11 @@
 package com.example.bd.controller;
 
 import com.example.bd.HelloApplication;
-import com.example.bd.dao.*;
+import com.example.bd.dao.CabangDAO;
+import com.example.bd.dao.DiskonDAO;
+import com.example.bd.dao.MenuDAO;
+import com.example.bd.dao.PelangganDAO;
+import com.example.bd.dao.PesananDAO;
 import com.example.bd.model.*;
 import com.example.bd.util.Navigasi;
 import com.example.bd.util.UserSession;
@@ -82,18 +86,26 @@ public class BuatPesananController implements Initializable {
         setupCabangComboBox();
         setupJadwalControls();
 
+        // Tambahkan listener untuk memperbarui menu secara dinamis
+        tanggalPicker.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null) {
+                refreshMenuTable(newDate);
+            }
+        });
+
         loadInitialData();
         updateTotalHarga();
     }
 
     private void setupJadwalControls() {
-        // PERUBAHAN: Jam mulai dari 06:00
+        // Jam mulai dari 06:00 pagi hingga 20:00 malam
         ObservableList<String> jamList = FXCollections.observableArrayList();
         for (int i = 6; i <= 20; i++) {
             jamList.add(String.format("%02d:00", i));
         }
         jamComboBox.setItems(jamList);
 
+        // Nonaktifkan tanggal sebelum hari ini
         tanggalPicker.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -101,97 +113,11 @@ public class BuatPesananController implements Initializable {
                 setDisable(empty || date.isBefore(LocalDate.now()));
             }
         });
+
+        // Atur tanggal default ke hari ini
+        tanggalPicker.setValue(LocalDate.now());
     }
 
-    // ... (metode setup lainnya tidak berubah)
-
-    @FXML
-    void handleBuatPesanan(ActionEvent event) {
-        if (keranjangList.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Keranjang pesanan tidak boleh kosong.");
-            return;
-        }
-        if (txtAlamat.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Alamat pengiriman harus diisi.");
-            return;
-        }
-
-        Timestamp jadwalPengiriman;
-        LocalDate tanggalDipilih = tanggalPicker.getValue();
-        String jamDipilih = jamComboBox.getValue();
-
-        if (tanggalDipilih == null || jamDipilih == null || jamDipilih.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Lengkap", "Tanggal dan Jam Pengiriman wajib diisi.");
-            return;
-        }
-
-        try {
-            LocalTime waktuDipilih = LocalTime.parse(jamDipilih);
-            LocalDateTime jadwalLengkap = LocalDateTime.of(tanggalDipilih, waktuDipilih);
-
-            // PERUBAHAN: Validasi minimal 2 jam ke depan jika di hari yang sama
-            if (tanggalDipilih.isEqual(LocalDate.now()) && jadwalLengkap.isBefore(LocalDateTime.now().plusHours(2))) {
-                showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Valid", "Untuk pengiriman hari ini, waktu pengiriman minimal 2 jam dari sekarang.");
-                return;
-            }
-
-            jadwalPengiriman = Timestamp.valueOf(jadwalLengkap);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Format Jadwal Salah", "Terjadi kesalahan pada format jadwal.");
-            return;
-        }
-
-        try {
-            Dialog<ButtonType> dialog = new Dialog<>();
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/PembayaranDialog.fxml"));
-            Parent root = loader.load();
-            PembayaranDialogController controller = loader.getController();
-
-            String totalText = lblTotalAkhir.getText().replaceAll("[^\\d]", "");
-            double totalHargaFinal = Double.parseDouble(totalText);
-
-            controller.setTotal(totalHargaFinal);
-            dialog.getDialogPane().setContent(root);
-            dialog.setTitle("Konfirmasi Pembayaran");
-            dialog.showAndWait();
-
-            MetodePembayaran metode = controller.getMetodeTerpilih();
-            if (metode != null) {
-                Pesanan pesanan = new Pesanan();
-                pesanan.setIdPelanggan(pelangganAktif.getIdPelanggan());
-                pesanan.setAlamatTujuan(txtAlamat.getText());
-                pesanan.setTotalHargaPesanan(totalHargaFinal);
-                pesanan.setStatusPembayaran("Lunas");
-                pesanan.setJadwalPengiriman(jadwalPengiriman);
-
-                List<DetailPesanan> detailList = new ArrayList<>();
-                for (ItemKeranjang item : keranjangList) {
-                    DetailPesanan detail = new DetailPesanan();
-                    detail.setIdMenuHarian(item.getIdMenuHarian());
-                    detail.setJumlah(item.getKuantitas());
-                    detail.setHargaProduk(item.getHargaMenu());
-                    detailList.add(detail);
-                }
-
-                Pembayaran pembayaran = new Pembayaran();
-                pembayaran.setIdMetode(metode.getIdMetode());
-                pesananDAO.simpanPesananLengkap(pesanan, detailList, pembayaran);
-
-                if (voucherTerpilih != null) {
-                    pelangganDAO.gunakanVoucher(voucherTerpilih.getIdPelangganVoucher());
-                }
-
-                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
-                UserSession.getInstance().clearKeranjang();
-                clearAllForm();
-            }
-        } catch (IOException | SQLException | NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gagal memproses pesanan. Terjadi kesalahan.");
-            e.printStackTrace();
-        }
-    }
-
-    // ... (sisa metode di controller tidak berubah)
     private void setupCabangComboBox() {
         comboCabang.setItems(FXCollections.observableArrayList(cabangDAO.getAllCabang()));
         comboCabang.setConverter(new StringConverter<>() {
@@ -216,7 +142,7 @@ public class BuatPesananController implements Initializable {
                         return;
                     }
                 }
-                refreshMenuTable();
+                refreshMenuTable(tanggalPicker.getValue());
             }
         });
 
@@ -276,14 +202,14 @@ public class BuatPesananController implements Initializable {
         });
     }
 
-    private void refreshMenuTable() {
+    private void refreshMenuTable(LocalDate tanggal) {
         menuList.clear();
         Cabang cabangTerpilih = comboCabang.getValue();
-        if (cabangTerpilih != null) {
-            menuList.addAll(menuDAO.getMenuHarianByDateAndBranch(LocalDate.now(), cabangTerpilih.getIdCabang()));
+        if (cabangTerpilih != null && tanggal != null) {
+            menuList.addAll(menuDAO.getMenuHarianByDateAndBranch(tanggal, cabangTerpilih.getIdCabang()));
         }
         menuTable.setItems(menuList);
-        menuTable.setPlaceholder(new Label("Tidak ada menu yang tersedia di cabang ini untuk hari ini."));
+        menuTable.setPlaceholder(new Label("Tidak ada menu untuk tanggal & cabang ini."));
     }
 
     private void refreshVoucherComboBox() {
@@ -301,6 +227,8 @@ public class BuatPesananController implements Initializable {
         ObservableList<Diskon> diskonAktifList = FXCollections.observableArrayList(diskonDAO.getActiveDiscounts());
         diskonAktifList.add(0, null);
         comboDiskon.setItems(diskonAktifList);
+
+        refreshMenuTable(LocalDate.now());
     }
 
     @FXML
@@ -382,6 +310,92 @@ public class BuatPesananController implements Initializable {
     }
 
     @FXML
+    void handleBuatPesanan(ActionEvent event) {
+        if (keranjangList.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Keranjang pesanan tidak boleh kosong.");
+            return;
+        }
+        if (txtAlamat.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Alamat pengiriman harus diisi.");
+            return;
+        }
+
+        Timestamp jadwalPengiriman;
+        LocalDate tanggalDipilih = tanggalPicker.getValue();
+        String jamDipilih = jamComboBox.getValue();
+
+        if (tanggalDipilih == null || jamDipilih == null || jamDipilih.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Lengkap", "Tanggal dan Jam Pengiriman wajib diisi.");
+            return;
+        }
+
+        try {
+            LocalTime waktuDipilih = LocalTime.parse(jamDipilih);
+            LocalDateTime jadwalLengkap = LocalDateTime.of(tanggalDipilih, waktuDipilih);
+
+            // PERUBAHAN: Validasi minimal 1 jam ke depan jika di hari yang sama
+            if (tanggalDipilih.isEqual(LocalDate.now()) && jadwalLengkap.isBefore(LocalDateTime.now().plusHours(1))) {
+                showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Valid", "Untuk pengiriman hari ini, waktu pengiriman minimal 1 jam dari sekarang.");
+                return;
+            }
+
+            jadwalPengiriman = Timestamp.valueOf(jadwalLengkap);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Format Jadwal Salah", "Terjadi kesalahan pada format jadwal.");
+            return;
+        }
+
+        try {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/PembayaranDialog.fxml"));
+            Parent root = loader.load();
+            PembayaranDialogController controller = loader.getController();
+
+            String totalText = lblTotalAkhir.getText().replaceAll("[^\\d]", "");
+            double totalHargaFinal = Double.parseDouble(totalText);
+
+            controller.setTotal(totalHargaFinal);
+            dialog.getDialogPane().setContent(root);
+            dialog.setTitle("Konfirmasi Pembayaran");
+            dialog.showAndWait();
+
+            MetodePembayaran metode = controller.getMetodeTerpilih();
+            if (metode != null) {
+                Pesanan pesanan = new Pesanan();
+                pesanan.setIdPelanggan(pelangganAktif.getIdPelanggan());
+                pesanan.setAlamatTujuan(txtAlamat.getText());
+                pesanan.setTotalHargaPesanan(totalHargaFinal);
+                pesanan.setStatusPembayaran("Lunas");
+                pesanan.setJadwalPengiriman(jadwalPengiriman);
+
+                List<DetailPesanan> detailList = new ArrayList<>();
+                for (ItemKeranjang item : keranjangList) {
+                    DetailPesanan detail = new DetailPesanan();
+                    detail.setIdMenuHarian(item.getIdMenuHarian());
+                    detail.setJumlah(item.getKuantitas());
+                    detail.setHargaProduk(item.getHargaMenu());
+                    detailList.add(detail);
+                }
+
+                Pembayaran pembayaran = new Pembayaran();
+                pembayaran.setIdMetode(metode.getIdMetode());
+                pesananDAO.simpanPesananLengkap(pesanan, detailList, pembayaran);
+
+                if (voucherTerpilih != null) {
+                    pelangganDAO.gunakanVoucher(voucherTerpilih.getIdPelangganVoucher());
+                }
+
+                showAlert(Alert.AlertType.INFORMATION, "Sukses", "Pesanan baru berhasil dibuat!");
+                UserSession.getInstance().clearKeranjang();
+                clearAllForm();
+            }
+        } catch (IOException | SQLException | NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Gagal memproses pesanan. Terjadi kesalahan.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void handleKembali(ActionEvent event) {
         Navigasi.goBack(event, "PelangganDashboardView.fxml");
     }
@@ -395,7 +409,7 @@ public class BuatPesananController implements Initializable {
         keranjangTable.getSelectionModel().clearSelection();
         comboDiskon.getSelectionModel().selectFirst();
         comboVoucher.getSelectionModel().selectFirst();
-        tanggalPicker.setValue(null);
+        tanggalPicker.setValue(LocalDate.now());
         jamComboBox.setValue(null);
         updateTotalHarga();
     }
