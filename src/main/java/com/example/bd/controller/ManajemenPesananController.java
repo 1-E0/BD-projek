@@ -25,6 +25,8 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
 public class ManajemenPesananController implements Initializable {
@@ -37,6 +39,7 @@ public class ManajemenPesananController implements Initializable {
     @FXML private TableColumn<Pesanan, String> colAlamatTujuan;
     @FXML private TableColumn<Pesanan, String> colStatusBayar;
     @FXML private TableColumn<Pesanan, String> colStatusKirim;
+    @FXML private TableColumn<Pesanan, Timestamp> colJadwal;
     @FXML private TableColumn<Pesanan, Void> colAksi;
 
     private final PesananDAO pesananDAO = new PesananDAO();
@@ -45,7 +48,6 @@ public class ManajemenPesananController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupPesananTable();
         loadPesananData();
-        addAksiButtonToTable();
     }
 
     private void setupPesananTable() {
@@ -56,6 +58,24 @@ public class ManajemenPesananController implements Initializable {
         colAlamatTujuan.setCellValueFactory(new PropertyValueFactory<>("alamatTujuan"));
         colStatusBayar.setCellValueFactory(new PropertyValueFactory<>("statusPembayaran"));
         colStatusKirim.setCellValueFactory(new PropertyValueFactory<>("statusPengiriman"));
+        colJadwal.setCellValueFactory(new PropertyValueFactory<>("jadwalPengiriman"));
+
+        // Format tampilan jadwal agar mudah dibaca
+        colJadwal.setCellFactory(column -> new TableCell<>() {
+            private final SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+
+            @Override
+            protected void updateItem(Timestamp item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Langsung Kirim");
+                } else {
+                    setText(format.format(item));
+                }
+            }
+        });
+
+        addAksiButtonToTable();
     }
 
     private void loadPesananData() {
@@ -63,10 +83,8 @@ public class ManajemenPesananController implements Initializable {
         ObservableList<Pesanan> pesananList;
 
         if (loggedInAdmin != null && "Cabang".equalsIgnoreCase(loggedInAdmin.getJenisAdmin())) {
-            // Admin Cabang hanya melihat pesanan cabangnya
             pesananList = FXCollections.observableArrayList(pesananDAO.getPesananByCabang(loggedInAdmin.getIdCabang()));
         } else {
-            // Admin Pusat melihat semua pesanan
             pesananList = FXCollections.observableArrayList(pesananDAO.getAllPesanan());
         }
         pesananTable.setItems(pesananList);
@@ -105,7 +123,7 @@ public class ManajemenPesananController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/EditPesananDialog.fxml"));
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Edit Pesanan");
+            dialogStage.setTitle("Edit Pesanan #" + pesanan.getIdPesanan());
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(pesananTable.getScene().getWindow());
             Scene scene = new Scene(loader.load());
@@ -126,7 +144,7 @@ public class ManajemenPesananController implements Initializable {
     }
 
     @FXML
-    private void handleKembali(ActionEvent event) throws IOException {
+    private void handleKembali(ActionEvent event) {
         Navigasi.goBack(event, "DashboardView.fxml");
     }
 }

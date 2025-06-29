@@ -4,121 +4,135 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.BuatPesananController">
-    <left>
-        <VBox prefWidth="500.0" spacing="10.0" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets bottom="20.0" left="20.0" right="10.0" top="20.0" />
-            </BorderPane.margin>
+<AnchorPane prefHeight="720.0" prefWidth="1280.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bd.controller.BuatPesananController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0">
             <children>
-                <Label styleClass="section-title" text="Daftar Menu Hari Ini" />
-                <TableView fx:id="menuTable" prefHeight="200.0" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="colNamaMenu" prefWidth="250.0" text="Nama Menu" />
-                        <TableColumn fx:id="colHargaMenu" prefWidth="120.0" text="Harga" />
-                        <TableColumn fx:id="colStok" prefWidth="80.0" text="Stok" />
-                    </columns>
-                    <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                    </columnResizePolicy>
-                </TableView>
-                <Button onAction="#handleTambahKeKeranjang" prefHeight="40.0" prefWidth="Infinity" text="Tambah ke Keranjang" />
-            </children>
-        </VBox>
-    </left>
-    <center>
-        <VBox prefWidth="450.0" spacing="10.0" styleClass="card" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets bottom="20.0" left="10.0" right="20.0" top="20.0" />
-            </BorderPane.margin>
-            <children>
-                <Label styleClass="section-title" text="Keranjang Anda" />
-                <TableView fx:id="keranjangTable" prefHeight="200.0" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="colKeranjangNama" prefWidth="180.0" text="Item" />
-                        <TableColumn fx:id="colKeranjangKuantitas" prefWidth="75.0" text="Jumlah" />
-                        <TableColumn fx:id="colKeranjangSubtotal" prefWidth="120.0" text="Subtotal" />
-                    </columns>
-                    <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                    </columnResizePolicy>
-                </TableView>
-                <Button onAction="#handleHapusDariKeranjang" prefWidth="Infinity" styleClass="delete-button" text="Hapus Item Terpilih" />
-                <VBox spacing="5.0">
-                    <children>
-                        <Label styleClass="input-label" text="Alamat Pengiriman:" />
-                        <TextArea fx:id="txtAlamat" prefHeight="60.0" wrapText="true" />
-                    </children>
-                </VBox>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <children>
-                        <Label styleClass="input-label" text="Diskon Global:" />
-                        <ComboBox fx:id="comboDiskon" HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <children>
-                        <Label styleClass="input-label" text="Gunakan Voucher:" />
-                        <ComboBox fx:id="comboVoucher" HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-                <HBox>
-                    <children>
-                        <Label text="Subtotal" />
-                        <Pane HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblSubtotal" text="Rp 0" />
-                    </children>
-                </HBox>
-                <HBox>
-                    <children>
-                        <Label text="Diskon" />
-                        <Pane HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblJumlahDiskon" text="- Rp 0" style="-fx-text-fill: #EF5350;" />
-                    </children>
-                </HBox>
-                <HBox>
-                    <children>
-                        <Label style="-fx-font-weight: bold;" text="Total" />
-                        <Pane HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblTotalAkhir" style="-fx-font-weight: bold;" text="Rp 0" />
-                    </children>
-                </HBox>
-                <Button onAction="#handleBuatPesanan" prefHeight="40.0" prefWidth="Infinity" text="Lanjutkan ke Pembayaran" />
-            </children>
-        </VBox>
-    </center>
-    <top>
-        <VBox spacing="8.0" BorderPane.alignment="CENTER">
-            <children>
-                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
                         <Button onAction="#handleKembali" styleClass="back-button" text="Kembali">
                             <graphic>
-                                <FontAwesomeIconView glyphName="ARROW_LEFT" />
+                                <FontAwesomeIconView glyphName="ARROW_LEFT" fill="WHITE"/>
                             </graphic>
                         </Button>
-                        <Label fx:id="lblNamaPelanggan" styleClass="title-label" text="Buat Pesanan Baru" HBox.hgrow="ALWAYS" />
+                        <Label styleClass="title-label" text="Buat Pesanan Baru" />
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
+
+                <HBox spacing="30.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <Label text="Pesan dari Cabang:" style="-fx-font-weight: bold;" />
-                        <ComboBox fx:id="comboCabang" prefWidth="250.0" promptText="Pilih Cabang" />
+                        <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="Pilih Cabang:" />
+                                                <ComboBox fx:id="comboCabang" prefWidth="350.0" promptText="Pilih Cabang..." styleClass="form-combo-box" />
+                                            </children>
+                                        </HBox>
+                                        <TableView fx:id="menuTable" prefHeight="280.0">
+                                            <columns>
+                                                <TableColumn fx:id="colNamaMenu" prefWidth="250.0" text="Nama Menu" />
+                                                <TableColumn fx:id="colHargaMenu" prefWidth="150.0" text="Harga" />
+                                                <TableColumn fx:id="colStok" prefWidth="80.0" text="Stok" />
+                                            </columns>
+                                            <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                            </columnResizePolicy>
+                                        </TableView>
+                                        <Button onAction="#handleTambahKeKeranjang" prefWidth="200.0" text="Tambah ke Keranjang" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <Label styleClass="section-title" text="Keranjang Belanja" />
+                                        <TableView fx:id="keranjangTable" prefHeight="200.0" VBox.vgrow="ALWAYS">
+                                            <columns>
+                                                <TableColumn fx:id="colKeranjangNama" prefWidth="200.0" text="Item" />
+                                                <TableColumn fx:id="colKeranjangKuantitas" prefWidth="80.0" text="Jumlah" />
+                                                <TableColumn fx:id="colKeranjangSubtotal" prefWidth="120.0" text="Subtotal" />
+                                            </columns>
+                                            <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                            </columnResizePolicy>
+                                        </TableView>
+                                        <Button onAction="#handleHapusDariKeranjang" prefWidth="200.0" styleClass="delete-button" text="Hapus dari Keranjang" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <VBox styleClass="card" HBox.hgrow="NEVER" spacing="15.0" minWidth="450.0">
+                            <children>
+                                <Label styleClass="section-title" text="Ringkasan Pesanan" />
+                                <Label fx:id="lblNamaPelanggan" text="Pemesan: -" />
+                                <Separator prefWidth="200.0" />
+
+                                <Label text="Alamat Pengiriman:" />
+                                <TextArea fx:id="txtAlamat" prefHeight="70.0" promptText="Masukkan alamat lengkap..." wrapText="true" />
+
+                                <Label text="Jadwal Pengiriman (Wajib Diisi):" />
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <DatePicker fx:id="tanggalPicker" promptText="Pilih Tanggal" HBox.hgrow="ALWAYS"/>
+                                        <ComboBox fx:id="jamComboBox" promptText="Pilih Jam" HBox.hgrow="ALWAYS"/>
+                                    </children>
+                                </HBox>
+
+                                <Separator prefWidth="200.0" />
+
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Diskon:" GridPane.rowIndex="0" />
+                                        <ComboBox fx:id="comboDiskon" maxWidth="Infinity" styleClass="form-combo-box" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Label text="Voucher:" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="comboVoucher" maxWidth="Infinity" styleClass="form-combo-box" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </children>
+                                </GridPane>
+
+                                <Separator prefWidth="200.0" />
+
+                                <GridPane hgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Subtotal:" />
+                                        <Label fx:id="lblSubtotal" text="Rp 0" GridPane.columnIndex="1" />
+                                        <Label text="Potongan:" GridPane.rowIndex="1" />
+                                        <Label fx:id="lblJumlahDiskon" text="- Rp 0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Total Akhir:" GridPane.rowIndex="2" />
+                                        <Label fx:id="lblTotalAkhir" style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Rp 0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    </children>
+                                </GridPane>
+
+                                <VBox VBox.vgrow="ALWAYS" />
+
+                                <Button onAction="#handleBuatPesanan" prefHeight="40.0" maxWidth="Infinity" text="Proses Pembayaran" />
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
             </children>
-            <BorderPane.margin>
-                <Insets left="20.0" right="20.0" top="20.0" />
-            </BorderPane.margin>
         </VBox>
-    </top>
-</BorderPane>
+    </children>
+</AnchorPane>

@@ -23,14 +23,14 @@
                 <Label styleClass="sub-title-label" text="Daftar semua pesanan yang masuk ke sistem." />
                 <TableView fx:id="pesananTable" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colIdPesanan" minWidth="80.0" text="ID Pesanan" />
-                        <TableColumn fx:id="colNamaPelanggan" minWidth="150.0" text="Nama Pelanggan" />
-                        <TableColumn fx:id="colTanggal" minWidth="120.0" text="Tanggal" />
-                        <TableColumn fx:id="colTotal" minWidth="100.0" text="Total" />
-                        <TableColumn fx:id="colAlamatTujuan" minWidth="200.0" prefWidth="250.0" text="Alamat Tujuan" />
-                        <TableColumn fx:id="colStatusBayar" minWidth="120.0" text="Status Bayar" />
-                        <TableColumn fx:id="colStatusKirim" minWidth="120.0" text="Status Kirim" />
-                        <TableColumn fx:id="colAksi" minWidth="120.0" text="Aksi" />
+                        <TableColumn fx:id="colIdPesanan" text="ID Pesanan"/>
+                        <TableColumn fx:id="colNamaPelanggan" text="Nama Pelanggan"/>
+                        <TableColumn fx:id="colTanggal" text="Tgl Pesan"/>
+                        <TableColumn fx:id="colTotal" text="Total"/>
+                        <TableColumn fx:id="colAlamatTujuan" prefWidth="200.0" text="Alamat"/>
+                        <TableColumn fx:id="colStatusBayar" text="Status Bayar"/>
+                        <TableColumn fx:id="colStatusKirim" text="Status Kirim"/>
+                        <TableColumn fx:id="colJadwal" prefWidth="150.0" text="Jadwal Kirim"/> <TableColumn fx:id="colAksi" text="Aksi"/>
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
