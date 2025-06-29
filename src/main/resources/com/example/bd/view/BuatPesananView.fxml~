@@ -85,7 +85,7 @@
                                 <Label text="Alamat Pengiriman:" />
                                 <TextArea fx:id="txtAlamat" prefHeight="70.0" promptText="Masukkan alamat lengkap..." wrapText="true" />
 
-                                <Label text="Jadwal Pengiriman (Kosongkan untuk Kirim Sekarang):" />
+                                <Label text="Jadwal Pengiriman (Wajib Diisi):" />
                                 <HBox spacing="10.0">
                                     <children>
                                         <DatePicker fx:id="tanggalPicker" promptText="Pilih Tanggal" HBox.hgrow="ALWAYS"/>

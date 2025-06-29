@@ -66,7 +66,6 @@ public class PesananDAO {
         return pesananList;
     }
 
-    // --- METODE YANG HILANG ADA DI SINI ---
     public List<Pesanan> getPesananByCabang(int idCabang) {
         List<Pesanan> pesananList = new ArrayList<>();
         String sql = "SELECT DISTINCT p.*, pl.nama_pelanggan, png.status_pengiriman " +

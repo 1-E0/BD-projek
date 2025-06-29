@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 
 public class BuatPesananController implements Initializable {
 
-
+    // FXML Fields
     @FXML private TableView<MenuHarian> menuTable;
     @FXML private TableColumn<MenuHarian, String> colNamaMenu;
     @FXML private TableColumn<MenuHarian, Double> colHargaMenu;
@@ -55,18 +55,22 @@ public class BuatPesananController implements Initializable {
     @FXML private DatePicker tanggalPicker;
     @FXML private ComboBox<String> jamComboBox;
 
-
+    // DAOs
     private final MenuDAO menuDAO = new MenuDAO();
     private final PesananDAO pesananDAO = new PesananDAO();
     private final DiskonDAO diskonDAO = new DiskonDAO();
     private final PelangganDAO pelangganDAO = new PelangganDAO();
     private final CabangDAO cabangDAO = new CabangDAO();
 
-
+    // Data Collections
     private final ObservableList<MenuHarian> menuList = FXCollections.observableArrayList();
     private ObservableList<ItemKeranjang> keranjangList;
     private Pelanggan pelangganAktif;
     private PelangganVoucher voucherTerpilih = null;
+
+    // Definisikan jam operasional
+    private static final LocalTime JAM_BUKA = LocalTime.of(8, 0); // Jam 8 Pagi
+    private static final LocalTime JAM_TUTUP = LocalTime.of(20, 0); // Jam 8 Malam
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -86,25 +90,34 @@ public class BuatPesananController implements Initializable {
         setupCabangComboBox();
         setupJadwalControls();
 
-
         tanggalPicker.valueProperty().addListener((obs, oldDate, newDate) -> {
-            if (newDate != null) {
-                refreshMenuTable(newDate);
-            }
+            refreshMenuTableBasedOnSelection();
         });
+
+        comboCabang.valueProperty().addListener((obs, oldCabang, newCabang) -> {
+            refreshMenuTableBasedOnSelection();
+        });
+
 
         loadInitialData();
         updateTotalHarga();
     }
 
-    private void setupJadwalControls() {
+    private void refreshMenuTableBasedOnSelection() {
+        LocalDate tanggal = tanggalPicker.getValue();
+        if (tanggal == null) {
+            // Jika tanggal tidak dipilih, anggap hari ini untuk menampilkan menu
+            tanggal = LocalDate.now();
+        }
+        refreshMenuTable(tanggal);
+    }
 
+    private void setupJadwalControls() {
         ObservableList<String> jamList = FXCollections.observableArrayList();
-        for (int i = 6; i <= 20; i++) {
+        for (int i = JAM_BUKA.getHour(); i <= JAM_TUTUP.getHour(); i++) {
             jamList.add(String.format("%02d:00", i));
         }
         jamComboBox.setItems(jamList);
-
 
         tanggalPicker.setDayCellFactory(picker -> new DateCell() {
             @Override
@@ -113,9 +126,6 @@ public class BuatPesananController implements Initializable {
                 setDisable(empty || date.isBefore(LocalDate.now()));
             }
         });
-
-
-        tanggalPicker.setValue(LocalDate.now());
     }
 
     private void setupCabangComboBox() {
@@ -142,7 +152,7 @@ public class BuatPesananController implements Initializable {
                         return;
                     }
                 }
-                refreshMenuTable(tanggalPicker.getValue());
+                refreshMenuTableBasedOnSelection();
             }
         });
 
@@ -320,29 +330,36 @@ public class BuatPesananController implements Initializable {
             return;
         }
 
-        Timestamp jadwalPengiriman;
+        Timestamp jadwalPengiriman = null;
         LocalDate tanggalDipilih = tanggalPicker.getValue();
         String jamDipilih = jamComboBox.getValue();
 
-        if (tanggalDipilih == null || jamDipilih == null || jamDipilih.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Lengkap", "Tanggal dan Jam Pengiriman wajib diisi.");
-            return;
-        }
+        boolean isScheduled = tanggalDipilih != null && jamDipilih != null && !jamDipilih.isEmpty();
 
-        try {
-            LocalTime waktuDipilih = LocalTime.parse(jamDipilih);
-            LocalDateTime jadwalLengkap = LocalDateTime.of(tanggalDipilih, waktuDipilih);
+        if (isScheduled) {
+            try {
+                LocalTime waktuDipilih = LocalTime.parse(jamDipilih);
+                LocalDateTime jadwalLengkap = LocalDateTime.of(tanggalDipilih, waktuDipilih);
 
-
-            if (tanggalDipilih.isEqual(LocalDate.now()) && jadwalLengkap.isBefore(LocalDateTime.now().plusHours(1))) {
-                showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Valid", "Untuk pengiriman hari ini, waktu pengiriman minimal 1 jam dari sekarang.");
+                if (tanggalDipilih.isEqual(LocalDate.now()) && jadwalLengkap.isBefore(LocalDateTime.now().plusHours(1))) {
+                    showAlert(Alert.AlertType.ERROR, "Jadwal Tidak Valid", "Untuk pengiriman hari ini, waktu pengiriman minimal 1 jam dari sekarang.");
+                    return;
+                }
+                jadwalPengiriman = Timestamp.valueOf(jadwalLengkap);
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Format Jadwal Salah", "Terjadi kesalahan pada format jadwal.");
                 return;
             }
-
-            jadwalPengiriman = Timestamp.valueOf(jadwalLengkap);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Format Jadwal Salah", "Terjadi kesalahan pada format jadwal.");
-            return;
+        } else {
+            // Logika untuk "Kirim Sekarang Juga" (jika jadwal tidak diisi)
+            LocalTime sekarang = LocalTime.now();
+            if (sekarang.isBefore(JAM_BUKA) || sekarang.isAfter(JAM_TUTUP)) {
+                showAlert(Alert.AlertType.WARNING, "Toko Sedang Tutup",
+                        "Pemesanan langsung hanya dapat dilakukan selama jam operasional ("
+                                + JAM_BUKA + " - " + JAM_TUTUP + ").\nSilakan pilih jadwal pengiriman untuk besok.");
+                return;
+            }
+            // Jika jadwal null, akan dianggap "Kirim Sekarang"
         }
 
         try {
@@ -409,7 +426,7 @@ public class BuatPesananController implements Initializable {
         keranjangTable.getSelectionModel().clearSelection();
         comboDiskon.getSelectionModel().selectFirst();
         comboVoucher.getSelectionModel().selectFirst();
-        tanggalPicker.setValue(LocalDate.now());
+        tanggalPicker.setValue(null);
         jamComboBox.setValue(null);
         updateTotalHarga();
     }
